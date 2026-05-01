@@ -81,15 +81,15 @@ export default function MapPage() {
   const [showList, setShowList] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchHospitals = useCallback(async (lat: number, lon: number) => {
+  const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000) => {
     setLoading(true);
     setError(null);
     try {
-      // Use a 10km radius for facilities
-      const query = `[out:json][timeout:15];nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:10000,${lat},${lon});out center body 50;`;
+      const query = `[out:json][timeout:15];nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${lat},${lon});out center body 50;`;
       const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error("Medical database busy. Please try again.");
       const data = await res.json();
+      
       const results: HospitalMarker[] = data.elements.map((el: any) => {
         const hLat = el.lat || el.center?.lat;
         const hLon = el.lon || el.center?.lon;
@@ -104,8 +104,13 @@ export default function MapPage() {
       }).filter((h: any) => h.lat && h.lon)
         .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
 
+      if (results.length === 0 && radius < 30000) {
+        console.log(`No results in ${radius}m, expanding to 30km...`);
+        return fetchHospitals(lat, lon, 30000);
+      }
+
       setHospitals(results);
-      if (results.length === 0) setError("No facilities found in 10km radius.");
+      if (results.length === 0) setError(`No facilities found in ${radius/1000}km radius.`);
     } catch (err: any) { 
       console.error("Failed to fetch hospitals", err); 
       setError(err.message);
