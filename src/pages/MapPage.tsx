@@ -51,15 +51,18 @@ function LocationMarker({ onLocationFound }: { onLocationFound: (lat: number, lo
     };
 
     const error = () => {
-      // Fallback to Leaflet locate if native fails
-      map.locate({ setView: true, maxZoom: 15 });
+      // Fallback to Bangalore if denied
+      const fallback: [number, number] = [12.9716, 77.5946];
+      console.warn("Location access denied. Falling back to Bangalore.");
+      map.setView(fallback, 13);
+      onLocationFound(fallback[0], fallback[1]);
       setAttempted(true);
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(success, error, { timeout: 10000, enableHighAccuracy: true });
     } else {
-      map.locate({ setView: true, maxZoom: 15 });
+      error();
     }
 
     const onLocFound = (e: L.LocationEvent) => {
@@ -203,7 +206,7 @@ export default function MapPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="rounded-2xl overflow-hidden border border-cyan-500/20 dark:border-cyan-500/15 shadow-[0_0_30px_rgba(0,243,255,0.06)]"
         >
-          <div className="h-[500px] md:h-[600px] w-full relative" style={{ zIndex: 0 }}>
+          <div className="h-[350px] md:h-[500px] lg:h-[600px] w-full relative" style={{ zIndex: 0 }}>
             {loading && (
               <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-background/70 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-3">
@@ -236,7 +239,7 @@ export default function MapPage() {
                 </form>
                 <button
                   onClick={() => setShowList(!showList)}
-                  className="w-full flex items-center justify-center gap-2 text-[10px] font-mono font-bold py-1.5 rounded-lg uppercase tracking-wider text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 text-[10px] font-mono font-bold py-2 rounded-lg uppercase tracking-wider text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/10 transition-colors border border-cyan-500/10"
                 >
                   {showList ? <X className="h-3 w-3" /> : <List className="h-3 w-3" />}
                   {showList ? t("map.hideList") : t("map.showList")} ({hospitals.length})
@@ -247,9 +250,9 @@ export default function MapPage() {
                       <p className="text-[9px] text-center font-mono text-orange-500/80 py-2 uppercase font-bold">{error}</p>
                     )}
                     {hospitals.map((h) => (
-                      <div key={h.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 hover:bg-cyan-500/10 transition-colors border border-transparent hover:border-cyan-500/20">
-                        <div className="flex-1 truncate">
-                          <p className="text-[10px] font-mono text-foreground/80 truncate">{h.name}</p>
+                      <div key={h.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 hover:bg-cyan-500/10 transition-colors border border-transparent hover:border-cyan-500/20 w-full overflow-hidden">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-mono text-foreground/80 truncate pr-2">{h.name}</p>
                           <div className="flex gap-1.5 mt-0.5">
                             <span className="text-[8px] font-black font-mono text-cyan-600/60 uppercase">{h.distance?.toFixed(1)} km</span>
                             {h.distance && h.distance <= 5 && (
@@ -306,7 +309,7 @@ export default function MapPage() {
                 <Hospital className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-mono text-sm font-bold text-foreground leading-tight">{h.name}</p>
+                <p className="font-mono text-sm font-bold text-foreground leading-tight truncate">{h.name}</p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <p className="font-mono text-[10px] text-cyan-600 dark:text-cyan-400 font-black">{h.distance?.toFixed(1)} KM AWAY</p>
                   {i === 0 && (
@@ -316,7 +319,7 @@ export default function MapPage() {
                   )}
                   {h.distance && h.distance <= 5 && (
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-mono text-[8px] font-bold uppercase tracking-widest">
-                      Nearby (Within 5km)
+                      Nearby
                     </span>
                   )}
                 </div>

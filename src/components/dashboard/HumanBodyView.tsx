@@ -13,7 +13,7 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
   const pulseDuration = heartRate > 0 ? 60 / heartRate : 1;
 
   return (
-    <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden rounded-2xl liquid-glass holographic-edge">
+    <div className="relative w-full h-[300px] md:h-[500px] flex items-center justify-center overflow-hidden rounded-2xl liquid-glass holographic-edge">
       {/* Background Grid */}
       <div 
         className="absolute inset-0 opacity-10"
@@ -30,7 +30,8 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
       <div className="relative z-10 w-full h-full p-8 flex justify-center items-center">
         <svg 
           viewBox="0 0 100 250" 
-          className="h-full drop-shadow-[0_0_10px_rgba(0,243,255,0.3)] transition-all duration-500"
+          preserveAspectRatio="xMidYMid meet"
+          className="h-full w-full max-w-[200px] md:max-w-none drop-shadow-[0_0_10px_rgba(0,243,255,0.3)] transition-all duration-500"
         >
           <g stroke="rgba(0, 243, 255, 0.6)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
             {/* Head */}

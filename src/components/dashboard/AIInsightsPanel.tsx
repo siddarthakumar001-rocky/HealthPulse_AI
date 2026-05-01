@@ -85,13 +85,13 @@ export default function AIInsightsPanel({
           >
             {insights.map((insight, i) => (
               <div key={`insight-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${i * 150}ms` }}>
-                <span className="text-cyan-600 dark:text-cyan-400 font-bold">&gt;</span>
-                <span className="text-cyan-700 dark:text-cyan-400 leading-relaxed">{insight}</span>
+                <span className="text-cyan-600 dark:text-cyan-400 font-bold shrink-0">&gt;</span>
+                <span className="text-cyan-700 dark:text-cyan-400 leading-relaxed break-words whitespace-normal">{insight}</span>
               </div>
             ))}
             <div className="flex gap-2">
-              <span className={isHighRisk ? "text-destructive" : "text-green-600 dark:text-green-400"}>&gt;</span>
-              <span className={`leading-relaxed ${isHighRisk ? "text-destructive" : "text-green-700 dark:text-green-400"}`}>
+              <span className={isHighRisk ? "text-destructive shrink-0" : "text-green-600 dark:text-green-400 shrink-0"}>&gt;</span>
+              <span className={`leading-relaxed break-words whitespace-normal ${isHighRisk ? "text-destructive" : "text-green-700 dark:text-green-400"}`}>
                 {message || (insights.length > 0 ? "" : "No anomalies detected. Vitals within nominal parameters.")}
               </span>
             </div>
@@ -99,21 +99,21 @@ export default function AIInsightsPanel({
             {recommendations && (
               <>
                 {recommendations.lifestyle?.map((rec, i) => (
-                  <div key={`life-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + 1) * 200}ms` }}>
-                    <span className="text-blue-500">&gt;</span>
-                    <span className="text-foreground/70 uppercase text-[9px]">[LIFESTYLE] {rec}</span>
+                   <div key={`life-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + 1) * 200}ms` }}>
+                    <span className="text-blue-500 shrink-0">&gt;</span>
+                    <span className="text-foreground/70 uppercase text-[9px] break-words whitespace-normal">[LIFESTYLE] {rec}</span>
                   </div>
                 ))}
                 {recommendations.diet?.map((rec, i) => (
                   <div key={`diet-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + recommendations.lifestyle?.length! + 1) * 200}ms` }}>
-                    <span className="text-orange-500">&gt;</span>
-                    <span className="text-foreground/70 uppercase text-[9px]">[DIET] {rec}</span>
+                    <span className="text-orange-500 shrink-0">&gt;</span>
+                    <span className="text-foreground/70 uppercase text-[9px] break-words whitespace-normal">[DIET] {rec}</span>
                   </div>
                 ))}
                 {recommendations.activity?.map((rec, i) => (
                   <div key={`act-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + recommendations.lifestyle?.length! + recommendations.diet?.length! + 1) * 200}ms` }}>
-                    <span className="text-emerald-500">&gt;</span>
-                    <span className="text-foreground/70 uppercase text-[9px]">[ACTIVITY] {rec}</span>
+                    <span className="text-emerald-500 shrink-0">&gt;</span>
+                    <span className="text-foreground/70 uppercase text-[9px] break-words whitespace-normal">[ACTIVITY] {rec}</span>
                   </div>
                 ))}
               </>

@@ -84,7 +84,7 @@ export default function VitalsPanel({ heartRate, spo2, temperature }: VitalsPane
             <div className="flex items-end gap-2">
               <AnimatedNumber
                 value={heartRate || 0}
-                className={`font-display text-5xl font-bold ${hrColor}`}
+                className={`font-display text-4xl md:text-5xl font-bold ${hrColor}`}
               />
               <span className="font-mono text-xs text-foreground/80 pb-2 font-bold">{t("dashboard.bpm")}</span>
             </div>
@@ -185,7 +185,7 @@ export default function VitalsPanel({ heartRate, spo2, temperature }: VitalsPane
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <AnimatedNumber
               value={spo2 || 0}
-              className={`font-display text-4xl font-bold ${spo2Color}`}
+              className={`font-display text-3xl md:text-4xl font-bold ${spo2Color}`}
             />
             <span className="font-mono text-[10px] text-foreground/80 font-bold">%SpO₂</span>
           </div>
@@ -217,7 +217,7 @@ export default function VitalsPanel({ heartRate, spo2, temperature }: VitalsPane
           <AnimatedNumber
             value={temperature > 0 ? temperature : 0}
             decimals={1}
-            className={`font-display text-5xl font-bold ${isHighTemp ? "text-red-400 neon-text-pink" : "text-orange-400 neon-text-orange"}`}
+            className={`font-display text-4xl md:text-5xl font-bold ${isHighTemp ? "text-red-400 neon-text-pink" : "text-orange-400 neon-text-orange"}`}
           />
           <span className="font-mono text-xs text-foreground/80 pb-2 font-bold">°C</span>
           {isHighTemp && (

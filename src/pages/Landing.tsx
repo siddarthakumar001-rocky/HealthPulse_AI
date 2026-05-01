@@ -157,11 +157,11 @@ export default function Landing() {
         className="fixed top-0 w-full z-50 border-b border-cyan-500/10 bg-background/50 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,243,255,0.05)]"
       >
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 group-hover:bg-cyan-500/20 transition-all">
-              <Heart className="h-6 w-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,243,255,0.8)]" />
+          <div className="flex items-center gap-2 md:gap-3 cursor-pointer group">
+            <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 group-hover:bg-cyan-500/20 transition-all">
+              <Heart className="h-5 w-5 md:h-6 md:w-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,243,255,0.8)]" />
             </div>
-            <span className="font-display text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-cyan-400 dark:to-cyan-200">
+            <span className="font-display text-lg md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-black dark:from-white to-cyan-400 dark:to-cyan-200">
               HealthPulse <span className="text-cyan-400 drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">AI</span>
             </span>
           </div>
@@ -174,9 +174,9 @@ export default function Landing() {
               </Button>
             </MagneticButton>
             <MagneticButton>
-              <Button asChild className="relative group overflow-hidden bg-transparent border border-cyan-400 text-cyan-400 hover:text-black font-bold uppercase tracking-widest text-xs h-10 px-6 rounded-full shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:shadow-[0_0_25px_rgba(0,243,255,0.6)] transition-all duration-300">
+              <Button asChild className="relative group overflow-hidden bg-transparent border border-cyan-400 text-cyan-400 hover:text-black font-bold uppercase tracking-widest text-[10px] md:text-xs h-9 md:h-10 px-4 md:px-6 rounded-full shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:shadow-[0_0_25px_rgba(0,243,255,0.6)] transition-all duration-300">
                 <Link to="/signup">
-                  <span className="relative z-10">{t("landing.getStarted", "Access System")}</span>
+                  <span className="relative z-10">{t("landing.getStarted", "Access")}</span>
                   <div className="absolute inset-0 bg-cyan-400 transform scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-300 ease-out -z-0" />
                 </Link>
               </Button>
@@ -232,9 +232,9 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
               className="flex flex-wrap items-center gap-6 pt-4"
             >
-              <MagneticButton>
-                <Button size="lg" asChild className="h-14 px-8 rounded-full bg-cyan-500 text-black hover:bg-cyan-400 font-bold uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(0,243,255,0.4)] hover:shadow-[0_0_35px_rgba(0,243,255,0.6)] transition-all">
-                  <Link to="/signup">Initialize Scan <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <MagneticButton className="w-full sm:w-auto">
+                <Button size="lg" asChild className="w-full sm:w-auto h-14 px-8 rounded-full bg-cyan-500 text-black hover:bg-cyan-400 font-bold uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(0,243,255,0.4)] hover:shadow-[0_0_35px_rgba(0,243,255,0.6)] transition-all">
+                  <Link to="/signup" className="flex items-center justify-center">Initialize Scan <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
               </MagneticButton>
               
@@ -410,7 +410,7 @@ export default function Landing() {
               <p className="text-muted-foreground max-w-2xl mx-auto">Our Liquid Glass interface houses an array of advanced diagnostic tools designed for seamless human-machine interaction.</p>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
                 { icon: Activity, title: "Real-Time Monitoring", desc: "Instantly synchronize with wearable IoT sensors. Track heart rate, oxygen levels, and temperature with zero latency.", color: "text-cyan-400" },
                 { icon: Brain, title: "AI-Based Predictions", desc: "Our neural network analyzes historical health data to predict potential medical anomalies before they become critical.", color: "text-blue-400" },

@@ -312,32 +312,32 @@ export default function Dashboard() {
 
 
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="font-display text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 drop-shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 px-2 md:px-0">
+          <div className="space-y-2">
+            <h1 className="font-display text-3xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 drop-shadow-sm">
               AI HEALTH PULSE
             </h1>
-            <p className="font-mono text-xs text-cyan-800 dark:text-cyan-500/60 uppercase tracking-widest mt-1 font-bold">Biometric Telemetry HUD</p>
+            <p className="font-mono text-[10px] md:text-xs text-cyan-800 dark:text-cyan-500/60 uppercase tracking-widest font-bold">Biometric Telemetry HUD</p>
           </div>
 
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
             {connectionMode === "ble" ? (
               <MagneticWrapper>
-                <Button onClick={() => { bleManager.disconnect(); setConnectionMode("cloud"); localStorage.setItem("healthpulse_connection_mode", "cloud"); }} className="glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
+                <Button onClick={() => { bleManager.disconnect(); setConnectionMode("cloud"); localStorage.setItem("healthpulse_connection_mode", "cloud"); }} className="w-full sm:w-auto glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
                   <BluetoothConnected className="mr-2 h-4 w-4" />
                   BLE SYNCED
                 </Button>
               </MagneticWrapper>
             ) : (
               <>
-                <MagneticWrapper>
-                  <Button onClick={toggleConnectionMode} className="glass-panel text-blue-700 dark:text-blue-400 border-blue-400/30 hover:bg-blue-900/30">
+                <MagneticWrapper className="w-full sm:w-auto">
+                  <Button onClick={toggleConnectionMode} className="w-full sm:w-auto glass-panel text-blue-700 dark:text-blue-400 border-blue-400/30 hover:bg-blue-900/30">
                     {connectionMode === "local" ? <Wifi className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
                     {connectionMode === "local" ? t("dashboard.switchToLocal") : t("dashboard.switchToCloud")}
                   </Button>
                 </MagneticWrapper>
-                <MagneticWrapper>
-                  <Button onClick={handleBLEConnect} className="glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
+                <MagneticWrapper className="w-full sm:w-auto">
+                  <Button onClick={handleBLEConnect} className="w-full sm:w-auto glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
                     <Bluetooth className="mr-2 h-4 w-4" />
                     {t("deviceConnect.connectButton")}
                   </Button>
@@ -346,8 +346,8 @@ export default function Dashboard() {
             )}
 
             {onboarding && (
-              <MagneticWrapper>
-                <Button onClick={handleAnalyze} disabled={isAnalyzing} className="bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.6)] border-none">
+              <MagneticWrapper className="w-full sm:w-auto">
+                <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full sm:w-auto bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.6)] border-none">
                   {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Brain className="mr-2 h-4 w-4" />}
                   {t("dashboard.analyzeHealth")}
                 </Button>
@@ -384,10 +384,10 @@ export default function Dashboard() {
         ) : (
           <>
             <motion.div
-              className="grid grid-cols-1 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             >
               {/* LEFT PANEL: Vitals */}
-              <ParallaxWrapper depth={0.03} className="lg:col-span-1 h-full floating-element">
+              <ParallaxWrapper depth={0.03} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 lg:col-span-1 gap-6 h-full floating-element">
                 <VitalsPanel
                   heartRate={latest?.heart_rate || 0}
                   spo2={latest?.spo2 || 0}
@@ -397,7 +397,7 @@ export default function Dashboard() {
               </ParallaxWrapper>
 
               {/* CENTER PANEL: Human Body */}
-              <ParallaxWrapper depth={0.05} className="lg:col-span-2 h-full">
+              <ParallaxWrapper depth={0.05} className="md:col-span-2 lg:col-span-2 h-full">
                 <HumanBodyView
                   heartRate={latest?.heart_rate || 0}
                   fingerPresent={fingerPresent}
@@ -407,7 +407,7 @@ export default function Dashboard() {
               </ParallaxWrapper>
 
               {/* RIGHT PANEL: AI Insights */}
-              <ParallaxWrapper depth={0.03} className="lg:col-span-1 h-full floating-element" style={{ animationDelay: '1s' }}>
+              <ParallaxWrapper depth={0.03} className="md:col-span-2 lg:col-span-1 h-full floating-element" style={{ animationDelay: '1s' }}>
                 <AIInsightsPanel
                   healthScore={displayHealthScore}
                   stressLevel={stressLevel}
@@ -429,10 +429,8 @@ export default function Dashboard() {
                 <AnalyticsPanel chartData={chartData} />
               </div>
 
-
-
               {/* FEEDBACK SECTION */}
-              <ParallaxWrapper depth={0.02} className="w-full liquid-glass p-8 rounded-3xl relative overflow-hidden mb-12 holographic-edge">
+              <ParallaxWrapper depth={0.02} className="w-full liquid-glass p-4 md:p-8 rounded-3xl relative overflow-hidden mb-12 holographic-edge">
                 <div className="relative z-10">
                   <Feedback />
                 </div>
