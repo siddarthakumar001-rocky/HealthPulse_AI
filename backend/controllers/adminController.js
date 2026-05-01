@@ -3,7 +3,7 @@ const Feedback = require('../models/Feedback');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret123';
+const JWT_SECRET = process.env.JWT_SECRET || "healthpulse_fallback_secret_2026_secure_default";
 
 exports.adminLogin = (req, res) => {
   const { username, password } = req.body;
