@@ -108,7 +108,20 @@ export default function MapPage() {
 
   const [searchRadius, setSearchRadius] = useState(10);
 
-  const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000) => {
+  const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000, force = false) => {
+    // Check cache first (unless forced)
+    const cacheKey = `hospitals_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (!force && cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < 1000 * 60 * 60 * 24) { // 24h cache
+        setHospitals(data);
+        setLoading(false);
+        setSearchRadius(radius / 1000);
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     setSearchRadius(radius / 1000);
@@ -116,35 +129,31 @@ export default function MapPage() {
     const servers = [
       "https://overpass-api.de/api/interpreter",
       "https://lz4.overpass-api.de/api/interpreter",
-      "https://overpass.kumi.systems/api/interpreter"
+      "https://overpass.kumi.systems/api/interpreter",
+      "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
     ];
 
-    // Primary Query: Strict medical categories
-    // Secondary Query: Any medical or healthcare tagged nodes
-    const query = `[out:json][timeout:35];
-    (
-      nwr["amenity"~"hospital|clinic|doctors|pharmacy|medical|dentist"](around:${radius},${lat},${lon});
-      nwr["healthcare"](around:${radius},${lat},${lon});
-    );
-    out center body 100;`;
+    const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|pharmacy|doctors|medical"](around:${radius},${lat},${lon});nwr["healthcare"](around:${radius},${lat},${lon}););out center body 50;`;
     
     let success = false;
     for (const server of servers) {
       if (success) break;
       try {
-        const res = await fetch(`${server}?data=${encodeURIComponent(query)}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per server
+        
+        const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
         if (!res.ok) continue;
         const data = await res.json();
         
         if (!data.elements || data.elements.length === 0) {
-          // Progressively expand search if nothing found
-          if (radius < 100000) {
-            const nextRadius = radius < 50000 ? 50000 : 100000;
-            console.log(`[Map] No results in ${radius}m, expanding to ${nextRadius/1000}km...`);
-            return fetchHospitals(lat, lon, nextRadius);
+          if (radius < 50000) {
+            return fetchHospitals(lat, lon, radius === 10000 ? 30000 : 50000, force);
           }
           setHospitals([]);
-          setError(`No medical facilities found within 100km.`);
+          setError(`No results in 50km radius.`);
           setLoading(false);
           return;
         }
@@ -155,25 +164,26 @@ export default function MapPage() {
           const tags = el.tags || {};
           return {
             id: el.id, 
-            name: tags.name || tags["name:en"] || tags["name:kn"] || tags.operator || "Medical Center", 
+            name: tags.name || tags["name:en"] || tags["name:kn"] || "Medical Center", 
             type: tags.amenity || tags.healthcare || "Facility",
-            lat: hLat, 
-            lon: hLon,
+            lat: hLat, lon: hLon,
             distance: calculateDistance(lat, lon, hLat, hLon)
           };
         }).filter((h: any) => h.lat && h.lon)
           .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
 
         setHospitals(results);
+        localStorage.setItem(cacheKey, JSON.stringify({ data: results, timestamp: Date.now() }));
         success = true;
       } catch (err: any) { 
-        console.warn(`[Map] Server ${server} failed, trying next...`, err);
+        console.warn(`[Map] ${server} failed, moving to next mirror...`);
       }
     }
 
     if (!success) {
-      setError("Medical databases are currently under heavy load. Retrying...");
-      setTimeout(() => fetchHospitals(lat, lon, radius), 3000);
+      setError("Network lag detected. Attempting deep scan...");
+      // Deep scan: increase timeout and try once more
+      setTimeout(() => fetchHospitals(lat, lon, radius, true), 2000);
     }
     setLoading(false);
   }, []);
