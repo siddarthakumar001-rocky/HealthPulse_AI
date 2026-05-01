@@ -81,47 +81,64 @@ export default function MapPage() {
   const [showList, setShowList] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchRadius, setSearchRadius] = useState(10);
+
   const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000) => {
     setLoading(true);
     setError(null);
-    try {
-      console.log(`Searching for medical facilities in ${radius}m radius at ${lat}, ${lon}`);
-      // Use Union operator () to combine results from multiple tags
-      const query = `[out:json][timeout:30];(nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor|pharmacy"](around:${radius},${lat},${lon}););out center body 100;`;
-      
-      const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-      if (!res.ok) throw new Error("Medical database busy. Please try again.");
-      const data = await res.json();
-      
-      if (!data.elements || data.elements.length === 0) {
-        if (radius < 50000) {
-          const nextRadius = radius === 10000 ? 30000 : 50000;
-          return fetchHospitals(lat, lon, nextRadius);
+    setSearchRadius(radius / 1000);
+    
+    const servers = [
+      "https://overpass-api.de/api/interpreter",
+      "https://lz4.overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter"
+    ];
+
+    const query = `[out:json][timeout:30];(nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor|pharmacy"](around:${radius},${lat},${lon}););out center body 100;`;
+    
+    let success = false;
+    for (const server of servers) {
+      if (success) break;
+      try {
+        console.log(`[Map] Attempting fetch from ${server} (Radius: ${radius}m)`);
+        const res = await fetch(`${server}?data=${encodeURIComponent(query)}`);
+        if (!res.ok) continue;
+        const data = await res.json();
+        
+        if (!data.elements || data.elements.length === 0) {
+          if (radius < 50000) {
+            const nextRadius = radius === 10000 ? 30000 : 50000;
+            return fetchHospitals(lat, lon, nextRadius);
+          }
+          setHospitals([]);
+          setError(`No medical facilities found within 50km.`);
+          setLoading(false);
+          return;
         }
-        setHospitals([]);
-        setError(`No medical facilities found within 50km.`);
-        setLoading(false);
-        return;
+
+        const results: HospitalMarker[] = data.elements.map((el: any) => {
+          const hLat = el.lat || el.center?.lat;
+          const hLon = el.lon || el.center?.lon;
+          return {
+            id: el.id, 
+            name: el.tags?.name || el.tags?.["name:en"] || el.tags?.["name:kn"] || "Medical Center", 
+            type: el.tags?.amenity || el.tags?.healthcare || "Facility",
+            lat: hLat, 
+            lon: hLon,
+            distance: calculateDistance(lat, lon, hLat, hLon)
+          };
+        }).filter((h: any) => h.lat && h.lon)
+          .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
+
+        setHospitals(results);
+        success = true;
+      } catch (err: any) { 
+        console.warn(`[Map] Server ${server} failed, trying next...`, err);
       }
+    }
 
-      const results: HospitalMarker[] = data.elements.map((el: any) => {
-        const hLat = el.lat || el.center?.lat;
-        const hLon = el.lon || el.center?.lon;
-        return {
-          id: el.id, 
-          name: el.tags?.name || el.tags?.["name:en"] || el.tags?.["name:kn"] || "Medical Center", 
-          type: el.tags?.amenity || el.tags?.healthcare || "Facility",
-          lat: hLat, 
-          lon: hLon,
-          distance: calculateDistance(lat, lon, hLat, hLon)
-        };
-      }).filter((h: any) => h.lat && h.lon)
-        .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
-
-      setHospitals(results);
-    } catch (err: any) { 
-      console.error("Failed to fetch hospitals", err); 
-      setError(err.message);
+    if (!success) {
+      setError("Medical databases are currently unreachable. Please try again later.");
     }
     setLoading(false);
   }, []);
@@ -196,7 +213,7 @@ export default function MapPage() {
                       style={{ animationDirection: "reverse", animationDuration: "0.8s" }} />
                   </div>
                   <p className="font-mono text-xs text-cyan-600 dark:text-cyan-400 uppercase tracking-widest animate-pulse">
-                    {t("map.locating")}
+                    {t("map.locating")} ({searchRadius}km range)
                   </p>
                 </div>
               </div>
