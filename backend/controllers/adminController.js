@@ -30,8 +30,8 @@ exports.adminLogin = (req, res) => {
 
 exports.getStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const users = await User.find({}, 'loginCount');
+    const totalUsers = await User.countDocuments({ role: { $ne: 'admin' } });
+    const users = await User.find({ role: { $ne: 'admin' } }, 'loginCount');
     const totalLogins = users.reduce((sum, user) => sum + (user.loginCount || 0), 0);
     const totalFeedbacks = await Feedback.countDocuments();
 

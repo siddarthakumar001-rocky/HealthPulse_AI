@@ -78,8 +78,7 @@ class Tracker {
   public track(eventType: 'pageview' | 'click' | 'time', data: Partial<TrackEvent> = {}) {
     const currentPath = data.path || window.location.pathname;
     
-    // Do not track admin portals, login, or if logged in as admin
-    if (currentPath.startsWith('/admin') || localStorage.getItem('admin_token')) {
+    if (currentPath.startsWith('/admin') || currentPath === '/login' || localStorage.getItem('admin_token')) {
       return;
     }
 
