@@ -17,7 +17,8 @@ const deviceAuth = async (req, res, next) => {
   else if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const JWT_SECRET = process.env.JWT_SECRET || "healthpulse_fallback_secret_2026_secure_default";
+      const decoded = jwt.verify(token, JWT_SECRET);
       req.user = decoded; // Attach user so backend knows who synced
       isAuthenticated = true;
     } catch (err) {
