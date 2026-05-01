@@ -1,50 +1,49 @@
 const HealthData = require('../models/HealthData');
 const HealthAnalysis = require('../models/HealthAnalysis');
 const OnboardingData = require('../models/OnboardingData');
-const { checkCriticalConditions } = require('./ruleEngine');
+const { generateHealthInsights } = require('./healthEngine');
+const Alert = require('../models/Alert');
 const axios = require('axios');
 
 /**
  * Perform intelligent health analysis based on sensor data and onboarding profile.
- * Runs asynchronously to avoid blocking the IoT data pipeline.
  */
 const analyzeUserHealth = async (userId, sensorData, deviceId) => {
   try {
-    console.log(`[HealthService] Starting async analysis for User: ${userId}`);
+    console.log(`[HealthService] Starting intelligent analysis for User: ${userId}`);
 
-    // 1. Fetch Latest Onboarding Data
-    const onboarding = await OnboardingData.findOne({ user_id: userId }).sort({ createdAt: -1 });
+    // 1. Fetch Latest Onboarding Data and Recent Vitals
+    const [onboarding, recentVitals] = await Promise.all([
+      OnboardingData.findOne({ user_id: userId }).sort({ createdAt: -1 }),
+      HealthData.find({ user_id: userId }).sort({ createdAt: -1 }).limit(10)
+    ]);
     
-    // 2. Rule-Based Stress Analysis
-    const hr = sensorData.heartRate || 0;
-    const spo2 = sensorData.spo2 || 0;
+    // 2. Generate AI Insights via Health Engine
+    const healthResult = generateHealthInsights(onboarding || {}, sensorData, recentVitals);
     
-    let stressLevel = 'LOW';
-    if (hr > 100 || (onboarding?.chest_pressure)) {
-      stressLevel = 'HIGH';
-    } else if (hr > 85) {
-      stressLevel = 'MODERATE';
+    // 3. Automated Alert Generation
+    if (healthResult.alerts && healthResult.alerts.length > 0) {
+      const alertPromises = healthResult.alerts.map(a => {
+        return new Alert({
+          user_id: userId,
+          message: a.message,
+          severity: a.severity,
+          resolved: false,
+          timestamp: new Date()
+        }).save();
+      });
+      await Promise.all(alertPromises);
+      console.log(`[HealthService] Generated ${healthResult.alerts.length} automated alerts.`);
     }
 
-    // 3. Health Score Calculation (Weighted)
+    // 4. Calculate Health Score Fallback (if not from AI)
     let healthScore = 100;
-    
-    // Vital penalties
-    if (hr > 100 || hr < 50) healthScore -= 15;
-    if (spo2 < 95) healthScore -= 20;
-    if (spo2 < 90) healthScore -= 20;
-    
-    // Symptom penalties
-    const symptomCount = (onboarding?.common_symptoms?.length || 0);
-    healthScore -= (symptomCount * 5);
-    
-    // Existing condition penalties
-    if (onboarding?.bp_issues) healthScore -= 10;
-    if (onboarding?.sugar_issues) healthScore -= 10;
+    if (sensorData.heartRate > 100 || sensorData.heartRate < 50) healthScore -= 15;
+    if (sensorData.spo2 < 95) healthScore -= 20;
     
     healthScore = Math.max(0, Math.min(100, healthScore));
 
-    // 4. Trigger External AI Analysis (Optional/Async)
+    // 5. Trigger External AI Service (Optional)
     const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5001';
     let aiResult = null;
     
@@ -53,40 +52,29 @@ const analyzeUserHealth = async (userId, sensorData, deviceId) => {
         const aiResponse = await axios.post(`${AI_SERVICE_URL}/analyze`, {
           symptoms: onboarding.common_symptoms || [],
           onboardingData: onboarding,
-          vitals: sensorData,
-          location: { lat: 12.9716, lng: 77.5946 } // Default or last known
+          vitals: sensorData
         }, { timeout: 3000 });
         aiResult = aiResponse.data;
       }
     } catch (aiErr) {
-      console.warn("[HealthService] External AI Service unreachable, using local fallback.");
+      console.warn("[HealthService] External AI Service unreachable, using local intelligence engine.");
     }
 
-    // 5. Consolidate and Save Analysis
-    const ruleResults = checkCriticalConditions(onboarding || {}, sensorData);
-    
+    // 6. Consolidate and Save Analysis
     const analysis = new HealthAnalysis({
       user_id: userId,
-      type: (aiResult?.type === 'EMERGENCY' || ruleResults.riskLevel === 'high') ? 'EMERGENCY' : 'NORMAL',
-      condition: aiResult?.predictedDisease || (ruleResults.riskLevel === 'high' ? "Follow-up Required" : "Stable"),
+      type: (aiResult?.type === 'EMERGENCY' || healthResult.riskLevel === 'high') ? 'EMERGENCY' : 'NORMAL',
+      condition: aiResult?.predictedDisease || (healthResult.riskLevel === 'high' ? "Attention Required" : "Stable"),
       healthScore: aiResult?.healthScore || healthScore,
-      riskLevel: aiResult?.riskLevel || ruleResults.riskLevel,
-      dominantDosha: aiResult?.dosha || "N/A",
-      recommendations: aiResult?.recommendations || {
-        medicines: [],
-        lifestyle: ["Stay hydrated", "Monitor vitals regularly"],
-        diet: ["Light, warm meals"],
-        disclaimer: "Interim analysis. Consult a professional."
-      },
+      riskLevel: aiResult?.riskLevel || healthResult.riskLevel,
+      insights: healthResult.insights,
+      recommendations: aiResult?.recommendations || healthResult.recommendations,
       sensorData: sensorData,
       timestamp: new Date()
     });
 
-    // Add stressLevel to specific field if we had one, otherwise add to critical flags or similar
-    // For now, let's keep it in the log and condition
-    console.log(`[HealthService] Analysis Complete. Score: ${healthScore}, Stress: ${stressLevel}`);
-    
     await analysis.save();
+    console.log(`[HealthService] Analysis Saved. Risk: ${healthResult.riskLevel}`);
     return analysis;
 
   } catch (err) {

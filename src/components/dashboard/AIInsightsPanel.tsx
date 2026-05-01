@@ -7,10 +7,21 @@ interface AIInsightsPanelProps {
   stressLevel: string;
   condition: string;
   message: string;
+  insights?: string[];
   isEmergency: boolean;
+  recommendations?: {
+    lifestyle?: string[];
+    diet?: string[];
+    activity?: string[];
+    medicines?: string[];
+    disclaimer?: string;
+  };
+  onboarding?: any;
 }
 
-export default function AIInsightsPanel({ healthScore, stressLevel, condition, message, isEmergency }: AIInsightsPanelProps) {
+export default function AIInsightsPanel({ 
+  healthScore, stressLevel, condition, message, insights = [], isEmergency, recommendations, onboarding 
+}: AIInsightsPanelProps) {
   const { t } = useTranslation();
   const isHighRisk = (stressLevel === 'HIGH' || isEmergency) && condition !== 'NOMINAL' && condition !== '';
   const mainColor = isHighRisk ? "text-destructive neon-text-pink" : "text-cyan-600 dark:text-cyan-400 dark:neon-text-cyan";
@@ -72,20 +83,41 @@ export default function AIInsightsPanel({ healthScore, stressLevel, condition, m
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex gap-2">
-              <span className="text-cyan-600 dark:text-cyan-400">&gt;</span>
-              <span className="text-cyan-700 dark:text-cyan-400">Initializing biometric scan...</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-cyan-600 dark:text-cyan-400">&gt;</span>
-              <span className="text-cyan-700 dark:text-cyan-400">Cross-referencing historical data...</span>
-            </div>
+            {insights.map((insight, i) => (
+              <div key={`insight-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${i * 150}ms` }}>
+                <span className="text-cyan-600 dark:text-cyan-400 font-bold">&gt;</span>
+                <span className="text-cyan-700 dark:text-cyan-400 leading-relaxed">{insight}</span>
+              </div>
+            ))}
             <div className="flex gap-2">
               <span className={isHighRisk ? "text-destructive" : "text-green-600 dark:text-green-400"}>&gt;</span>
               <span className={`leading-relaxed ${isHighRisk ? "text-destructive" : "text-green-700 dark:text-green-400"}`}>
-                {message || "No anomalies detected. Vitals within nominal parameters."}
+                {message || (insights.length > 0 ? "" : "No anomalies detected. Vitals within nominal parameters.")}
               </span>
             </div>
+
+            {recommendations && (
+              <>
+                {recommendations.lifestyle?.map((rec, i) => (
+                  <div key={`life-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + 1) * 200}ms` }}>
+                    <span className="text-blue-500">&gt;</span>
+                    <span className="text-foreground/70 uppercase text-[9px]">[LIFESTYLE] {rec}</span>
+                  </div>
+                ))}
+                {recommendations.diet?.map((rec, i) => (
+                  <div key={`diet-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + recommendations.lifestyle?.length! + 1) * 200}ms` }}>
+                    <span className="text-orange-500">&gt;</span>
+                    <span className="text-foreground/70 uppercase text-[9px]">[DIET] {rec}</span>
+                  </div>
+                ))}
+                {recommendations.activity?.map((rec, i) => (
+                  <div key={`act-${i}`} className="flex gap-2 animate-in fade-in slide-in-from-left-2 duration-500" style={{ animationDelay: `${(i + recommendations.lifestyle?.length! + recommendations.diet?.length! + 1) * 200}ms` }}>
+                    <span className="text-emerald-500">&gt;</span>
+                    <span className="text-foreground/70 uppercase text-[9px]">[ACTIVITY] {rec}</span>
+                  </div>
+                ))}
+              </>
+            )}
           </motion.div>
 
           <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-muted/60 dark:from-black/60 to-transparent pointer-events-none" />

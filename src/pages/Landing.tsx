@@ -257,10 +257,10 @@ export default function Landing() {
           {/* Right: Live AI Preview & Human Body */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8, duration: 0.8 }}
-            className="flex-1 relative w-full max-w-lg mx-auto"
+            className="flex-1 relative w-full max-w-sm md:max-w-lg mx-auto lg:mx-0 mt-8 lg:mt-0"
             style={{ x: xParallax * -1, y: yParallax * -1 }} // Opposite parallax
           >
-            <div className="relative aspect-square">
+            <div className="relative aspect-[3/4] md:aspect-square">
               {/* Glowing Background Sphere */}
               <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -327,35 +327,33 @@ export default function Landing() {
               {/* Mini Dashboard Panels (Live AI Preview) */}
               <motion.div 
                 animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                className="absolute top-[60%] -right-4 lg:-right-12 w-48 liquid-glass border border-cyan-500/30 p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+                className="absolute top-[65%] -right-2 md:-right-8 lg:-right-12 w-40 md:w-48 liquid-glass border border-cyan-500/30 p-3 md:p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl z-[30]"
               >
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">SpO2 Level</span>
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-[9px] md:text-[10px] font-bold text-cyan-500 uppercase tracking-widest">SpO2 Level</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                 </div>
-                <div className="flex items-end gap-2">
-                  <span className="text-3xl font-black text-foreground dark:text-white font-mono">98</span>
-                  <span className="text-cyan-500/70 text-sm font-bold mb-1">%</span>
+                <div className="flex items-end gap-1 md:gap-2">
+                  <span className="text-2xl md:text-3xl font-black text-foreground dark:text-white font-mono">98</span>
+                  <span className="text-cyan-500/70 text-xs md:text-sm font-bold mb-1">%</span>
                 </div>
-                {/* Fake Circular Progress */}
-                <div className="mt-3 relative h-1 bg-cyan-950 rounded-full overflow-hidden">
+                <div className="mt-2 md:mt-3 relative h-1 bg-cyan-950 rounded-full overflow-hidden">
                   <motion.div className="absolute top-0 left-0 h-full bg-cyan-400 shadow-[0_0_10px_#00f3ff]" initial={{ width: "0%" }} animate={{ width: "98%" }} transition={{ duration: 1.5, delay: 1 }} />
                 </div>
-                <p className="mt-2 text-[9px] text-muted-foreground uppercase text-center tracking-widest">Normal Condition</p>
+                <p className="mt-2 text-[8px] md:text-[9px] text-muted-foreground uppercase text-center tracking-widest">Condition: Stable</p>
               </motion.div>
 
               <motion.div 
                 animate={{ y: [0, 15, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
-                className="absolute top-[20%] -left-4 lg:-left-12 w-56 liquid-glass border border-blue-500/30 p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+                className="absolute top-[5%] -left-8 md:-left-16 w-48 md:w-56 liquid-glass border border-blue-500/30 p-3 md:p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl z-[30]"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-4 w-4 text-blue-400" />
-                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">AI Status</span>
+                  <Brain className="h-3 w-3 md:h-4 md:w-4 text-blue-400" />
+                  <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-widest">AI Intelligence</span>
                 </div>
-                <p className="text-sm text-foreground dark:text-white font-medium mb-3">Analyzing telemetry...</p>
-                {/* Fake Waveform */}
-                <div className="flex items-end h-8 gap-1">
-                  {Array.from({ length: 15 }).map((_, i) => (
+                <p className="text-[10px] text-foreground dark:text-white font-medium mb-2 opacity-80 uppercase tracking-tighter">Neural analysis stream...</p>
+                <div className="flex items-end h-6 md:h-8 gap-0.5 md:gap-1">
+                  {Array.from({ length: 12 }).map((_, i) => (
                     <motion.div 
                       key={i} 
                       className="w-full bg-blue-500/50 rounded-t-sm"
@@ -363,6 +361,20 @@ export default function Landing() {
                       transition={{ repeat: Infinity, duration: 1 + Math.random(), delay: i * 0.1 }}
                     />
                   ))}
+                </div>
+              </motion.div>
+
+              <motion.div 
+                animate={{ y: [0, -12, 0], x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 2 }}
+                className="absolute top-[45%] -left-4 md:-left-12 w-32 md:w-36 liquid-glass border border-emerald-500/30 p-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl z-[40]"
+              >
+                <p className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Health Score</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-white font-mono">94</span>
+                  <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400" />
+                </div>
+                <div className="h-0.5 bg-emerald-950 mt-2 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-400 w-[94%]" />
                 </div>
               </motion.div>
             </div>

@@ -6,85 +6,90 @@
 const checkCriticalConditions = (onboardingData, sensorData = {}) => {
   const alerts = [];
   const criticalFlags = [];
+  const recommendations = {
+    medicines: [],
+    lifestyle: [],
+    diet: [],
+    disclaimer: "These recommendations are based on your profile and vitals. Please consult a doctor for official medical advice."
+  };
 
-  // 1. CARDIAC RISK CHECK
-  if (
-    onboardingData.chest_pain_side && 
-    onboardingData.chest_pain_side !== 'none' && 
-    onboardingData.chest_pressure === true
-  ) {
-    criticalFlags.push('POSSIBLE_CARDIAC_ISSUE');
+  const hr = sensorData.heartRate || 0;
+  const spo2 = sensorData.spo2 || 0;
+  const temp = sensorData.temperature || 0;
+
+  // 1. CARDIAC & VITAL RISKS
+  if (hr > 120 || (onboardingData.chest_pain_side && onboardingData.chest_pain_side !== 'none' && onboardingData.chest_pressure)) {
+    criticalFlags.push('CARDIAC_EMERGENCY');
     alerts.push({
       type: 'cardiac_risk',
       severity: 'high',
-      message: 'Persistent chest pain combined with pressure detected. Immediate medical consultation advised.'
+      message: 'Critical heart activity or chest pressure detected. Contact emergency services or a cardiologist immediately.'
     });
+    recommendations.lifestyle.push("Immediate rest and medical evaluation");
+    recommendations.diet.push("Avoid all caffeine and stimulants");
+  } else if (hr > 100) {
+    alerts.push({ type: 'tachycardia', severity: 'moderate', message: 'Elevated heart rate detected.' });
+    recommendations.lifestyle.push("Practice deep breathing (Pranayama)");
+    recommendations.lifestyle.push("Reduce stress and physical exertion");
   }
 
-  if (onboardingData.cardiac_arrest_history === true) {
-    criticalFlags.push('HISTORY_OF_CARDIAC_ARREST');
+  // 2. RESPIRATORY RISKS
+  if (spo2 > 0 && spo2 < 92) {
+    const isAsthmatic = onboardingData.conditions?.includes('asthma');
+    criticalFlags.push('RESPIRATORY_DISTRESS');
     alerts.push({
-      type: 'cardiac_history',
-      severity: 'moderate',
-      message: 'User has a history of cardiac arrest. Regular monitoring is essential.'
-    });
-  }
-
-  // 2. NEUROLOGICAL RISK CHECK
-  const neuroSymptoms = onboardingData.common_symptoms || [];
-  if (
-    onboardingData.stroke_history === true && 
-    (neuroSymptoms.includes('numbness') || neuroSymptoms.includes('tingling') || neuroSymptoms.includes('dizziness'))
-  ) {
-    criticalFlags.push('NEUROLOGICAL_RISK');
-    alerts.push({
-      type: 'neuro_risk',
+      type: 'hypoxia',
       severity: 'high',
-      message: 'Neurological symptoms (numbness/dizziness) detected in a user with stroke history. High stroke recurrence risk.'
+      message: isAsthmatic ? 'Severe respiratory distress in asthmatic profile.' : 'Low oxygen levels detected.'
     });
+    recommendations.lifestyle.push("Sit upright and ensure fresh air circulation");
+    if (isAsthmatic) recommendations.lifestyle.push("Use prescribed rescue inhaler if needed");
   }
 
-  // 3. RESPIRATORY DISTRESS CHECK
-  if (onboardingData.conditions && onboardingData.conditions.includes('asthma')) {
-    if (sensorData.spo2 && sensorData.spo2 < 92) {
-      criticalFlags.push('RESPIRATORY_DISTRESS');
-      alerts.push({
-        type: 'respiratory_risk',
-        severity: 'high',
-        message: 'Low oxygen levels (SpO2) detected in an asthmatic user.'
-      });
+  // 3. LIFESTYLE & ADDICTION MAPPING
+  if (onboardingData.smoking && onboardingData.smoking !== 'never') {
+    recommendations.lifestyle.push("Smoking cessation program recommended");
+    recommendations.diet.push("Increase Vitamin C and antioxidant intake");
+    if (spo2 < 95) {
+      alerts.push({ type: 'smoker_hypoxia', severity: 'moderate', message: 'Lower SpO2 levels likely correlated with smoking history.' });
     }
   }
 
-  // 4. SENSOR THRESHOLD ALERTS (REAL-TIME)
-  if (sensorData.heartRate > 120) {
-    alerts.push({
-      priority: 'high',
-      type: 'tachycardia',
-      message: 'High Heart Rate Detected (> 120 BPM)'
-    });
+  if (onboardingData.alcohol && onboardingData.alcohol !== 'never') {
+    recommendations.diet.push("Increase hydration (2-3L water daily)");
+    recommendations.diet.push("B-complex vitamin-rich foods (Leafy greens, eggs)");
   }
 
-  if (sensorData.spo2 && sensorData.spo2 < 90) {
-    alerts.push({
-      priority: 'critical',
-      type: 'hypoxia',
-      message: 'Critical Low SpO2 Detected (< 90%)'
-    });
+  // 4. CHRONIC CONDITIONS (BP/SUGAR)
+  if (onboardingData.has_bp) {
+    recommendations.diet.push("Follow DASH diet (Low sodium, high potassium)");
+    recommendations.lifestyle.push("Daily 30-min brisk walk");
   }
 
-  if (sensorData.temperature > 39) {
-    alerts.push({
-      priority: 'high',
-      type: 'high_fever',
-      message: 'High Body Temperature Detected (> 39°C)'
-    });
+  if (onboardingData.has_sugar) {
+    recommendations.diet.push("Low Glycemic Index (GI) foods only");
+    recommendations.lifestyle.push("Regular blood glucose monitoring");
   }
+
+  // 5. PAIN & PHYSICAL STATE
+  if (onboardingData.physical_exhaustion || onboardingData.low_energy) {
+    recommendations.lifestyle.push("Ensure 7-9 hours of consistent sleep");
+    recommendations.diet.push("Increase iron and magnesium intake");
+  }
+
+  if (onboardingData.body_pain_location?.length > 0) {
+    recommendations.lifestyle.push(`Gentle stretching focused on: ${onboardingData.body_pain_location.join(', ')}`);
+  }
+
+  // 6. GENERAL REVIEWS
+  if (recommendations.lifestyle.length === 0) recommendations.lifestyle.push("Maintain current healthy habits");
+  if (recommendations.diet.length === 0) recommendations.diet.push("Balanced Mediterranean-style diet");
 
   return {
     alerts,
     criticalFlags,
-    riskLevel: alerts.some(a => a.severity === 'high' || a.priority === 'critical') ? 'high' : 
+    recommendations,
+    riskLevel: alerts.some(a => a.severity === 'high') ? 'high' : 
                alerts.length > 0 ? 'moderate' : 'low'
   };
 };

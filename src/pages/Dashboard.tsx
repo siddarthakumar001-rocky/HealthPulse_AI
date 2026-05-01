@@ -392,6 +392,7 @@ export default function Dashboard() {
                   heartRate={latest?.heart_rate || 0}
                   spo2={latest?.spo2 || 0}
                   temperature={latest?.temperature || 0}
+                  onboarding={onboarding}
                 />
               </ParallaxWrapper>
 
@@ -412,7 +413,10 @@ export default function Dashboard() {
                   stressLevel={stressLevel}
                   condition={aiAnalysis?.condition || ""}
                   message={aiAnalysis?.message || "Standing by for biometric input..."}
+                  insights={aiAnalysis?.insights || []}
                   isEmergency={aiAnalysis?.type === 'EMERGENCY'}
+                  recommendations={aiAnalysis?.recommendations}
+                  onboarding={onboarding}
                 />
               </ParallaxWrapper>
             </motion.div>

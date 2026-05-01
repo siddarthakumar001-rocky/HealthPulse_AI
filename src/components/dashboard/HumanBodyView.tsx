@@ -13,7 +13,7 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
   const pulseDuration = heartRate > 0 ? 60 / heartRate : 1;
 
   return (
-    <div className="relative w-full h-[500px] flex items-center justify-center overflow-hidden rounded-2xl liquid-glass holographic-edge">
+    <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden rounded-2xl liquid-glass holographic-edge">
       {/* Background Grid */}
       <div 
         className="absolute inset-0 opacity-10"

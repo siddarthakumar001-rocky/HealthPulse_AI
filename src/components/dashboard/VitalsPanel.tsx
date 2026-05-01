@@ -7,6 +7,7 @@ interface VitalsPanelProps {
   heartRate: number;
   spo2: number;
   temperature: number;
+  onboarding?: any;
 }
 
 /** Animated number count-up using Framer Motion */
