@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  console.error('[CRITICAL] JWT_SECRET is not set in environment variables!');
+  const msg = "[CRITICAL] JWT_SECRET is missing in environment variables. Authentication will fail.";
+  console.error(msg);
 }
 
 exports.signup = async (req, res) => {
