@@ -45,22 +45,33 @@ function LocationMarker({ onLocationFound }: { onLocationFound: (lat: number, lo
     
     const success = (pos: GeolocationPosition) => {
       const { latitude, longitude } = pos.coords;
-      map.setView([latitude, longitude], 15);
+      console.log(`[Map] Native Geolocation success: ${latitude}, ${longitude}`);
+      map.setView([latitude, longitude], 13);
       onLocationFound(latitude, longitude);
       setAttempted(true);
     };
 
-    const error = () => {
-      // Fallback to Bangalore if denied
-      const fallback: [number, number] = [12.9716, 77.5946];
-      console.warn("Location access denied. Falling back to Bangalore.");
-      map.setView(fallback, 13);
-      onLocationFound(fallback[0], fallback[1]);
+    const error = (err?: any) => {
+      console.warn(`[Map] Native Geolocation failed (${err?.message}), trying Leaflet locate...`);
+      map.locate({ setView: true, maxZoom: 13, enableHighAccuracy: true });
       setAttempted(true);
+      // Even if everything fails, wait 5s then use fallback
+      setTimeout(() => {
+        if (!attempted) {
+          const fallback: [number, number] = [12.9716, 77.5946];
+          map.setView(fallback, 13);
+          onLocationFound(fallback[0], fallback[1]);
+          setAttempted(true);
+        }
+      }, 8000);
     };
 
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, error, { timeout: 10000, enableHighAccuracy: true });
+      navigator.geolocation.getCurrentPosition(success, error, { 
+        timeout: 5000, 
+        enableHighAccuracy: true,
+        maximumAge: 0 
+      });
     } else {
       error();
     }
@@ -72,6 +83,17 @@ function LocationMarker({ onLocationFound }: { onLocationFound: (lat: number, lo
     map.on("locationfound", onLocFound);
     return () => { map.off("locationfound", onLocFound); };
   }, [map, onLocationFound, attempted]);
+  return null;
+}
+
+function MapBounds({ hospitals, position }: { hospitals: HospitalMarker[], position: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (hospitals.length > 0) {
+      const bounds = L.latLngBounds([position, ...hospitals.map(h => [h.lat, h.lon] as [number, number])]);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }
+  }, [hospitals, position, map]);
   return null;
 }
 
@@ -97,24 +119,32 @@ export default function MapPage() {
       "https://overpass.kumi.systems/api/interpreter"
     ];
 
-    const query = `[out:json][timeout:30];(nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor|pharmacy"](around:${radius},${lat},${lon}););out center body 100;`;
+    // Primary Query: Strict medical categories
+    // Secondary Query: Any medical or healthcare tagged nodes
+    const query = `[out:json][timeout:35];
+    (
+      nwr["amenity"~"hospital|clinic|doctors|pharmacy|medical|dentist"](around:${radius},${lat},${lon});
+      nwr["healthcare"](around:${radius},${lat},${lon});
+    );
+    out center body 100;`;
     
     let success = false;
     for (const server of servers) {
       if (success) break;
       try {
-        console.log(`[Map] Attempting fetch from ${server} (Radius: ${radius}m)`);
         const res = await fetch(`${server}?data=${encodeURIComponent(query)}`);
         if (!res.ok) continue;
         const data = await res.json();
         
         if (!data.elements || data.elements.length === 0) {
-          if (radius < 50000) {
-            const nextRadius = radius === 10000 ? 30000 : 50000;
+          // Progressively expand search if nothing found
+          if (radius < 100000) {
+            const nextRadius = radius < 50000 ? 50000 : 100000;
+            console.log(`[Map] No results in ${radius}m, expanding to ${nextRadius/1000}km...`);
             return fetchHospitals(lat, lon, nextRadius);
           }
           setHospitals([]);
-          setError(`No medical facilities found within 50km.`);
+          setError(`No medical facilities found within 100km.`);
           setLoading(false);
           return;
         }
@@ -122,10 +152,11 @@ export default function MapPage() {
         const results: HospitalMarker[] = data.elements.map((el: any) => {
           const hLat = el.lat || el.center?.lat;
           const hLon = el.lon || el.center?.lon;
+          const tags = el.tags || {};
           return {
             id: el.id, 
-            name: el.tags?.name || el.tags?.["name:en"] || el.tags?.["name:kn"] || "Medical Center", 
-            type: el.tags?.amenity || el.tags?.healthcare || "Facility",
+            name: tags.name || tags["name:en"] || tags["name:kn"] || tags.operator || "Medical Center", 
+            type: tags.amenity || tags.healthcare || "Facility",
             lat: hLat, 
             lon: hLon,
             distance: calculateDistance(lat, lon, hLat, hLon)
@@ -141,7 +172,8 @@ export default function MapPage() {
     }
 
     if (!success) {
-      setError("Medical databases are currently unreachable. Please try again later.");
+      setError("Medical databases are currently under heavy load. Retrying...");
+      setTimeout(() => fetchHospitals(lat, lon, radius), 3000);
     }
     setLoading(false);
   }, []);
@@ -237,6 +269,17 @@ export default function MapPage() {
                     <Search className="h-4 w-4" />
                   </Button>
                 </form>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {[10, 30, 50, 100].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => fetchHospitals(position[0], position[1], r * 1000)}
+                      className={`flex-1 py-1 rounded text-[9px] font-mono font-bold uppercase transition-all ${searchRadius === r ? 'bg-cyan-500 text-black shadow-[0_0_10px_rgba(0,243,255,0.4)]' : 'bg-muted/40 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/10'}`}
+                    >
+                      {r}km
+                    </button>
+                  ))}
+                </div>
                 <button
                   onClick={() => setShowList(!showList)}
                   className="w-full flex items-center justify-center gap-2 text-[10px] font-mono font-bold py-2 rounded-lg uppercase tracking-wider text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/10 transition-colors border border-cyan-500/10"
@@ -275,6 +318,7 @@ export default function MapPage() {
             <MapContainer center={position} zoom={13} className="h-full w-full" scrollWheelZoom>
               <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <LocationMarker onLocationFound={handleLocationFound} />
+              <MapBounds hospitals={hospitals} position={position} />
               <Marker position={position}><Popup>Current Location</Popup></Marker>
               {hospitals.map((h) => (
                 <Marker key={h.id} position={[h.lat, h.lon]} icon={hospitalIcon}>
