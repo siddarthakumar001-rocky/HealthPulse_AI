@@ -255,8 +255,8 @@ export default function MapPage() {
             )}
 
             {/* Floating glass panel */}
-            <div className="absolute top-3 right-3 z-[400] pointer-events-none" style={{ maxWidth: "95%" }}>
-              <div className="pointer-events-auto w-64 sm:w-80 rounded-xl p-3 space-y-2 bg-background/90 dark:bg-black/80 backdrop-blur-xl border border-cyan-500/20 shadow-2xl">
+            <div className="absolute top-3 right-3 z-[1000] pointer-events-none" style={{ maxWidth: "90%" }}>
+              <div className="pointer-events-auto w-64 sm:w-80 rounded-xl p-3 space-y-2 bg-background/95 dark:bg-black/90 backdrop-blur-2xl border border-cyan-500/30 shadow-2xl">
                 <form onSubmit={handleSearch} className="flex gap-2">
                   <Input
                     value={searchQuery}
@@ -338,8 +338,16 @@ export default function MapPage() {
           </div>
         </motion.div>
 
-        {/* Hospital list (desktop) */}
-        <div className="hidden md:block space-y-3">
+        {/* Hospital list */}
+        <div className="space-y-3 pb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-mono text-xs text-cyan-700 dark:text-cyan-500/60 uppercase tracking-widest font-bold">
+              Discovered Facilities ({hospitals.length})
+            </h2>
+            {hospitals.length > 0 && (
+              <span className="text-[10px] font-mono text-emerald-500 font-bold uppercase animate-pulse">Live Feed Active</span>
+            )}
+          </div>
           {hospitals.map((h, i) => (
             <motion.div
               key={h.id}
@@ -347,7 +355,7 @@ export default function MapPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.04 }}
               whileHover={{ scale: 1.01, x: 4 }}
-              className="liquid-glass flex items-center gap-4 p-4 rounded-2xl"
+              className="liquid-glass flex items-center gap-4 p-4 rounded-2xl border border-cyan-500/10 hover:border-cyan-500/30 transition-all"
             >
               <div className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/20">
                 <Hospital className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
