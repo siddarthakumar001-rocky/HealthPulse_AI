@@ -49,7 +49,7 @@ export default function MapPage() {
   const fetchHospitals = useCallback(async (lat: number, lon: number) => {
     setLoading(true);
     try {
-      const query = `[out:json][timeout:15];nwr["amenity"~"hospital|clinic"](around:10000,${lat},${lon});out center body 40;`;
+      const query = `[out:json][timeout:15];nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:20000,${lat},${lon});out center body 40;`;
       const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error("Overpass API error");
       const data = await res.json();
