@@ -4,10 +4,11 @@ const Device = require('../models/Device');
 const UserDevice = require('../models/UserDevice');
 const HealthData = require('../models/HealthData');
 const authMiddleware = require('../config/authMiddleware');
+const deviceAuth = require('../middleware/deviceAuth');
 
 // 1. POST /api/device/register
 // Register device on startup
-router.post('/register', async (req, res) => {
+router.post('/register', deviceAuth, async (req, res) => {
   try {
     const { deviceId } = req.body;
     if (!deviceId) return res.status(400).json({ error: "deviceId is required" });
@@ -26,38 +27,66 @@ router.post('/register', async (req, res) => {
   }
 });
 
+const { analyzeUserHealth } = require('../services/healthService');
+
 // 2. POST /api/device/data
 // Update status and lastSeen from ESP32
-router.post('/data', async (req, res) => {
+router.post('/data', deviceAuth, async (req, res) => {
   try {
     const { deviceId, heartRate, spo2, temperature } = req.body;
     if (!deviceId) return res.status(400).json({ error: "deviceId is required" });
 
-    // 1. Update/Create Device status
+    // Validation Rules
+    const isValidHR = heartRate === null || (heartRate >= 30 && heartRate <= 220);
+    const isValidSpO2 = spo2 === null || (spo2 >= 0 && spo2 <= 100);
+    const isValidTemp = temperature === null || (temperature >= 30 && temperature <= 45);
+
+    if (!isValidHR || !isValidSpO2 || !isValidTemp) {
+      return res.status(400).json({ error: "Invalid sensor data ranges" });
+    }
+
+    // 1. Update/Create Device status (Auto-registration)
     const device = await Device.findOneAndUpdate(
       { deviceId },
       { status: 'online', lastSeen: new Date() },
       { upsert: true, new: true }
     );
 
-    // 2. Find associated user and save health data
-    const mapping = await UserDevice.findOne({ deviceId });
-    if (mapping && heartRate !== undefined && spo2 !== undefined && temperature !== undefined) {
-      const newHealthRecord = new HealthData({
-        userId: mapping.userId,
-        heartRate,
-        spo2,
-        temperature
-      });
-      await newHealthRecord.save();
-      console.log(`[IoT] Saved data for User: ${mapping.userId} via Device: ${deviceId}`);
-    } else if (!mapping) {
-      console.log(`[IoT] Received data for unmapped Device: ${deviceId}`);
+    try {
+      // 2. Find associated user and save health data
+      // Prioritize req.user if synchronized from frontend, else fallback to mapping
+      let linkedUserId = req.user ? req.user.id : null;
+      if (!linkedUserId) {
+        const mapping = await UserDevice.findOne({ deviceId });
+        if (mapping) linkedUserId = mapping.userId;
+      }
+
+      if (linkedUserId && (heartRate !== null || spo2 !== null)) {
+        const newHealthRecord = new HealthData({
+          userId: linkedUserId,
+          deviceId: deviceId,
+          heartRate: heartRate || 0,
+          spo2: spo2 || 0,
+          temperature: temperature || 36.5
+        });
+        await newHealthRecord.save();
+        console.log(`[IoT] Saved data for User: ${linkedUserId} via Device: ${deviceId}`);
+        
+        // 3. Trigger ASYNC intelligent analysis (Non-blocking)
+        analyzeUserHealth(linkedUserId, { heartRate, spo2, temperature }, deviceId)
+          .catch(err => console.error("[IoT] Analysis Background Error:", err));
+
+      } else if (!linkedUserId) {
+        console.log(`[IoT] Ignored data for unmapped Device: ${deviceId}`);
+      }
+    } catch (saveErr) {
+      console.error("[IoT] Database Save Error:", saveErr);
+      // We still proceed to return 200 so the ESP32 doesn't error out
     }
     
-    res.json({ message: "Status updated", device });
+    res.json({ message: "Status updated and data processed", device });
   } catch (err) {
-    console.error("Device data update error:", err);
+    console.error("Device data global error:", err);
     res.status(500).json({ error: err.message });
   }
 });

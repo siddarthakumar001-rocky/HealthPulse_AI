@@ -6,6 +6,10 @@ const healthDataSchema = new mongoose.Schema({
     ref: 'User', 
     required: true 
   },
+  deviceId: {
+    type: String,
+    required: false // Optional for manual entries, though usually provided by IoT
+  },
   heartRate: { 
     type: Number, 
     required: true 

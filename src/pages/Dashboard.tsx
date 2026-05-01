@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Heart, Thermometer, Wind, Brain, TrendingUp, Clock, Smartphone, Bell, FileText, Loader2, Check, HelpCircle } from "lucide-react";
+import { Heart, Thermometer, Wind, Brain, TrendingUp, Clock, Smartphone, Bell, FileText, Loader2, Check, HelpCircle, Wifi, Globe, Bluetooth, BluetoothConnected } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import DashboardLayout from "@/components/DashboardLayout";
 import StressGauge from "@/components/StressGauge";
@@ -11,8 +11,18 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { trackEvent, AnalyticsCategory, AnalyticsAction } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
 import HowToUseModal from "@/components/HowToUseModal";
+import { bleManager } from "@/lib/ble";
+import axios from "axios";
+import MagneticWrapper from "@/components/dashboard/MagneticWrapper";
+import ParallaxWrapper from "@/components/dashboard/ParallaxWrapper";
+import HumanBodyView from "@/components/dashboard/HumanBodyView";
+import VitalsPanel from "@/components/dashboard/VitalsPanel";
+import AIInsightsPanel from "@/components/dashboard/AIInsightsPanel";
+import AnalyticsPanel from "@/components/dashboard/AnalyticsPanel";
+import { motion } from "framer-motion";
 
 interface HealthReading {
   heart_rate: number;
@@ -36,6 +46,11 @@ export default function Dashboard() {
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [connectionMode, setConnectionMode] = useState<"cloud" | "local" | "ble">(
+    (localStorage.getItem("healthpulse_connection_mode") as any) || "cloud"
+  );
+  const [bleStatus, setBleStatus] = useState<string>(bleManager.status);
+  const [fingerPresent, setFingerPresent] = useState<boolean>(false);
 
   // Show guide on first visit
   useEffect(() => {
@@ -46,14 +61,119 @@ export default function Dashboard() {
     }
   }, []);
 
+  // ── BLE Mode: subscribe to live sensor data ─────────────────
+  useEffect(() => {
+    if (connectionMode !== "ble") return;
+
+    // If BLE is connected, mark device as present
+    if (bleManager.isConnected()) {
+      setHasDevice(true);
+      setDevice({ device_id: "ESP32-BLE-HEALTH" });
+    }
+
+    const unsubData = bleManager.onData((data) => {
+      const newReading: HealthReading = {
+        heart_rate: data.heartRate ?? 0,
+        spo2: data.spo2 ?? 0,
+        temperature: data.temperature ?? 0,
+        timestamp: data.timestamp,
+      };
+      setLatest(newReading);
+      setFingerPresent(data.fingerPresent || false);
+      setReadings(prev => [...prev.slice(-19), newReading]);
+      setHasDevice(true);
+      if (!device) setDevice({ device_id: bleManager.deviceName || "ESP32-BLE-HEALTH" });
+
+      // Sync to cloud backend in background (non-blocking)
+      api.post("/device/data", {
+        deviceId: "ESP32-BLE-HEALTH",
+        heartRate: data.heartRate,
+        spo2: data.spo2,
+        temperature: data.temperature || 36.5,
+      }).catch(() => { });
+    });
+
+    const unsubStatus = bleManager.onStatus((status) => {
+      setBleStatus(status);
+      if (status === 'disconnected') {
+        toast({ title: "Bluetooth Disconnected", variant: "destructive" });
+      }
+    });
+
+    return () => { unsubData(); unsubStatus(); };
+  }, [connectionMode]);
+
+  const fetchLocalData = async () => {
+    try {
+      const savedIp = localStorage.getItem("healthpulse_local_ip") || "192.168.4.1";
+      const response = await axios.get(`http://${savedIp}/data?key=ESP32_KEY`, { timeout: 2000 });
+      const data = response.data;
+      const newReading: HealthReading = {
+        heart_rate: data.heartRate,
+        spo2: data.spo2,
+        temperature: data.temperature || 36.5,
+        timestamp: new Date().toISOString()
+      };
+
+      setLatest(newReading);
+      setReadings(prev => [...prev.slice(-19), newReading]);
+      setHasDevice(true);
+      if (!device) setDevice({ device_id: "ESP32-LOCAL" });
+
+      // Local -> Cloud Sync
+      try {
+        await api.post("/device/data", {
+          deviceId: data.deviceId || "ESP32-LOCAL",
+          heartRate: data.heartRate,
+          spo2: data.spo2,
+          temperature: data.temperature || 36.5
+        });
+
+        // Check offline queue and flush
+        const offlineQueue = JSON.parse(localStorage.getItem('healthpulse_offline_queue') || '[]');
+        if (offlineQueue.length > 0) {
+          console.log(`[Sync] Flushing ${offlineQueue.length} offline records...`);
+          // We could flush them all here, but for now just clear to avoid spamming
+          localStorage.removeItem('healthpulse_offline_queue');
+        }
+      } catch (syncErr) {
+        console.warn("Cloud sync failed during Local Mode. Queueing offline.", syncErr);
+        // Save to offline queue
+        const offlineQueue = JSON.parse(localStorage.getItem('healthpulse_offline_queue') || '[]');
+        offlineQueue.push({
+          deviceId: data.deviceId || "ESP32-LOCAL",
+          heartRate: data.heartRate,
+          spo2: data.spo2,
+          temperature: data.temperature || 36.5,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('healthpulse_offline_queue', JSON.stringify(offlineQueue));
+      }
+
+    } catch (err) {
+      console.warn("Local fetch failed, falling back to cloud mode check");
+      setConnectionMode("cloud");
+      localStorage.setItem("healthpulse_connection_mode", "cloud");
+    }
+  };
+
   const fetchData = async () => {
+    if (connectionMode === "ble") {
+      // BLE mode: data comes from BLE subscriptions (useEffect above), no polling needed
+      return;
+    }
+    if (connectionMode === "local") {
+      await fetchLocalData();
+      return;
+    }
+
     try {
       const [devices, onboardingData, latestAi] = await Promise.all([
-        api.get("/api/devices"),
-        api.get("/api/onboarding").catch(() => null),
-        api.get("/api/ai/latest").catch(() => null)
+        api.get("/devices"),
+        api.get("/onboarding").catch(() => null),
+        api.get("/ai/latest").catch(() => null)
       ]);
-      
+
       if (onboardingData) setOnboarding(onboardingData);
       if (latestAi) setAiAnalysis(latestAi);
 
@@ -62,15 +182,18 @@ export default function Dashboard() {
         setDevice(null);
         return;
       }
-      
+
       setHasDevice(true);
       setDevice(devices[0]);
-      const data = await api.get(`/api/device/${user.id}`);
+      const data = await api.get(`/device/${user.id}`);
       if (data?.length) {
+        if (!latest || data[data.length - 1].timestamp !== latest.timestamp) {
+          trackEvent(AnalyticsCategory.DEVICE, AnalyticsAction.DEVICE_DATA_RECEIVED);
+        }
         setReadings(data);
         setLatest(data[data.length - 1]);
       }
-    } catch(err) {
+    } catch (err) {
       console.error("Dashboard data fetch failed:", err);
     }
   };
@@ -80,22 +203,69 @@ export default function Dashboard() {
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, connectionMode]);
+
+  const handleBLEConnect = async () => {
+    try {
+      await bleManager.connect();
+      setConnectionMode("ble");
+      localStorage.setItem("healthpulse_connection_mode", "ble");
+      toast({ title: "Bluetooth Connected!", description: `Connected to ${bleManager.deviceName || "ESP32"}` });
+    } catch (err: any) {
+      toast({ title: "Bluetooth Failed", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const toggleConnectionMode = () => {
+    const modes: Array<"cloud" | "local" | "ble"> = ["cloud", "local", "ble"];
+    const currentIdx = modes.indexOf(connectionMode);
+    const newMode = modes[(currentIdx + 1) % modes.length];
+
+    if (newMode === "ble") {
+      handleBLEConnect();
+      return;
+    }
+
+    setConnectionMode(newMode);
+    localStorage.setItem("healthpulse_connection_mode", newMode);
+    toast({
+      title: `Switched to ${newMode.toUpperCase()} mode`,
+      description: newMode === "local" ? "Fetching data directly from ESP32" : "Syncing with cloud backend",
+    });
+  };
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
-      const result = await api.post("/api/ai/analyze", {
+      let location = { lat: null, lng: null };
+      try {
+        const pos: any = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      } catch (locErr) {
+        console.warn("Location access denied or failed", locErr);
+      }
+
+      const result = await api.post("/ai/analyze", {
         sensorData: latest ? {
           heartRate: latest.heart_rate,
           spo2: latest.spo2,
           temperature: latest.temperature
-        } : {}
+        } : {},
+        location
       });
       setAiAnalysis(result);
+      trackEvent(AnalyticsCategory.HEALTH, AnalyticsAction.AI_ANALYSIS_TRIGGER);
+
+      if (result.type === 'EMERGENCY') {
+        trackEvent(AnalyticsCategory.EMERGENCY, AnalyticsAction.EMERGENCY_TRIGGER, result.condition);
+      }
+
       toast({
-        title: t("dashboard.analysisComplete"),
-        description: `${result.condition}`,
+        title: result.type === 'EMERGENCY' ? "EMERGENCY DETECTED" : t("dashboard.analysisComplete"),
+        description: `${result.condition || result.message}`,
+        variant: result.type === 'EMERGENCY' ? "destructive" : "default"
       });
     } catch (err: any) {
       toast({
@@ -109,12 +279,12 @@ export default function Dashboard() {
   };
 
   const symptomCount = onboarding ? (
-    (onboarding.common_symptoms?.length || 0) + 
-    (onboarding.ent_issues?.length || 0) + 
+    (onboarding.common_symptoms?.length || 0) +
+    (onboarding.ent_issues?.length || 0) +
     (onboarding.ocular_issues?.length || 0) +
     (onboarding.pain_locations?.length || 0)
   ) : 0;
-  
+
   const sleepHours = onboarding?.sleep_hours?.[0] || 7;
 
   const stressScore = computeStressScore({
@@ -124,12 +294,11 @@ export default function Dashboard() {
     sleepHours,
   });
 
-  const stressLevel = getStressLevel(stressScore);
-  const healthScore = Math.max(0, 100 - stressScore);
-  const recommendations = getRecommendations(stressLevel);
+  const stressLevel = aiAnalysis?.riskLevel ? (aiAnalysis.riskLevel.toUpperCase() as any) : getStressLevel(stressScore).toUpperCase();
+  const displayHealthScore = aiAnalysis?.healthScore !== undefined ? aiAnalysis.healthScore : Math.max(0, 100 - stressScore);
 
-  const chartData = readings.map(r => ({
-    time: new Date(r.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  const chartData = readings.map((r, i) => ({
+    time: r.timestamp ? new Date(r.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : i,
     hr: r.heart_rate,
     temp: r.temperature,
     stress: computeStressScore({ heartRate: r.heart_rate, temperature: r.temperature }),
@@ -139,311 +308,134 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-12">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="relative space-y-6 max-w-7xl mx-auto z-10">
+
+
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">{t("dashboard.title")}</h1>
-            <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
+            <h1 className="font-display text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 drop-shadow-sm">
+              AI HEALTH PULSE
+            </h1>
+            <p className="font-mono text-xs text-cyan-800 dark:text-cyan-500/60 uppercase tracking-widest mt-1 font-bold">Biometric Telemetry HUD</p>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              variant="outline"
-              onClick={() => setShowGuide(true)}
-              className="rounded-full px-5 h-11"
-            >
-              <HelpCircle className="mr-2 h-4 w-4" />
-              {t("landing.howToUse")}
-            </Button>
-            {!aiAnalysis && onboarding && (
-              <Button onClick={handleAnalyze} disabled={isAnalyzing} className="rounded-full shadow-lg shadow-primary/20 h-11">
-                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Brain className="mr-2 h-4 w-4" />}
-                {t("dashboard.analyzeHealth")}
-              </Button>
+
+          <div className="flex gap-3 flex-wrap">
+            {connectionMode === "ble" ? (
+              <MagneticWrapper>
+                <Button onClick={() => { bleManager.disconnect(); setConnectionMode("cloud"); localStorage.setItem("healthpulse_connection_mode", "cloud"); }} className="glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
+                  <BluetoothConnected className="mr-2 h-4 w-4" />
+                  BLE SYNCED
+                </Button>
+              </MagneticWrapper>
+            ) : (
+              <>
+                <MagneticWrapper>
+                  <Button onClick={toggleConnectionMode} className="glass-panel text-blue-700 dark:text-blue-400 border-blue-400/30 hover:bg-blue-900/30">
+                    {connectionMode === "local" ? <Wifi className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
+                    {connectionMode === "local" ? t("dashboard.switchToLocal") : t("dashboard.switchToCloud")}
+                  </Button>
+                </MagneticWrapper>
+                <MagneticWrapper>
+                  <Button onClick={handleBLEConnect} className="glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
+                    <Bluetooth className="mr-2 h-4 w-4" />
+                    {t("deviceConnect.connectButton")}
+                  </Button>
+                </MagneticWrapper>
+              </>
+            )}
+
+            {onboarding && (
+              <MagneticWrapper>
+                <Button onClick={handleAnalyze} disabled={isAnalyzing} className="bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.6)] border-none">
+                  {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Brain className="mr-2 h-4 w-4" />}
+                  {t("dashboard.analyzeHealth")}
+                </Button>
+              </MagneticWrapper>
             )}
           </div>
-          {hasDevice && (
-            <div className="flex flex-col items-start md:items-end gap-1.5 bg-muted/50 p-3 rounded-xl border border-border/50">
-              <div className="flex items-center gap-2 text-xs font-semibold">
-                <Smartphone className="h-3.5 w-3.5 text-primary" />
-                <span>{t("dashboard.device")}: <span className="text-foreground">{device?.device_id || "Active Wearable"}</span></span>
-              </div>
-              {lastUpdated && (
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider">
-                  <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <Clock className="h-3 w-3" />
-                  <span>{t("dashboard.lastSync")}: {lastUpdated}</span>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {hasDevice === false ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-card/30 rounded-3xl border-2 border-dashed border-border/50">
-            <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-              <Smartphone className="h-10 w-10 text-primary" />
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 glass-panel rounded-3xl border-dashed border-cyan-500/50 shadow-[0_0_30px_rgba(0,243,255,0.1)]">
+            <div className="h-24 w-24 rounded-full bg-cyan-900/20 flex items-center justify-center mb-6 animate-pulse">
+              <Smartphone className="h-12 w-12 text-cyan-500 neon-text-cyan" />
             </div>
-            <h2 className="text-2xl font-bold mb-3">{t("dashboard.noDevice")}</h2>
-            <p className="max-w-md mx-auto mb-8 text-muted-foreground leading-relaxed">
+            <h2 className="text-3xl font-display font-black tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-3">{t("dashboard.noDevice")}</h2>
+            <p className="max-w-md mx-auto mb-8 font-mono text-sm text-cyan-800 dark:text-cyan-500/60 leading-relaxed uppercase font-bold">
               {t("dashboard.noDeviceDesc")}
             </p>
-            <Button size="lg" onClick={() => navigate("/device-connect")} className="rounded-full px-8 h-14 text-base shadow-xl shadow-primary/20">
-              {t("dashboard.connectDevice")}
-            </Button>
+            <MagneticWrapper>
+              <Button size="lg" onClick={() => navigate("/device-connect")} className="bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.6)] border-none px-12 h-14 font-display font-bold tracking-widest">
+                {t("deviceConnect.connectButton")}
+              </Button>
+            </MagneticWrapper>
           </div>
         ) : hasDevice === null ? (
-          <div className="flex h-96 items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              <p className="text-sm font-medium animate-pulse text-muted-foreground">{t("dashboard.syncing")}</p>
+          <div className="flex h-[400px] items-center justify-center">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative h-20 w-20">
+                <div className="absolute inset-0 rounded-full border-t-2 border-cyan-400 animate-spin shadow-[0_0_15px_rgba(0,243,255,0.5)]"></div>
+                <div className="absolute inset-2 rounded-full border-b-2 border-blue-500 animate-spin animation-delay-150"></div>
+              </div>
+              <p className="font-mono text-sm text-cyan-700 dark:text-cyan-400 animate-pulse uppercase tracking-widest">{t("dashboard.syncing")}</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Rule Engine Alerts */}
-            {aiAnalysis?.alerts?.length > 0 && (
-              <div className="space-y-4">
-                {aiAnalysis.alerts.map((alert: any, idx: number) => (
-                  <div key={idx} className={`p-4 rounded-xl border flex items-center gap-3 ${
-                    alert.severity === 'high' || alert.priority === 'critical' 
-                    ? "bg-destructive/10 border-destructive/20 text-destructive" 
-                    : "bg-orange-500/10 border-orange-500/20 text-orange-600"
-                  }`}>
-                    <Bell className="h-5 w-5 shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm font-bold">{alert.message}</p>
-                    </div>
-                  </div>
-                ))}
+          <>
+            <motion.div
+              className="grid grid-cols-1 lg:grid-cols-4 gap-6"
+            >
+              {/* LEFT PANEL: Vitals */}
+              <ParallaxWrapper depth={0.03} className="lg:col-span-1 h-full floating-element">
+                <VitalsPanel
+                  heartRate={latest?.heart_rate || 0}
+                  spo2={latest?.spo2 || 0}
+                  temperature={latest?.temperature || 0}
+                />
+              </ParallaxWrapper>
+
+              {/* CENTER PANEL: Human Body */}
+              <ParallaxWrapper depth={0.05} className="lg:col-span-2 h-full">
+                <HumanBodyView
+                  heartRate={latest?.heart_rate || 0}
+                  fingerPresent={fingerPresent}
+                  status={connectionMode === "ble" && bleStatus === 'connected' ? 'connected' : connectionMode === "ble" ? 'connecting' : 'disconnected'}
+                  painAreas={onboarding?.pain_locations || []}
+                />
+              </ParallaxWrapper>
+
+              {/* RIGHT PANEL: AI Insights */}
+              <ParallaxWrapper depth={0.03} className="lg:col-span-1 h-full floating-element" style={{ animationDelay: '1s' }}>
+                <AIInsightsPanel
+                  healthScore={displayHealthScore}
+                  stressLevel={stressLevel}
+                  condition={aiAnalysis?.condition || ""}
+                  message={aiAnalysis?.message || "Standing by for biometric input..."}
+                  isEmergency={aiAnalysis?.type === 'EMERGENCY'}
+                />
+              </ParallaxWrapper>
+            </motion.div>
+
+            <motion.div
+              className="flex flex-col gap-6 w-full"
+            >
+              {/* BOTTOM PANEL: Analytics */}
+              <div className="w-full">
+                <AnalyticsPanel chartData={chartData} />
               </div>
-            )}
 
-            {/* AI Health Overview Card */}
-            <Card className="overflow-hidden border-none shadow-premium bg-gradient-to-br from-primary/5 via-primary/10 to-transparent p-1">
-              <div className="bg-card rounded-[inherit] p-6">
-                <div className="flex flex-col md:flex-row gap-8 items-center">
-                  <div className="flex-shrink-0 relative">
-                    <StressGauge score={aiAnalysis?.severity || stressScore} />
-                  </div>
-                  
-                  <div className="flex-1 space-y-4 text-center md:text-left">
-                    <div>
-                      <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                        <h2 className="text-2xl font-bold">{aiAnalysis?.condition || t("dashboard.analyzing")}</h2>
-                        {aiAnalysis && (
-                          <div className="flex gap-2">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              aiAnalysis.riskLevel === 'high' ? "bg-destructive/10 text-destructive" :
-                              aiAnalysis.riskLevel === 'medium' ? "bg-orange-500/10 text-orange-600" :
-                              "bg-green-500/10 text-green-600"
-                            }`}>
-                              {aiAnalysis.riskLevel} {t("dashboard.risk")}
-                            </span>
-                            {aiAnalysis.dominantDosha && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                                {aiAnalysis.dominantDosha} Type
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-muted-foreground text-sm max-w-md">
-                        {t("dashboard.basedOn")}
-                      </p>
-                    </div>
-                    
-                    <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                      <Button 
-                        onClick={handleAnalyze} 
-                        disabled={isAnalyzing} 
-                        className="rounded-full px-6 h-11 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
-                      >
-                        {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Brain className="mr-2 h-4 w-4" />}
-                        {t("dashboard.rerunAnalysis")}
-                      </Button>
-                      <Button variant="outline" className="rounded-full px-6 h-11" onClick={() => navigate("/report-upload")}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        {t("dashboard.viewReport")}
-                      </Button>
-                    </div>
-                  </div>
+
+
+              {/* FEEDBACK SECTION */}
+              <ParallaxWrapper depth={0.02} className="w-full liquid-glass p-8 rounded-3xl relative overflow-hidden mb-12 holographic-edge">
+                <div className="relative z-10">
+                  <Feedback />
                 </div>
-              </div>
-            </Card>
-
-            {/* Vital Cards */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="overflow-hidden border-none shadow-premium bg-gradient-to-br from-card to-destructive/5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("dashboard.heartRate")}</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center">
-                    <Heart className="h-4 w-4 text-destructive" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold font-display">{latest?.heart_rate || "0"}</div>
-                  <p className="text-[10px] font-bold text-destructive mt-1 uppercase">{t("dashboard.bpm")}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden border-none shadow-premium bg-gradient-to-br from-card to-blue-500/5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("dashboard.spo2")}</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <Wind className="h-4 w-4 text-blue-500" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold font-display">{latest?.spo2 || "0"}</div>
-                  <p className="text-[10px] font-bold text-blue-500 mt-1 uppercase">{t("dashboard.oxygenLevel")}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden border-none shadow-premium bg-gradient-to-br from-card to-orange-500/5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("dashboard.bodyTemp")}</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                    <Thermometer className="h-4 w-4 text-orange-500" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold font-display">{latest?.temperature?.toFixed(1) || "0.0"}</div>
-                  <p className="text-[10px] font-bold text-orange-500 mt-1 uppercase">{t("dashboard.celsius")}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden border-none shadow-premium bg-gradient-to-br from-card to-primary/5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("dashboard.healthScore")}</CardTitle>
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold font-display">{healthScore}</div>
-                  <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-tighter">{t("dashboard.basedOnAI")}</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Ayurvedic Recommendations Section */}
-            {aiAnalysis?.recommendations && (
-              <div className="grid gap-6 md:grid-cols-2">
-                <Card className="p-8 bg-card/50 border-none shadow-premium border-l-4 border-l-primary/30">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Heart className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg">{t("dashboard.ayurvedic")}</h3>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">{t("dashboard.herbalSupport")}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    {aiAnalysis.recommendations.doshaAdvice && (
-                      <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 mb-4 animate-in slide-in-from-top-2 duration-500">
-                        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Prakriti Analysis</p>
-                        <p className="text-sm font-medium leading-relaxed">{aiAnalysis.recommendations.doshaAdvice}</p>
-                      </div>
-                    )}
-                    {aiAnalysis.recommendations.medicines?.map((m: any, i: number) => (
-                      <div key={i} className="group p-3 rounded-xl bg-background/50 hover:bg-primary/5 transition-colors border border-border/20">
-                        <p className="font-bold text-sm text-primary group-hover:translate-x-1 transition-transform">{m.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{m.benefit}</p>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card className="p-8 bg-card/50 border-none shadow-premium border-l-4 border-l-green-500/30">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                      <Brain className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg">{t("dashboard.lifestyle")}</h3>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">{t("dashboard.wellnessPlan")}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-green-600 mb-3 tracking-widest">{t("dashboard.lifestyleTips")}</p>
-                      <ul className="space-y-3">
-                        {aiAnalysis.recommendations.lifestyleTips?.map((tip: string, i: number) => (
-                          <li key={i} className="text-sm flex gap-2 text-foreground/80">
-                            <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-green-600 mb-3 tracking-widest">{t("dashboard.dietAdvice")}</p>
-                      <ul className="space-y-3">
-                        {aiAnalysis.recommendations.dietTips?.map((tip: string, i: number) => (
-                          <li key={i} className="text-sm flex gap-2 text-foreground/80">
-                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0 mt-2" />
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Disclaimer */}
-                <div className="md:col-span-2">
-                  <div className="bg-muted/30 p-4 rounded-xl border border-border/50">
-                    <p className="text-[10px] leading-relaxed text-muted-foreground italic">
-                      <span className="font-bold uppercase not-italic mr-2">{t("dashboard.disclaimer")}</span>
-                      {aiAnalysis.recommendations.disclaimer}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Charts */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card className="p-6 bg-card/50 border-none shadow-premium">
-                <p className="mb-6 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("dashboard.hrTrend")}</p>
-                <div className="h-[250px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.5)" />
-                      <XAxis dataKey="time" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                      <Line type="monotone" dataKey="hr" stroke="hsl(var(--destructive))" strokeWidth={3} dot={false} animationDuration={1500} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-card/50 border-none shadow-premium">
-                <p className="mb-6 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("dashboard.aiMetrics")}</p>
-                <div className="h-[250px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.5)" />
-                      <XAxis dataKey="time" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                      <Line type="monotone" dataKey="temp" stroke="hsl(var(--stress-moderate))" strokeWidth={2} dot={false} animationDuration={1500} />
-                      <Line type="monotone" dataKey="stress" stroke="hsl(var(--primary))" strokeWidth={3} dot={false} animationDuration={1500} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
-            </div>
-          </div>
+              </ParallaxWrapper>
+            </motion.div>
+          </>
         )}
-
-        {/* Feedback Section */}
-        <div className="pt-20">
-          <Feedback />
-        </div>
       </div>
 
       <HowToUseModal open={showGuide} onOpenChange={setShowGuide} />

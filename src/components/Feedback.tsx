@@ -25,8 +25,13 @@ export default function Feedback() {
     setSubmitting(true);
     try {
       const username = user?.user_metadata?.name || user?.email || "Anonymous";
-      await api.post("/api/feedback", { rating, comment, username });
+      await api.post("/feedback", { rating, comment, username });
       toast({ title: "Feedback Submitted", description: "Thank you for your response!" });
+      
+      // Track GA Event
+      const { trackEvent, AnalyticsCategory, AnalyticsAction } = await import("@/lib/analytics");
+      trackEvent(AnalyticsCategory.FEEDBACK, AnalyticsAction.FEEDBACK_SUBMIT, `Rating: ${rating}`);
+
       setRating(0);
       setComment("");
     } catch (err: any) {
@@ -38,13 +43,13 @@ export default function Feedback() {
 
   return (
     <div className="space-y-8 py-10">
-      <Card className="mx-auto max-w-2xl border-primary/20 bg-primary/5 transition-all hover:shadow-lg">
+      <Card className="mx-auto max-w-2xl border-primary/20 bg-muted/30 dark:bg-primary/5 transition-all hover:shadow-lg">
         <CardHeader>
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
             <CardTitle className="text-xl">User Feedback</CardTitle>
           </div>
-          <CardDescription>Tell us how we're doing and how we can improve.</CardDescription>
+          <CardDescription className="text-foreground/70">Tell us how we're doing and how we can improve.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -64,7 +69,7 @@ export default function Feedback() {
                       className={`h-8 w-8 transition-colors ${
                         (hover || rating) >= star
                           ? "fill-primary text-primary"
-                          : "fill-transparent text-muted-foreground"
+                          : "fill-transparent text-primary/20"
                       }`}
                     />
                   </button>
@@ -76,7 +81,7 @@ export default function Feedback() {
               <Label className="text-sm font-semibold">Your Suggestions</Label>
               <Textarea
                 placeholder="What can we do better? (e.g. data visualization, speed, device support...)"
-                className="min-h-[120px] bg-background/50"
+                className="min-h-[120px] bg-muted/40"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 required

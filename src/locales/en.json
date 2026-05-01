@@ -73,7 +73,11 @@
     "lastSync": "Last Sync",
     "risk": "Risk",
     "analysisComplete": "Health Check Done",
-    "analysisFailed": "Health Check Failed"
+    "analysisFailed": "Health Check Failed",
+    "connectionLocal": "Connected (Local)",
+    "connectionCloud": "Connected (Cloud)",
+    "switchToCloud": "Switch to Cloud",
+    "switchToLocal": "Switch to Local"
   },
   "map": {
     "title": "Nearby Hospitals",
@@ -106,7 +110,11 @@
     "connectButton": "Connect Device",
     "skip": "Skip for now",
     "success": "Device connected!",
-    "failed": "Connection failed"
+    "failed": "Connection failed",
+    "scanButton": "Scan for Device",
+    "scanning": "Scanning...",
+    "localFound": "Local device found!",
+    "localNotFound": "No local device detected"
   },
   "login": {
     "welcomeBack": "Welcome Back",
@@ -271,6 +279,7 @@
     "outsideFood": "Outside / Junk Food Intake",
     "weekly": "Weekly",
     "daily": "Daily",
+    "rarely": "Rarely",
     "completeBtn": "Complete",
     "options": {
       "headache": {

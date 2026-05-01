@@ -1,68 +1,100 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 const authMiddleware = require('../config/authMiddleware');
 const OnboardingData = require('../models/OnboardingData');
 const HealthAnalysis = require('../models/HealthAnalysis');
+const Report = require('../models/Report');
+const HealthData = require('../models/HealthData');
 const { checkCriticalConditions } = require('../services/ruleEngine');
 const { predictCondition } = require('../services/predictionService');
 const { getAyurvedicRecommendations } = require('../services/ayurvedaService');
+const { analyzeReport } = require('../services/informaticsService');
 
 /**
  * POST /api/ai/analyze
- * Full pipeline for health analysis
+ * Full Hybrid Health Intelligence Pipeline:
+ *  1. Fetch onboarding + latest report + latest IoT vitals
+ *  2. Call Python /ai/predict (ensemble ML)
+ *  3. Fallback to Node.js rule engine if Python is down
+ *  4. Merge all data and save
  */
 router.post('/analyze', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { sensorData } = req.body;
+    const { sensorData, skinAnalysis } = req.body;
 
-    // 1. Fetch user's latest onboarding data
+    // 1. Fetch data sources
     const onboarding = await OnboardingData.findOne({ user_id: userId }).sort({ createdAt: -1 });
+    const latestReport = await Report.findOne({ userId }).sort({ createdAt: -1 });
+    const latestSensor = await HealthData.findOne({ userId }).sort({ createdAt: -1 });
 
-    if (!onboarding) {
-      return res.status(404).json({ error: "Onboarding data not found. Please complete the assessment first." });
+    // Fuse body sensor data with DB sensor data
+    const vitals = sensorData || {};
+    if (latestSensor) {
+      vitals.heart_rate = vitals.heartRate || vitals.heart_rate || latestSensor.heartRate;
+      vitals.spo2 = vitals.spo2 || latestSensor.spo2;
+      vitals.temperature = vitals.temperature || latestSensor.temperature;
     }
 
-    // 2. Run Rule Engine for critical checks
-    const ruleResults = checkCriticalConditions(onboarding, sensorData);
+    // 2. Call Unified AI Medical Informatics Engine (11-Step Pipeline)
+    const result = analyzeReport({
+      reportData: latestReport?.extractedData || [],
+      onboardingData: onboarding || {},
+      sensorData: vitals,
+      skinAnalysis: skinAnalysis || null
+    });
 
-    // 3. Run Prediction Service
-    const prediction = predictCondition(onboarding, sensorData);
-
-    // 4. Get Ayurvedic Recommendations
-    const ayurveda = getAyurvedicRecommendations(prediction.condition, prediction.dominantDosha);
-
-    // 5. Build and Save Analysis Result
-    const analysisResult = new HealthAnalysis({
+    // 3. Save to History
+    const analysisRecord = new HealthAnalysis({
       user_id: userId,
-      condition: prediction.condition,
-      severity: prediction.severity,
-      riskLevel: prediction.riskLevel,
-      dominantDosha: prediction.dominantDosha,
-      recommendations: ayurveda,
-      alerts: ruleResults.alerts,
-      criticalFlags: ruleResults.criticalFlags,
-      sensorData: sensorData || {},
+      type: result.alert ? 'EMERGENCY' : 'NORMAL',
+      condition: result.predictions?.[0]?.condition || "Healthy",
+      healthScore: result.summary.health_score,
+      riskLevel: result.summary.riskLevel,
+      dominantDosha: result.predictions?.[0]?.dosha || "Balanced",
+      recommendations: result.recommendations,
+      sensorData: vitals,
+      skinAnalysis: result.skin_analysis,
       timestamp: new Date()
     });
 
-    await analysisResult.save();
+    await analysisRecord.save();
 
-    res.json(analysisResult);
+    // 4. Update latest report if one was analyzed
+    if (latestReport) {
+      latestReport.analysis = result;
+      await latestReport.save();
+    }
+
+    res.json({
+      success: true,
+      data: result,
+      message: "Unified health analysis completed"
+    });
+
   } catch (err) {
-    console.error("AI Analysis Error:", err);
-    res.status(500).json({ error: err.message });
+    console.error("[AI] Unified Engine Error:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
 /**
  * GET /api/ai/latest
- * Fetch user's latest analysis
+ * Fetch user's latest analysis + latest report parameters
  */
 router.get('/latest', authMiddleware, async (req, res) => {
   try {
     const analysis = await HealthAnalysis.findOne({ user_id: req.user.id }).sort({ timestamp: -1 });
-    res.json(analysis);
+    const latestReport = await Report.findOne({ userId: req.user.id }).sort({ createdAt: -1 });
+
+    if (!analysis) return res.json(null);
+
+    const responseObj = analysis.toObject();
+    responseObj.reportParameters = latestReport?.extractedData || [];
+    responseObj.reportAnalysis = latestReport?.analysis || null;
+
+    res.json(responseObj);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

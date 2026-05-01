@@ -79,7 +79,7 @@ export default function Onboarding() {
         return;
       }
       try {
-        const res = await api.get("/api/onboarding");
+        const res = await api.get("/onboarding");
         
         // Always start with user metadata if it's there
         const meta = user.user_metadata || {};
@@ -89,8 +89,8 @@ export default function Onboarding() {
           gender: meta.gender || data.gender,
         };
 
-        if (res.data && Object.keys(res.data).length > 0) {
-          setData({ ...baseData, ...res.data });
+        if (res && Object.keys(res).length > 0) {
+          setData({ ...baseData, ...res });
           
           const searchParams = new URLSearchParams(window.location.search);
           if (searchParams.get("mode") !== "update") {
@@ -116,9 +116,13 @@ export default function Onboarding() {
   const handleFinish = async () => {
     try {
       if (user) {
-        await api.post("/api/onboarding", data);
+        await api.post("/onboarding", data);
         toast({ title: t('onboarding.complete', "Assessment complete!"), description: t('onboarding.completeDesc', "Your health profile has been updated.") });
         
+        // Track GA Event
+        const { trackEvent, AnalyticsCategory, AnalyticsAction } = await import("@/lib/analytics");
+        trackEvent(AnalyticsCategory.USER, AnalyticsAction.ONBOARDING_COMPLETE);
+
         // After update, if we came from reports, go back to reports
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.get("mode") === "update") {

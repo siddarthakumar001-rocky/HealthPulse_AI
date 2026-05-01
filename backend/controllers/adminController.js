@@ -143,3 +143,93 @@ exports.getUserHealthAnalysis = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getAnalytics = async (req, res) => {
+  try {
+    const TrackEvent = require('../models/TrackEvent');
+    
+    const now = new Date();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const fiveMinsAgo = new Date(now.getTime() - 5 * 60000);
+    const adminFilter = { $not: /^\/admin/ };
+
+    // Active Users: unique sessionIds in last 5 mins
+    const activeUsers = await TrackEvent.distinct('sessionId', { timestamp: { $gte: fiveMinsAgo }, path: adminFilter });
+    
+    // Sessions Today: unique sessionIds since todayStart
+    const sessionsToday = await TrackEvent.distinct('sessionId', { timestamp: { $gte: todayStart }, path: adminFilter });
+
+    // Avg Session Time (in seconds)
+    // Find 'time' events for today, calculate average
+    const timeEvents = await TrackEvent.find({ eventType: 'time', timestamp: { $gte: todayStart }, path: adminFilter });
+    const totalTime = timeEvents.reduce((acc, ev) => acc + (ev.timeSpent || 0), 0);
+    const avgSessionTime = sessionsToday.length > 0 ? Math.round(totalTime / sessionsToday.length) : 0;
+
+    // Bounce Rate: Sessions with exactly 1 pageview
+    const sessionPageviews = await TrackEvent.aggregate([
+      { $match: { timestamp: { $gte: todayStart }, eventType: 'pageview', path: adminFilter } },
+      { $group: { _id: '$sessionId', count: { $sum: 1 } } }
+    ]);
+    const singlePageSessions = sessionPageviews.filter(s => s.count === 1).length;
+    const bounceRate = sessionPageviews.length > 0 ? Math.round((singlePageSessions / sessionPageviews.length) * 100) : 0;
+
+    // Charts: Activity Over Time (last 24 hours, grouped by hour)
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60000);
+    const activityOverTimeAgg = await TrackEvent.aggregate([
+      { $match: { timestamp: { $gte: twentyFourHoursAgo }, eventType: 'pageview', path: adminFilter } },
+      { $group: {
+          _id: { $hour: { date: '$timestamp', timezone: 'Asia/Kolkata' } },
+          views: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+    
+    // Format activity for chart (fill missing hours with 0)
+    const activityOverTime = [];
+    const currentHour = now.getHours();
+    for (let i = 0; i < 24; i++) {
+      const hourIndex = (currentHour - 23 + i + 24) % 24;
+      const found = activityOverTimeAgg.find(a => a._id === hourIndex);
+      activityOverTime.push({
+        time: `${hourIndex}:00`,
+        views: found ? found.views : 0
+      });
+    }
+
+    // Top Pages
+    const topPagesAgg = await TrackEvent.aggregate([
+      { $match: { eventType: 'pageview', timestamp: { $gte: todayStart }, path: adminFilter } },
+      { $group: { _id: '$path', views: { $sum: 1 } } },
+      { $sort: { views: -1 } },
+      { $limit: 5 }
+    ]);
+    const topPages = topPagesAgg.map(p => ({ path: p._id, views: p.views }));
+
+    // Device Distribution
+    const devicesAgg = await TrackEvent.aggregate([
+      { $match: { eventType: 'pageview', timestamp: { $gte: todayStart }, path: adminFilter } },
+      { $group: { _id: '$deviceType', count: { $sum: 1 } } }
+    ]);
+    const devices = devicesAgg.map(d => ({ name: d._id || 'Desktop', value: d.count }));
+
+    // Live Users (Recent activity)
+    const liveUsers = await TrackEvent.find({ timestamp: { $gte: fiveMinsAgo }, path: adminFilter })
+      .sort({ timestamp: -1 })
+      .limit(10)
+      .lean();
+
+    res.json({
+      stats: { activeUsers: activeUsers.length, sessionsToday: sessionsToday.length, avgSessionTime, bounceRate },
+      charts: { activityOverTime, topPages, devices },
+      liveUsers
+    });
+
+  } catch (err) {
+    console.error("Analytics Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+

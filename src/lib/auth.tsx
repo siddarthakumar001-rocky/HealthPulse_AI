@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      api.get("/api/auth/user")
+      api.get("/auth/user")
         .then(data => {
           if (data.user) setUser(data.user);
         })
@@ -47,19 +47,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
-    const data = await api.post("/api/auth/register", { email, password, data: metadata });
+    const data = await api.post("/auth/register", { email, password, data: metadata });
     if (data.session?.access_token) {
       localStorage.setItem("token", data.session.access_token);
+      localStorage.setItem("userRole", data.user?.role || "user");
       setUser(data.user);
     }
     return data;
   };
 
   const signIn = async (email: string, password: string) => {
-    const data = await api.post("/api/auth/login", { email, password });
+    const data = await api.post("/auth/login", { email, password });
     
     if (data.session?.access_token) {
       localStorage.setItem("token", data.session.access_token);
+      localStorage.setItem("userRole", data.user?.role || "user");
       setUser(data.user);
     }
     return { onboarding_completed: data.onboarding_completed, role: data.user.role };
@@ -67,6 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("userRole");
     setUser(null);
   };
 

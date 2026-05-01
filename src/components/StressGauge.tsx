@@ -46,7 +46,7 @@ export default function StressGauge({ score }: StressGaugeProps) {
         <text x={cx} y={cy - 10} textAnchor="middle" className="text-3xl font-bold fill-foreground" style={{ fontSize: 32, fontWeight: '800' }}>
           {score}
         </text>
-        <text x={cx} y={cy + 5} textAnchor="middle" className="fill-muted-foreground/60 font-bold" style={{ fontSize: 10, letterSpacing: '0.05em' }}>
+        <text x={cx} y={cy + 5} textAnchor="middle" className="fill-muted-foreground/80 font-bold" style={{ fontSize: 10, letterSpacing: '0.05em' }}>
           / 100
         </text>
         <text x={cx} y={cy + 18} textAnchor="middle" className="fill-muted-foreground font-bold tracking-tighter" style={{ fontSize: 8 }}>

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,8 +20,29 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { BackButton } from "./components/BackButton";
+import { useEffect } from "react";
+import { initGA, trackPageView } from "@/lib/analytics";
 
 const queryClient = new QueryClient();
+
+import { tracker } from "@/lib/tracker";
+
+// Analytics wrapper
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  useEffect(() => {
+    const fullPath = location.pathname + location.search;
+    trackPageView(fullPath);
+    tracker.pageview(fullPath);
+  }, [location]);
+
+  return null;
+}
 
 export default function App() {
   return (
@@ -30,6 +51,7 @@ export default function App() {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AnalyticsTracker />
           <ThemeProvider>
             <BackButton />
             <AuthProvider>
@@ -40,7 +62,8 @@ export default function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                 <Route path="/device-connect" element={<ProtectedRoute><DeviceConnect /></ProtectedRoute>} />
-                <Route path="/report-upload" element={<ProtectedRoute><ReportUpload /></ProtectedRoute>} />
+                <Route path="/report-upload" element={<Navigate to="/reports" replace />} />
+                <Route path="/reports" element={<ProtectedRoute><ReportUpload /></ProtectedRoute>} />
                 <Route path="/ai-suggestions" element={<ProtectedRoute><AiSuggestions /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />

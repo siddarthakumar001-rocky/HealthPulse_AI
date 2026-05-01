@@ -19,11 +19,12 @@ export default function AdminLogin() {
     const API_URL = "https://health-931r.onrender.com";
     try {
       console.log("Sending request via API service:", API_URL);
-      const data = await api.post("/api/admin/login", { username, password });
+      const data = await api.post("/admin/login", { username, password });
       
       console.log("Response:", data);
       if (data.token) {
         localStorage.setItem("admin_token", data.token);
+        localStorage.setItem("userRole", "admin");
         window.location.href = "/admin/dashboard";
       } else {
         alert("Login failed: No token received");

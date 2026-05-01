@@ -38,7 +38,7 @@ export default function Signup() {
       if (pending) {
         try {
           const onboardingData = JSON.parse(pending);
-          await api.post("/api/onboarding", onboardingData);
+          await api.post("/onboarding", onboardingData);
           localStorage.removeItem("pendingOnboarding");
           toast({ title: t("onboarding.complete"), description: t("onboarding.completeDesc") });
         } catch (onboardErr) {

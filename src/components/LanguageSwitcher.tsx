@@ -15,10 +15,10 @@ export default function LanguageSwitcher() {
   return (
     <div className="relative group">
       <button
-        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
+        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-foreground/70 dark:text-white/70 hover:text-cyan-400 dark:hover:text-cyan-400 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
         aria-label="Change language"
       >
-        <Globe className="h-4 w-4" />
+        <Globe className="h-4 w-4 text-foreground/80 dark:text-white/80" />
         <span className="hidden sm:inline text-xs">
           {languages.find((l) => l.code === i18n.language)?.label || "English"}
         </span>

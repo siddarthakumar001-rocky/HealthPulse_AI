@@ -1,26 +1,33 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://health-931r.onrender.com";
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5001/api"
+    : "https://health-931r.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+function getAuthToken(url) {
+  if (url && url.startsWith("/admin")) {
+    return localStorage.getItem("admin_token") || localStorage.getItem("token") || null;
+  }
+  return localStorage.getItem("token") || localStorage.getItem("admin_token") || null;
+}
+
 // Request interceptor for tokens
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  const adminToken = localStorage.getItem("admin_token");
-  const role = localStorage.getItem("userRole");
+  const token = getAuthToken(config.url);
 
-  // If calling an admin route OR user has admin role, use admin_token if available
-  const isAdminPath = config.url.startsWith("/api/admin");
-  const activeToken = (isAdminPath || role === "admin") ? adminToken : token;
+  console.log("Using token:", token);
 
-  if (activeToken) {
-    config.headers.Authorization = `Bearer ${activeToken}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   
   return config;

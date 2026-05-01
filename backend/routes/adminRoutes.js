@@ -11,6 +11,7 @@ router.post('/login', adminController.adminLogin);
 router.use(authMiddleware);
 router.use(isAdmin);
 
+router.get('/analytics', adminController.getAnalytics);
 router.get('/stats', adminController.getStats);
 router.get('/users', adminController.getUsers);
 router.get('/feedbacks', adminController.getFeedbacks);
