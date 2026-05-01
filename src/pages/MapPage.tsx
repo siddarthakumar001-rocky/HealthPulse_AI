@@ -85,11 +85,25 @@ export default function MapPage() {
     setLoading(true);
     setError(null);
     try {
-      const query = `[out:json][timeout:25];nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor|pharmacy"](around:${radius},${lat},${lon});out center body 100;`;
+      console.log(`Searching for medical facilities in ${radius}m radius at ${lat}, ${lon}`);
+      // Use Union operator () to combine results from multiple tags
+      const query = `[out:json][timeout:30];(nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor|pharmacy"](around:${radius},${lat},${lon}););out center body 100;`;
+      
       const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error("Medical database busy. Please try again.");
       const data = await res.json();
       
+      if (!data.elements || data.elements.length === 0) {
+        if (radius < 50000) {
+          const nextRadius = radius === 10000 ? 30000 : 50000;
+          return fetchHospitals(lat, lon, nextRadius);
+        }
+        setHospitals([]);
+        setError(`No medical facilities found within 50km.`);
+        setLoading(false);
+        return;
+      }
+
       const results: HospitalMarker[] = data.elements.map((el: any) => {
         const hLat = el.lat || el.center?.lat;
         const hLon = el.lon || el.center?.lon;
@@ -104,15 +118,7 @@ export default function MapPage() {
       }).filter((h: any) => h.lat && h.lon)
         .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
 
-      // Use a more aggressive fallback for rural areas
-      if (results.length === 0 && radius < 50000) {
-        const nextRadius = radius === 10000 ? 30000 : 50000;
-        console.log(`No results in ${radius}m, expanding to ${nextRadius/1000}km...`);
-        return fetchHospitals(lat, lon, nextRadius);
-      }
-
       setHospitals(results);
-      if (results.length === 0) setError(`No medical facilities found within 50km.`);
     } catch (err: any) { 
       console.error("Failed to fetch hospitals", err); 
       setError(err.message);
