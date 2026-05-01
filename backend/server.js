@@ -31,6 +31,7 @@ app.use(helmet());
 // 2. CORS Configuration
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  "https://health-sepia-three.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
   "http://localhost:8081",
