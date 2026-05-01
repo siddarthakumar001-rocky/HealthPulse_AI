@@ -2,10 +2,9 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  const msg = "[CRITICAL] JWT_SECRET is missing in environment variables. Authentication will fail.";
-  console.error(msg);
+const JWT_SECRET = process.env.JWT_SECRET || "healthpulse_fallback_secret_2026_secure_default";
+if (!process.env.JWT_SECRET) {
+  console.warn('[WARNING] JWT_SECRET is missing in environment variables. Using fallback secret. THIS IS NOT RECOMMENDED FOR PRODUCTION.');
 }
 
 exports.signup = async (req, res) => {

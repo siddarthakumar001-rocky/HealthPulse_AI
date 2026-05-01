@@ -112,7 +112,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Test Route
 app.get("/", (req, res) => {
-  res.send("🚀 HealthPulse AI Backend | System Version: 1.0.2-SECURE | Status: Online");
+  res.send("🚀 HealthPulse AI Backend | System Version: 1.0.3-FAILSAFE | Status: Online");
 });
 
 const PORT = process.env.PORT || 5000;
