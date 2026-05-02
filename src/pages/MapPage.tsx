@@ -160,13 +160,8 @@ export default function MapPage() {
         const data = await res.json();
         
         if (!data.elements || data.elements.length === 0) {
-          if (radius < 100000) {
-            const nextRadius = radius < 50000 ? 50000 : 100000;
-            console.log(`[Map] No results in ${radius}m, expanding to ${nextRadius/1000}km...`);
-            return fetchHospitals(lat, lon, nextRadius, force);
-          }
           setHospitals([]);
-          setError(`No medical facilities found within 100km.`);
+          setError(`No medical facilities found within 10km.`);
           setLoading(false);
           return;
         }
