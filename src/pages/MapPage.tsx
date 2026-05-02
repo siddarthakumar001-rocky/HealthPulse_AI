@@ -80,10 +80,9 @@ export default function MapPage() {
   const [hospitals, setHospitals] = useState<HospitalMarker[]>([]);
   const [loading, setLoading] = useState(false);
   const [locating, setLocating] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showList, setShowList] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchRadius, setSearchRadius] = useState(10);
+  const [searchRadius] = useState(10);
+  const [hasFetched, setHasFetched] = useState(false);
 
   // Initialize Geolocation on Mount
   useEffect(() => {
@@ -128,14 +127,12 @@ export default function MapPage() {
       if (Date.now() - timestamp < 1000 * 60 * 60 * 24) { // 24h cache
         setHospitals(data);
         setLoading(false);
-        setSearchRadius(radius / 1000);
         return;
       }
     }
 
     setLoading(true);
     setError(null);
-    setSearchRadius(radius / 1000);
     
     const servers = [
       "https://overpass-api.de/api/interpreter",
@@ -201,33 +198,16 @@ export default function MapPage() {
     setPosition([lat, lon]); 
   }, []);
 
-  // Auto-fetch when position is available
+  // Auto-fetch when position is available - Runs only once
   useEffect(() => {
-    if (position && hospitals.length === 0 && !loading && !locating) {
+    if (position && hospitals.length === 0 && !loading && !locating && !hasFetched) {
       console.log("User Location Triggered Fetch:", position);
       fetchHospitals(position[0], position[1]);
+      setHasFetched(true);
     }
-  }, [position, hospitals.length, loading, locating, fetchHospitals]);
+  }, [position, hospitals.length, loading, locating, fetchHospitals, hasFetched]);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        const newLat = parseFloat(lat);
-        const newLon = parseFloat(lon);
-        setPosition([newLat, newLon]);
-        fetchHospitals(newLat, newLon);
-      } else {
-        toast({ title: "Location not found", variant: "destructive" });
-      }
-    } catch (err) { console.error("Geocoding failed", err); }
-    setLoading(false);
-  };
+
 
   return (
     <DashboardLayout>
@@ -243,17 +223,6 @@ export default function MapPage() {
               {t("map.subtitle")}
             </p>
           </motion.div>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => position && fetchHospitals(position[0], position[1], 10000, true)}
-            disabled={loading || locating}
-            className="glass-panel border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-mono text-[10px] uppercase tracking-widest font-bold"
-          >
-            <RefreshCw className={`mr-2 h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh Area
-          </Button>
         </div>
 
         {/* Map container */}
@@ -278,66 +247,7 @@ export default function MapPage() {
               </div>
             )}
 
-            {/* Floating glass panel - Hidden on Mobile as per request */}
-            <div className="absolute top-3 right-3 z-[1000] pointer-events-none hidden md:block" style={{ maxWidth: "90%" }}>
-              <div className="pointer-events-auto w-64 sm:w-80 rounded-xl p-3 space-y-2 bg-background/95 dark:bg-black/90 backdrop-blur-2xl border border-cyan-500/30 shadow-2xl">
-                <form onSubmit={handleSearch} className="flex gap-2">
-                  <Input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t("map.searchPlaceholder")}
-                    className="h-9 rounded-lg text-xs font-mono bg-background/60 border-cyan-500/20 focus:border-cyan-500/50"
-                  />
-                  <Button type="submit" size="icon"
-                    className="h-9 w-9 shrink-0 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/25">
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </form>
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {[10, 30, 50, 100].map(r => (
-                    <button
-                      key={r}
-                      onClick={() => position && fetchHospitals(position[0], position[1], r * 1000, true)}
-                      className={`flex-1 py-1 rounded text-[9px] font-mono font-bold uppercase transition-all ${searchRadius === r ? 'bg-cyan-500 text-black shadow-[0_0_10px_rgba(0,243,255,0.4)]' : 'bg-muted/40 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/10'}`}
-                    >
-                      {r}km
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowList(!showList)}
-                  className="w-full flex items-center justify-center gap-2 text-[10px] font-mono font-bold py-2 rounded-lg uppercase tracking-wider text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/10 transition-colors border border-cyan-500/10"
-                >
-                  {showList ? <X className="h-3 w-3" /> : <List className="h-3 w-3" />}
-                  {showList ? t("map.hideList") : t("map.showList")} ({hospitals.length})
-                </button>
-                {showList && (
-                  <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-                    {error && (
-                      <p className="text-[9px] text-center font-mono text-orange-500/80 py-2 uppercase font-bold">{error}</p>
-                    )}
-                    {hospitals.map((h) => (
-                      <div key={h.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 hover:bg-cyan-500/10 transition-colors border border-transparent hover:border-cyan-500/20 w-full overflow-hidden">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-mono text-foreground/80 truncate pr-2">{h.name}</p>
-                          <div className="flex gap-1.5 mt-0.5">
-                            <span className="text-[8px] font-black font-mono text-cyan-600/60 uppercase">{h.distance?.toFixed(1)} km</span>
-                            {h.distance && h.distance <= 5 && (
-                              <span className="text-[7px] font-black font-mono text-emerald-500 uppercase px-1 rounded bg-emerald-500/10">Nearby</span>
-                            )}
-                          </div>
-                        </div>
-                        <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="text-[9px] font-black font-mono text-cyan-600 dark:text-cyan-400 hover:underline shrink-0 uppercase">
-                          {t("map.navigate")}
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+
 
             <MapContainer center={position || [12.9716, 77.5946]} zoom={13} className="h-full w-full" scrollWheelZoom>
               <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
