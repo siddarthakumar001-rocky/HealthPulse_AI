@@ -144,14 +144,14 @@ export default function MapPage() {
       "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
     ];
 
-    const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|pharmacy|doctors|medical"](around:${radius},${lat},${lon});nwr["healthcare"](around:${radius},${lat},${lon}););out center body 50;`;
+    const query = `[out:json][timeout:35];(nwr["amenity"~"hospital|clinic|pharmacy|doctors|medical|dentist|health_post|dispensary|nursing_home"](around:${radius},${lat},${lon});nwr["healthcare"](around:${radius},${lat},${lon}););out center body 100;`;
     
     let success = false;
     for (const server of servers) {
       if (success) break;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per server
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
         
         const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
         clearTimeout(timeoutId);
@@ -160,11 +160,13 @@ export default function MapPage() {
         const data = await res.json();
         
         if (!data.elements || data.elements.length === 0) {
-          if (radius < 50000) {
-            return fetchHospitals(lat, lon, radius === 10000 ? 30000 : 50000, force);
+          if (radius < 100000) {
+            const nextRadius = radius < 50000 ? 50000 : 100000;
+            console.log(`[Map] No results in ${radius}m, expanding to ${nextRadius/1000}km...`);
+            return fetchHospitals(lat, lon, nextRadius, force);
           }
           setHospitals([]);
-          setError(`No results in 50km radius.`);
+          setError(`No medical facilities found within 100km.`);
           setLoading(false);
           return;
         }
@@ -281,8 +283,8 @@ export default function MapPage() {
               </div>
             )}
 
-            {/* Floating glass panel */}
-            <div className="absolute top-3 right-3 z-[1000] pointer-events-none" style={{ maxWidth: "90%" }}>
+            {/* Floating glass panel - Hidden on Mobile as per request */}
+            <div className="absolute top-3 right-3 z-[1000] pointer-events-none hidden md:block" style={{ maxWidth: "90%" }}>
               <div className="pointer-events-auto w-64 sm:w-80 rounded-xl p-3 space-y-2 bg-background/95 dark:bg-black/90 backdrop-blur-2xl border border-cyan-500/30 shadow-2xl">
                 <form onSubmit={handleSearch} className="flex gap-2">
                   <Input
