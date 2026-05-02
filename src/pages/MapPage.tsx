@@ -38,51 +38,26 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 
 function LocationMarker({ onLocationFound }: { onLocationFound: (lat: number, lon: number) => void }) {
   const map = useMap();
-  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
-    if (attempted) return;
-    
-    const success = (pos: GeolocationPosition) => {
-      const { latitude, longitude } = pos.coords;
-      console.log(`[Map] Native Geolocation success: ${latitude}, ${longitude}`);
-      map.setView([latitude, longitude], 13);
-      onLocationFound(latitude, longitude);
-      setAttempted(true);
-    };
-
-    const error = (err?: any) => {
-      console.warn(`[Map] Native Geolocation failed (${err?.message}), trying Leaflet locate...`);
-      map.locate({ setView: true, maxZoom: 13, enableHighAccuracy: true });
-      setAttempted(true);
-      // Even if everything fails, wait 5s then use fallback
-      setTimeout(() => {
-        if (!attempted) {
-          const fallback: [number, number] = [12.9716, 77.5946];
-          map.setView(fallback, 13);
-          onLocationFound(fallback[0], fallback[1]);
-          setAttempted(true);
-        }
-      }, 8000);
-    };
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, error, { 
-        timeout: 5000, 
-        enableHighAccuracy: true,
-        maximumAge: 0 
-      });
-    } else {
-      error();
-    }
-
     const onLocFound = (e: L.LocationEvent) => {
+      console.log("[Map] Map-based location found:", e.latlng.lat, e.latlng.lng);
       onLocationFound(e.latlng.lat, e.latlng.lng);
     };
 
     map.on("locationfound", onLocFound);
     return () => { map.off("locationfound", onLocFound); };
-  }, [map, onLocationFound, attempted]);
+  }, [map, onLocationFound]);
+  return null;
+}
+
+function MapController({ center }: { center: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 13);
+    }
+  }, [center, map]);
   return null;
 }
 
@@ -99,14 +74,50 @@ function MapBounds({ hospitals, position }: { hospitals: HospitalMarker[], posit
 
 export default function MapPage() {
   const { t } = useTranslation();
-  const [position, setPosition] = useState<[number, number]>([20.5937, 78.9629]);
+  const { toast } = useToast();
+  
+  const [position, setPosition] = useState<[number, number] | null>(null);
   const [hospitals, setHospitals] = useState<HospitalMarker[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showList, setShowList] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [searchRadius, setSearchRadius] = useState(10);
+
+  // Initialize Geolocation on Mount
+  useEffect(() => {
+    console.log("Initializing User Location Scan...");
+    const fallback: [number, number] = [12.9716, 77.5946]; // Bangalore
+
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported by browser.");
+      setPosition(fallback);
+      setLocating(false);
+      toast({ title: "Location unsupported", description: "Showing hospitals from default area." });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        console.log("User Location Captured:", latitude, longitude);
+        setPosition([latitude, longitude]);
+        setLocating(false);
+      },
+      (err) => {
+        console.warn("Location permission denied or failed:", err.message);
+        setPosition(fallback);
+        setLocating(false);
+        toast({ 
+          title: "Location Permission Required", 
+          description: "Showing nearby hospitals from default area (Bangalore).",
+          variant: "destructive" 
+        });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, [toast]);
 
   const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000, force = false) => {
     // Check cache first (unless forced)
@@ -173,6 +184,7 @@ export default function MapPage() {
           .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
 
         setHospitals(results);
+        console.log("Hospitals API Response:", results);
         localStorage.setItem(cacheKey, JSON.stringify({ data: results, timestamp: Date.now() }));
         success = true;
       } catch (err: any) { 
@@ -190,8 +202,15 @@ export default function MapPage() {
 
   const handleLocationFound = useCallback((lat: number, lon: number) => {
     setPosition([lat, lon]); 
-    fetchHospitals(lat, lon);
-  }, [fetchHospitals]);
+  }, []);
+
+  // Auto-fetch when position is available
+  useEffect(() => {
+    if (position && hospitals.length === 0 && !loading && !locating) {
+      console.log("User Location Triggered Fetch:", position);
+      fetchHospitals(position[0], position[1]);
+    }
+  }, [position, hospitals.length, loading, locating, fetchHospitals]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,8 +232,6 @@ export default function MapPage() {
     setLoading(false);
   };
 
-  const { toast } = useToast();
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -233,8 +250,8 @@ export default function MapPage() {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={() => fetchHospitals(position[0], position[1])}
-            disabled={loading}
+            onClick={() => position && fetchHospitals(position[0], position[1], 10000, true)}
+            disabled={loading || locating}
             className="glass-panel border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-mono text-[10px] uppercase tracking-widest font-bold"
           >
             <RefreshCw className={`mr-2 h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -249,16 +266,16 @@ export default function MapPage() {
           className="rounded-2xl overflow-hidden border border-cyan-500/20 dark:border-cyan-500/15 shadow-[0_0_30px_rgba(0,243,255,0.06)]"
         >
           <div className="h-[350px] md:h-[500px] lg:h-[600px] w-full relative" style={{ zIndex: 0 }}>
-            {loading && (
+            {(loading || locating) && (
               <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-background/70 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 text-center px-4">
                   <div className="relative h-12 w-12">
                     <div className="absolute inset-0 rounded-full border-2 border-t-cyan-500 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
                     <div className="absolute inset-2 rounded-full border-2 border-b-blue-500 border-t-transparent border-r-transparent border-l-transparent animate-spin"
                       style={{ animationDirection: "reverse", animationDuration: "0.8s" }} />
                   </div>
-                  <p className="font-mono text-xs text-cyan-600 dark:text-cyan-400 uppercase tracking-widest animate-pulse">
-                    {t("map.locating")} ({searchRadius}km range)
+                  <p className="font-mono text-xs text-cyan-600 dark:text-cyan-400 uppercase tracking-widest animate-pulse max-w-[200px]">
+                    {locating ? "Establishing Biometric Location..." : `Scanning Medical Database (${searchRadius}km)...`}
                   </p>
                 </div>
               </div>
@@ -283,7 +300,7 @@ export default function MapPage() {
                   {[10, 30, 50, 100].map(r => (
                     <button
                       key={r}
-                      onClick={() => fetchHospitals(position[0], position[1], r * 1000)}
+                      onClick={() => position && fetchHospitals(position[0], position[1], r * 1000, true)}
                       className={`flex-1 py-1 rounded text-[9px] font-mono font-bold uppercase transition-all ${searchRadius === r ? 'bg-cyan-500 text-black shadow-[0_0_10px_rgba(0,243,255,0.4)]' : 'bg-muted/40 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/10'}`}
                     >
                       {r}km
@@ -325,11 +342,12 @@ export default function MapPage() {
               </div>
             </div>
 
-            <MapContainer center={position} zoom={13} className="h-full w-full" scrollWheelZoom>
+            <MapContainer center={position || [12.9716, 77.5946]} zoom={13} className="h-full w-full" scrollWheelZoom>
               <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <LocationMarker onLocationFound={handleLocationFound} />
-              <MapBounds hospitals={hospitals} position={position} />
-              <Marker position={position}><Popup>Current Location</Popup></Marker>
+              <MapController center={position} />
+              {position && <MapBounds hospitals={hospitals} position={position} />}
+              {position && <Marker position={position}><Popup>Current Location</Popup></Marker>}
               {hospitals.map((h) => (
                 <Marker key={h.id} position={[h.lat, h.lon]} icon={hospitalIcon}>
                   <Popup>
