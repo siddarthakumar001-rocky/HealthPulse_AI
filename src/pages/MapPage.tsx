@@ -119,12 +119,11 @@ export default function MapPage() {
   }, [toast]);
 
   const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000, force = false) => {
-    // Check cache first (unless forced)
     const cacheKey = `hospitals_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
     const cached = localStorage.getItem(cacheKey);
     if (!force && cached) {
       const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < 1000 * 60 * 60 * 24) { // 24h cache
+      if (Date.now() - timestamp < 1000 * 60 * 60 * 24) {
         setHospitals(data);
         setLoading(false);
         return;
@@ -141,57 +140,56 @@ export default function MapPage() {
       "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
     ];
 
-    const query = `[out:json][timeout:35];(nwr["amenity"~"hospital|clinic|pharmacy|doctors|medical|dentist|health_post|dispensary|nursing_home"](around:${radius},${lat},${lon});nwr["healthcare"](around:${radius},${lat},${lon}););out center body 100;`;
+    const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|pharmacy|doctors|medical|dentist|health_post|dispensary|nursing_home"](around:${radius},${lat},${lon});nwr["healthcare"](around:${radius},${lat},${lon}););out center body 50;`;
     
-    let success = false;
-    for (const server of servers) {
-      if (success) break;
+    // Parallel Race Strategy: Query all mirrors and take the first successful response
+    const fetchWithTimeout = async (url: string) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 15000);
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
-        
-        const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
-        if (!res.ok) continue;
-        const data = await res.json();
-        
-        if (!data.elements || data.elements.length === 0) {
-          setHospitals([]);
-          setError(`No medical facilities found within 10km.`);
-          setLoading(false);
-          return;
-        }
-
-        const results: HospitalMarker[] = data.elements.map((el: any) => {
-          const hLat = el.lat || el.center?.lat;
-          const hLon = el.lon || el.center?.lon;
-          const tags = el.tags || {};
-          return {
-            id: el.id, 
-            name: tags.name || tags["name:en"] || tags["name:kn"] || "Medical Center", 
-            type: tags.amenity || tags.healthcare || "Facility",
-            lat: hLat, lon: hLon,
-            distance: calculateDistance(lat, lon, hLat, hLon)
-          };
-        }).filter((h: any) => h.lat && h.lon)
-          .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
-
-        setHospitals(results);
-        console.log("Hospitals API Response:", results);
-        localStorage.setItem(cacheKey, JSON.stringify({ data: results, timestamp: Date.now() }));
-        success = true;
-      } catch (err: any) { 
-        console.warn(`[Map] ${server} failed, moving to next mirror...`);
+        const res = await fetch(`${url}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
+        clearTimeout(id);
+        if (!res.ok) throw new Error("Server rejected request");
+        return await res.json();
+      } catch (e) {
+        clearTimeout(id);
+        throw e;
       }
-    }
+    };
 
-    if (!success) {
-      setError("Network lag detected. Attempting deep scan...");
-      // Deep scan: increase timeout and try once more
-      setTimeout(() => fetchHospitals(lat, lon, radius, true), 2000);
+    try {
+      const data = await Promise.any(servers.map(s => fetchWithTimeout(s)));
+      
+      if (!data.elements || data.elements.length === 0) {
+        setHospitals([]);
+        setError(`No medical facilities found within 10km.`);
+        setLoading(false);
+        return;
+      }
+
+      const results: HospitalMarker[] = data.elements.map((el: any) => {
+        const hLat = el.lat || el.center?.lat;
+        const hLon = el.lon || el.center?.lon;
+        const tags = el.tags || {};
+        return {
+          id: el.id, 
+          name: tags.name || tags["name:en"] || tags["name:kn"] || "Medical Center", 
+          type: tags.amenity || tags.healthcare || "Facility",
+          lat: hLat, lon: hLon,
+          distance: calculateDistance(lat, lon, hLat, hLon)
+        };
+      }).filter((h: any) => h.lat && h.lon)
+        .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
+
+      setHospitals(results);
+      localStorage.setItem(cacheKey, JSON.stringify({ data: results, timestamp: Date.now() }));
+    } catch (err: any) {
+      console.error("[Map] All mirrors failed or timed out", err);
+      setError("Discovery systems are slow. Retrying...");
+      setTimeout(() => fetchHospitals(lat, lon, radius, true), 3000);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const handleLocationFound = useCallback((lat: number, lon: number) => {
