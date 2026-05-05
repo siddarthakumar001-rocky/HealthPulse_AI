@@ -22,6 +22,7 @@ const dermatologyRoutes = require("./routes/dermatologyRoutes");
 const skinRoutes = require("./routes/skinRoutes");
 const doctorAiRoutes = require("./routes/doctorAiRoutes");
 const skinAnalyzeRoutes = require("./routes/skinAnalyzeRoutes");
+const hospitalRoutes = require("./routes/hospitalRoutes");
 
 const app = express();
 
@@ -100,6 +101,7 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/dermatology", dermatologyRoutes);
 app.use("/api/skin", skinRoutes);
 app.use("/api/skin-analyze", skinAnalyzeRoutes);
+app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/track", require("./routes/trackRoutes"));
 
 // Static for uploads

@@ -118,14 +118,32 @@ export default function MapPage() {
     );
   }, [toast]);
 
-  // 📍 4, 5, 6, 7, 8. DISCOVERY PIPELINE
+  const processElements = (elements: any[], lat: number, lon: number, radius: number): HospitalMarker[] => {
+    const uniqueMap = new Map<string, HospitalMarker>();
+    elements.forEach((el: any) => {
+      const hLat = el.lat || el.center?.lat;
+      const hLon = el.lon || el.center?.lon;
+      if (!hLat || !hLon) return;
+      const key = `${hLat.toFixed(5)}_${hLon.toFixed(5)}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, {
+          id: el.id,
+          name: el.tags?.name || el.tags?.["name:en"] || "Medical Center",
+          type: el.tags?.amenity || el.tags?.healthcare || "Facility",
+          lat: hLat, lon: hLon,
+          distance: calculateDistance(lat, lon, hLat, hLon)
+        });
+      }
+    });
+    return Array.from(uniqueMap.values())
+      .filter(h => h.distance! <= radius)
+      .sort((a, b) => a.distance! - b.distance!);
+  };
+
   const executeDiscovery = useCallback(async (lat: number, lon: number, force = false) => {
-    // 📍 2, 3. VERSION CONTROL & CONCURRENCY
     if (isFetchingRef.current && !force) return;
-    
     requestIdRef.current += 1;
     const currentRequestId = requestIdRef.current;
-    
     isFetchingRef.current = true;
     setLoading(true);
 
@@ -133,18 +151,19 @@ export default function MapPage() {
     abortControllerRef.current = new AbortController();
 
     try {
+      const backendBase = import.meta.env.VITE_API_URL || "https://health-sepia-three.vercel.app/api";
+
       for (const radius of RADIUS_STAGES) {
         if (currentRequestId !== requestIdRef.current) return;
-        
         setCurrentRadius(radius);
         setDiscoveryState(radius === 5 ? "SEARCHING" : "EXPANDING");
 
-        const cacheKey = `hospitals_v3_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
+        const cacheKey = `hospitals_v4_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
         if (!force) {
           const cached = localStorage.getItem(cacheKey);
           if (cached) {
             const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < 1000 * 60 * 60 * 12) {
+            if (Date.now() - timestamp < 1000 * 60 * 60 * 12 && data.length > 0) {
               if (currentRequestId === requestIdRef.current) {
                 setHospitals(data);
                 setDiscoveryState("SUCCESS");
@@ -156,50 +175,45 @@ export default function MapPage() {
           }
         }
 
+        // --- 📍 PRIMARY: BACKEND PROXY (Failsafe for Vercel) ---
+        try {
+          const proxyUrl = `${backendBase}/hospitals/nearby?lat=${lat}&lon=${lon}&radius=${radius}`;
+          const response = await fetch(proxyUrl, { signal: abortControllerRef.current?.signal });
+          const resData = await response.json();
+          if (resData.success && resData.data.elements?.length > 0) {
+            const normalized = processElements(resData.data.elements, lat, lon, radius);
+            if (normalized.length >= 3 || radius === 30) {
+              if (currentRequestId === requestIdRef.current) {
+                setHospitals(normalized);
+                localStorage.setItem(cacheKey, JSON.stringify({ data: normalized, timestamp: Date.now() }));
+                setDiscoveryState("SUCCESS");
+                setLoading(false);
+                isFetchingRef.current = false;
+                return;
+              }
+            } else if (normalized.length > 0) {
+              if (currentRequestId === requestIdRef.current) setHospitals(normalized);
+            }
+            continue; 
+          }
+        } catch (err) {
+          console.warn("[Map] Backend proxy failed, falling back to direct mirrors.", err);
+        }
+
+        // --- 📍 SECONDARY: DIRECT MIRRORS (Legacy Fallback) ---
         for (const endpoint of ENDPOINTS) {
           let attempts = 0;
           while (attempts < 3) {
             if (currentRequestId !== requestIdRef.current) return;
-            
             try {
-              const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|doctors"](around:${radius * 1000},${lat},${lon}););out center body;`;
-              
-              // 📍 5. API FAULT TOLERANCE
+              const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|doctors"](around:${radius * 1000},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor"](around:${radius * 1000},${lat},${lon}););out center body;`;
               const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); 
-              const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, { 
-                signal: abortControllerRef.current?.signal 
-              });
+              const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, { signal: abortControllerRef.current?.signal });
               clearTimeout(timeoutId);
-
               if (!response.ok) throw new Error("API_ERROR");
               const data = await response.json();
-
-              if (data.elements && data.elements.length > 0) {
-                // 📍 6. DATA NORMALIZATION
-                const uniqueMap = new Map<string, HospitalMarker>();
-                data.elements.forEach((el: any) => {
-                  const hLat = el.lat || el.center?.lat;
-                  const hLon = el.lon || el.center?.lon;
-                  if (!hLat || !hLon) return;
-
-                  const key = `${hLat.toFixed(5)}_${hLon.toFixed(5)}`;
-                  if (!uniqueMap.has(key)) {
-                    uniqueMap.set(key, {
-                      id: el.id,
-                      name: el.tags?.name || "Medical Center",
-                      type: el.tags?.amenity || "Facility",
-                      lat: hLat, lon: hLon,
-                      distance: calculateDistance(lat, lon, hLat, hLon)
-                    });
-                  }
-                });
-
-                // 📍 7. DISTANCE FILTERING
-                const normalized = Array.from(uniqueMap.values())
-                  .filter(h => h.distance! <= radius)
-                  .sort((a, b) => a.distance! - b.distance!);
-
-                // 📍 5. WEAK RESULT LOGIC
+              if (data.elements?.length > 0) {
+                const normalized = processElements(data.elements, lat, lon, radius);
                 if (normalized.length >= 3 || radius === 30) {
                   if (currentRequestId === requestIdRef.current) {
                     setHospitals(normalized);
@@ -210,31 +224,20 @@ export default function MapPage() {
                     return;
                   }
                 } else if (normalized.length > 0) {
-                  // Keep the few we found but continue expanding
-                  if (currentRequestId === requestIdRef.current) {
-                    setHospitals(normalized);
-                  }
+                  if (currentRequestId === requestIdRef.current) setHospitals(normalized);
                 }
               }
-              break; // Radius expansion
+              break; 
             } catch (e: any) {
-              if (e.name === "AbortError") {
-                if (isFetchingRef.current) attempts++;
-                else return;
-              } else {
-                attempts++;
-              }
+              if (e.name === "AbortError") return;
+              attempts++;
               if (currentRequestId === requestIdRef.current) setDiscoveryState("RETRYING");
               await new Promise(r => setTimeout(r, 1000));
             }
           }
         }
       }
-      
-      // 📍 8. FALLBACK SAFETY SYSTEM
-      if (currentRequestId === requestIdRef.current) {
-        setDiscoveryState("FALLBACK");
-      }
+      if (currentRequestId === requestIdRef.current) setDiscoveryState("FALLBACK");
     } catch (err) {
       console.error("Critical discovery failure:", err);
     } finally {
