@@ -150,15 +150,22 @@ export default function MapPage() {
     if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
 
+    const MIRRORS = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+      "https://lz4.overpass-api.de/api/interpreter"
+    ];
+
     try {
-      const backendBase = import.meta.env.VITE_API_URL || "https://health-sepia-three.vercel.app/api";
+      const apiBase = import.meta.env.VITE_API_URL || "https://health-sepia-three.vercel.app";
+      const backendBase = apiBase.endsWith("/api") ? apiBase : `${apiBase}/api`;
 
       for (const radius of RADIUS_STAGES) {
         if (currentRequestId !== requestIdRef.current) return;
         setCurrentRadius(radius);
         setDiscoveryState(radius === 5 ? "SEARCHING" : "EXPANDING");
 
-        const cacheKey = `hospitals_v4_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
+        const cacheKey = `hospitals_v5_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
         if (!force) {
           const cached = localStorage.getItem(cacheKey);
           if (cached) {
@@ -175,7 +182,7 @@ export default function MapPage() {
           }
         }
 
-        // --- 📍 PRIMARY: BACKEND PROXY (Failsafe for Vercel) ---
+        // --- 📍 PRIMARY: BACKEND PROXY ---
         try {
           const proxyUrl = `${backendBase}/hospitals/nearby?lat=${lat}&lon=${lon}&radius=${radius}`;
           const response = await fetch(proxyUrl, { signal: abortControllerRef.current?.signal });
@@ -197,24 +204,29 @@ export default function MapPage() {
             continue; 
           }
         } catch (err) {
-          console.warn("[Map] Backend proxy failed, falling back to direct mirrors.", err);
+          console.warn("[Map] Proxy failed, using satellite mirrors.", err);
         }
 
-        // --- 📍 SECONDARY: DIRECT MIRRORS (Legacy Fallback) ---
-        for (const endpoint of ENDPOINTS) {
+        // --- 📍 SECONDARY: DIRECT SATELLITE MIRRORS (POST for reliability) ---
+        for (const endpoint of MIRRORS) {
           let attempts = 0;
-          while (attempts < 3) {
+          while (attempts < 2) {
             if (currentRequestId !== requestIdRef.current) return;
             try {
-              const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|doctors"](around:${radius * 1000},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor"](around:${radius * 1000},${lat},${lon}););out center body;`;
-              const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); 
-              const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, { signal: abortControllerRef.current?.signal });
-              clearTimeout(timeoutId);
+              const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|doctors|health"](around:${radius * 1000},${lat},${lon});nwr["healthcare"~"hospital|clinic|doctor|health"](around:${radius * 1000},${lat},${lon}););out center body;`;
+              
+              const response = await fetch(endpoint, {
+                method: 'POST',
+                body: `data=${encodeURIComponent(query)}`,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                signal: abortControllerRef.current?.signal
+              });
+
               if (!response.ok) throw new Error("API_ERROR");
               const data = await response.json();
               if (data.elements?.length > 0) {
                 const normalized = processElements(data.elements, lat, lon, radius);
-                if (normalized.length >= 3 || radius === 30) {
+                if (normalized.length >= 2 || radius === 30) {
                   if (currentRequestId === requestIdRef.current) {
                     setHospitals(normalized);
                     localStorage.setItem(cacheKey, JSON.stringify({ data: normalized, timestamp: Date.now() }));
@@ -232,7 +244,7 @@ export default function MapPage() {
               if (e.name === "AbortError") return;
               attempts++;
               if (currentRequestId === requestIdRef.current) setDiscoveryState("RETRYING");
-              await new Promise(r => setTimeout(r, 1000));
+              await new Promise(r => setTimeout(r, 800));
             }
           }
         }
