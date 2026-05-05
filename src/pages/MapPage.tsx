@@ -1,15 +1,15 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Navigation, Hospital, Search, List, X, RefreshCw } from "lucide-react";
+import { Navigation, Hospital, RefreshCw, AlertCircle, Signal } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
+// Fix Leaflet Icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
@@ -25,6 +25,8 @@ const hospitalIcon = new L.Icon({
 
 interface HospitalMarker { id: number; name: string; type: string; lat: number; lon: number; distance?: number; }
 
+type DiscoveryState = "INIT" | "SEARCHING" | "RETRYING" | "EXPANDING" | "SUCCESS" | "FALLBACK";
+
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -36,27 +38,19 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-function LocationMarker({ onLocationFound }: { onLocationFound: (lat: number, lon: number) => void }) {
+// 📍 10. MAP RENDER FIX (MOBILE)
+function MapHelper({ hospitals }: { hospitals: any[] }) {
   const map = useMap();
-
   useEffect(() => {
-    const onLocFound = (e: L.LocationEvent) => {
-      console.log("[Map] Map-based location found:", e.latlng.lat, e.latlng.lng);
-      onLocationFound(e.latlng.lat, e.latlng.lng);
-    };
-
-    map.on("locationfound", onLocFound);
-    return () => { map.off("locationfound", onLocFound); };
-  }, [map, onLocationFound]);
+    setTimeout(() => map.invalidateSize(), 100);
+  }, [map, hospitals.length]);
   return null;
 }
 
 function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
-    if (center) {
-      map.setView(center, 13);
-    }
+    if (center) map.setView(center, 13);
   }, [center, map]);
   return null;
 }
@@ -78,191 +72,295 @@ export default function MapPage() {
   
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [hospitals, setHospitals] = useState<HospitalMarker[]>([]);
+  const [discoveryState, setDiscoveryState] = useState<DiscoveryState>("INIT");
+  const [currentRadius, setCurrentRadius] = useState(5);
   const [loading, setLoading] = useState(false);
-  const [locating, setLocating] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchRadius] = useState(10);
-  const [hasFetched, setHasFetched] = useState(false);
 
-  // Initialize Geolocation on Mount
+  // 📍 1, 2, 3. CONTROL REFS
+  const hasLocationCaptured = useRef(false);
+  const requestIdRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const RADIUS_STAGES = [5, 10, 20, 30];
+  const ENDPOINTS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter"
+  ];
+
+  // 📍 1. GEOLOCATION (LOCKED EXECUTION)
   useEffect(() => {
-    console.log("Initializing User Location Scan...");
+    if (hasLocationCaptured.current) return;
+
     const fallback: [number, number] = [12.9716, 77.5946]; // Bangalore
+    
+    const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
     if (!navigator.geolocation) {
-      console.warn("Geolocation not supported by browser.");
       setPosition(fallback);
-      setLocating(false);
-      toast({ title: "Location unsupported", description: "Showing hospitals from default area." });
+      hasLocationCaptured.current = true;
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude } = pos.coords;
-        console.log("User Location Captured:", latitude, longitude);
-        setPosition([latitude, longitude]);
-        setLocating(false);
+        if (hasLocationCaptured.current) return;
+        setPosition([pos.coords.latitude, pos.coords.longitude]);
+        hasLocationCaptured.current = true;
       },
-      (err) => {
-        console.warn("Location permission denied or failed:", err.message);
+      () => {
+        if (hasLocationCaptured.current) return;
         setPosition(fallback);
-        setLocating(false);
-        toast({ 
-          title: "Location Permission Required", 
-          description: "Showing nearby hospitals from default area (Bangalore).",
-          variant: "destructive" 
-        });
+        hasLocationCaptured.current = true;
+        toast({ title: "Location Fallback", description: "Defaulting to safe coordinates (Bangalore)." });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      options
     );
   }, [toast]);
 
-  const fetchHospitals = useCallback(async (lat: number, lon: number, radius = 10000, force = false) => {
-    const cacheKey = `hospitals_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (!force && cached) {
-      const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < 1000 * 60 * 60 * 24) {
-        setHospitals(data);
-        setLoading(false);
-        return;
-      }
-    }
-
+  // 📍 4, 5, 6, 7, 8. DISCOVERY PIPELINE
+  const executeDiscovery = useCallback(async (lat: number, lon: number, force = false) => {
+    // 📍 2, 3. VERSION CONTROL & CONCURRENCY
+    if (isFetchingRef.current && !force) return;
+    
+    requestIdRef.current += 1;
+    const currentRequestId = requestIdRef.current;
+    
+    isFetchingRef.current = true;
     setLoading(true);
-    setError(null);
-    
-    const servers = [
-      "https://overpass-api.de/api/interpreter",
-      "https://lz4.overpass-api.de/api/interpreter",
-      "https://overpass.kumi.systems/api/interpreter",
-      "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
-    ];
 
-    const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|pharmacy|doctors|medical|dentist|health_post|dispensary|nursing_home"](around:${radius},${lat},${lon});nwr["healthcare"](around:${radius},${lat},${lon}););out center body 50;`;
-    
-    // Parallel Race Strategy: Query all mirrors and take the first successful response
-    const fetchWithTimeout = async (url: string) => {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 15000);
-      try {
-        const res = await fetch(`${url}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
-        clearTimeout(id);
-        if (!res.ok) throw new Error("Server rejected request");
-        return await res.json();
-      } catch (e) {
-        clearTimeout(id);
-        throw e;
-      }
-    };
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    abortControllerRef.current = new AbortController();
 
     try {
-      const data = await Promise.any(servers.map(s => fetchWithTimeout(s)));
-      
-      if (!data.elements || data.elements.length === 0) {
-        setHospitals([]);
-        setError(`No medical facilities found within 10km.`);
-        setLoading(false);
-        return;
+      for (const radius of RADIUS_STAGES) {
+        if (currentRequestId !== requestIdRef.current) return;
+        
+        setCurrentRadius(radius);
+        setDiscoveryState(radius === 5 ? "SEARCHING" : "EXPANDING");
+
+        const cacheKey = `hospitals_v3_${lat.toFixed(3)}_${lon.toFixed(3)}_${radius}`;
+        if (!force) {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp < 1000 * 60 * 60 * 12) {
+              if (currentRequestId === requestIdRef.current) {
+                setHospitals(data);
+                setDiscoveryState("SUCCESS");
+                setLoading(false);
+                isFetchingRef.current = false;
+                return;
+              }
+            }
+          }
+        }
+
+        for (const endpoint of ENDPOINTS) {
+          let attempts = 0;
+          while (attempts < 3) {
+            if (currentRequestId !== requestIdRef.current) return;
+            
+            try {
+              const query = `[out:json][timeout:25];(nwr["amenity"~"hospital|clinic|doctors"](around:${radius * 1000},${lat},${lon}););out center body;`;
+              
+              // 📍 5. API FAULT TOLERANCE
+              const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); 
+              const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, { 
+                signal: abortControllerRef.current?.signal 
+              });
+              clearTimeout(timeoutId);
+
+              if (!response.ok) throw new Error("API_ERROR");
+              const data = await response.json();
+
+              if (data.elements && data.elements.length > 0) {
+                // 📍 6. DATA NORMALIZATION
+                const uniqueMap = new Map<string, HospitalMarker>();
+                data.elements.forEach((el: any) => {
+                  const hLat = el.lat || el.center?.lat;
+                  const hLon = el.lon || el.center?.lon;
+                  if (!hLat || !hLon) return;
+
+                  const key = `${hLat.toFixed(5)}_${hLon.toFixed(5)}`;
+                  if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, {
+                      id: el.id,
+                      name: el.tags?.name || "Medical Center",
+                      type: el.tags?.amenity || "Facility",
+                      lat: hLat, lon: hLon,
+                      distance: calculateDistance(lat, lon, hLat, hLon)
+                    });
+                  }
+                });
+
+                // 📍 7. DISTANCE FILTERING
+                const normalized = Array.from(uniqueMap.values())
+                  .filter(h => h.distance! <= radius)
+                  .sort((a, b) => a.distance! - b.distance!);
+
+                // 📍 5. WEAK RESULT LOGIC
+                if (normalized.length >= 3 || radius === 30) {
+                  if (currentRequestId === requestIdRef.current) {
+                    setHospitals(normalized);
+                    localStorage.setItem(cacheKey, JSON.stringify({ data: normalized, timestamp: Date.now() }));
+                    setDiscoveryState("SUCCESS");
+                    setLoading(false);
+                    isFetchingRef.current = false;
+                    return;
+                  }
+                } else if (normalized.length > 0) {
+                  // Keep the few we found but continue expanding
+                  if (currentRequestId === requestIdRef.current) {
+                    setHospitals(normalized);
+                  }
+                }
+              }
+              break; // Radius expansion
+            } catch (e: any) {
+              if (e.name === "AbortError") {
+                if (isFetchingRef.current) attempts++;
+                else return;
+              } else {
+                attempts++;
+              }
+              if (currentRequestId === requestIdRef.current) setDiscoveryState("RETRYING");
+              await new Promise(r => setTimeout(r, 1000));
+            }
+          }
+        }
       }
-
-      const results: HospitalMarker[] = data.elements.map((el: any) => {
-        const hLat = el.lat || el.center?.lat;
-        const hLon = el.lon || el.center?.lon;
-        const tags = el.tags || {};
-        return {
-          id: el.id, 
-          name: tags.name || tags["name:en"] || tags["name:kn"] || "Medical Center", 
-          type: tags.amenity || tags.healthcare || "Facility",
-          lat: hLat, lon: hLon,
-          distance: calculateDistance(lat, lon, hLat, hLon)
-        };
-      }).filter((h: any) => h.lat && h.lon)
-        .sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
-
-      setHospitals(results);
-      localStorage.setItem(cacheKey, JSON.stringify({ data: results, timestamp: Date.now() }));
-    } catch (err: any) {
-      console.error("[Map] All mirrors failed or timed out", err);
-      setError("Discovery systems are slow. Retrying...");
-      setTimeout(() => fetchHospitals(lat, lon, radius, true), 3000);
+      
+      // 📍 8. FALLBACK SAFETY SYSTEM
+      if (currentRequestId === requestIdRef.current) {
+        setDiscoveryState("FALLBACK");
+      }
+    } catch (err) {
+      console.error("Critical discovery failure:", err);
     } finally {
-      setLoading(false);
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+        isFetchingRef.current = false;
+      }
     }
   }, []);
 
-  const handleLocationFound = useCallback((lat: number, lon: number) => {
-    setPosition([lat, lon]); 
-  }, []);
-
-  // Auto-fetch when position is available - Runs only once
   useEffect(() => {
-    if (position && hospitals.length === 0 && !loading && !locating && !hasFetched) {
-      console.log("User Location Triggered Fetch:", position);
-      fetchHospitals(position[0], position[1]);
-      setHasFetched(true);
+    if (position && discoveryState === "INIT" && !loading) {
+      executeDiscovery(position[0], position[1]);
     }
-  }, [position, hospitals.length, loading, locating, fetchHospitals, hasFetched]);
+  }, [position, discoveryState, loading, executeDiscovery]);
 
+  // 📍 12. MANUAL RESET CONTROL
+  const handleRefresh = () => {
+    if (position) {
+      localStorage.clear();
+      setHospitals([]);
+      requestIdRef.current += 1;
+      setDiscoveryState("INIT");
+      executeDiscovery(position[0], position[1], true);
+    }
+  };
 
+  const getStatusText = () => {
+    switch (discoveryState) {
+      case "INIT": return "Acquiring precision location...";
+      case "SEARCHING": return `Scanning ${currentRadius}km sector...`;
+      case "EXPANDING": return `Expanding radius to ${currentRadius}km...`;
+      case "RETRYING": return "Switching satellite uplink mirror...";
+      case "FALLBACK": return "Limited facilities found in this region";
+      case "SUCCESS": return `Scan Complete - ${hospitals.length} centers found`;
+      default: return "Ready";
+    }
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="font-display text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <h1 className="font-display text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 uppercase">
               {t("map.title")}
             </h1>
-            <p className="font-mono text-xs text-cyan-700 dark:text-cyan-500/60 uppercase tracking-widest mt-1 font-bold">
-              {t("map.subtitle")}
+            <p className="font-mono text-[9px] text-cyan-600 dark:text-cyan-500/60 uppercase tracking-[0.4em] mt-1 font-black flex items-center gap-2">
+              <Signal className={`h-3 w-3 ${loading ? "animate-pulse text-cyan-500" : "text-emerald-500"}`} />
+              {getStatusText()}
             </p>
           </motion.div>
+
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            disabled={loading}
+            className="liquid-glass border-cyan-500/20 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 font-mono text-[10px] tracking-widest uppercase h-10 px-6 rounded-xl"
+          >
+            <RefreshCw className={`mr-2 h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            Refresh Nearby Hospitals
+          </Button>
         </div>
 
-        {/* Map container */}
+        {/* 📍 11. MOBILE UI HARDENING */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl overflow-hidden border border-cyan-500/20 dark:border-cyan-500/15 shadow-[0_0_30px_rgba(0,243,255,0.06)]"
+          className="rounded-[2rem] overflow-hidden border border-cyan-500/20 dark:border-cyan-500/10 shadow-2xl relative"
         >
-          <div className="h-[350px] md:h-[500px] lg:h-[600px] w-full relative" style={{ zIndex: 0 }}>
-            {(loading || locating) && (
-              <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-background/70 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3 text-center px-4">
-                  <div className="relative h-12 w-12">
-                    <div className="absolute inset-0 rounded-full border-2 border-t-cyan-500 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
-                    <div className="absolute inset-2 rounded-full border-2 border-b-blue-500 border-t-transparent border-r-transparent border-l-transparent animate-spin"
-                      style={{ animationDirection: "reverse", animationDuration: "0.8s" }} />
+          <div className="h-[300px] md:h-[550px] w-full relative" style={{ zIndex: 0 }}>
+            <AnimatePresence>
+              {loading && (
+                <motion.div 
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-[1000] flex items-center justify-center bg-background/50 backdrop-blur-2xl"
+                >
+                  <div className="flex flex-col items-center gap-8 text-center px-6">
+                    <div className="relative h-24 w-24">
+                      <div className="absolute inset-0 rounded-full border-4 border-t-cyan-500 animate-spin" />
+                      <div className="absolute inset-4 rounded-full border-4 border-b-blue-600 animate-spin" style={{ animationDirection: "reverse", animationDuration: "2s" }} />
+                      <Hospital className="absolute inset-0 m-auto h-10 w-10 text-cyan-500 animate-pulse" />
+                    </div>
+                    <div className="space-y-3">
+                      <p className="font-mono text-[11px] text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.5em] font-black">
+                        {getStatusText()}
+                      </p>
+                      <div className="flex gap-2 justify-center">
+                        {RADIUS_STAGES.map(r => (
+                          <div key={r} className={`h-1.5 w-10 rounded-full transition-all duration-500 ${currentRadius >= r ? "bg-cyan-500 shadow-[0_0_10px_#06b6d4]" : "bg-cyan-500/10"}`} />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-mono text-xs text-cyan-600 dark:text-cyan-400 uppercase tracking-widest animate-pulse max-w-[200px]">
-                    {locating ? "Establishing Biometric Location..." : `Scanning Medical Database (${searchRadius}km)...`}
-                  </p>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-
-
-            <MapContainer center={position || [12.9716, 77.5946]} zoom={13} className="h-full w-full" scrollWheelZoom>
-              <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <LocationMarker onLocationFound={handleLocationFound} />
+            {/* 📍 10. Force re-render with key */}
+            <MapContainer key={`map_v3_${hospitals.length}_${discoveryState}`} center={position || [12.9716, 77.5946]} zoom={13} className="h-full w-full">
+              <TileLayer attribution='&copy; OSM' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <MapController center={position} />
+              <MapHelper hospitals={hospitals} />
               {position && <MapBounds hospitals={hospitals} position={position} />}
-              {position && <Marker position={position}><Popup>Current Location</Popup></Marker>}
+              {position && (
+                <Marker position={position}>
+                  <Popup><span className="font-mono text-[10px] font-black uppercase">User Center</span></Popup>
+                </Marker>
+              )}
               {hospitals.map((h) => (
                 <Marker key={h.id} position={[h.lat, h.lon]} icon={hospitalIcon}>
-                  <Popup>
-                    <div className="p-1">
-                      <p className="font-bold text-sm text-foreground">{h.name}</p>
-                      <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`}
-                        target="_blank" rel="noopener noreferrer"
-                        className="text-[10px] font-bold text-cyan-600 hover:underline inline-block mt-1">
-                        {t("map.navigate")}
-                      </a>
+                  <Popup className="custom-popup">
+                    <div className="p-3 min-w-[200px] font-mono">
+                      <p className="text-sm font-black text-foreground uppercase border-b border-cyan-500/20 pb-2 mb-3">{h.name}</p>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-cyan-600 font-bold uppercase">{h.type}</span>
+                          <span className="text-[10px] text-emerald-500 font-black">{h.distance?.toFixed(2)} KM</span>
+                        </div>
+                        <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`}
+                          target="_blank" rel="noopener noreferrer"
+                          className="text-center py-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-[10px] font-black text-cyan-600 hover:bg-cyan-500/20 transition-all uppercase">
+                          Get Directions
+                        </a>
+                      </div>
                     </div>
                   </Popup>
                 </Marker>
@@ -271,59 +369,66 @@ export default function MapPage() {
           </div>
         </motion.div>
 
-        {/* Hospital list */}
-        <div className="space-y-3 pb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-mono text-xs text-cyan-700 dark:text-cyan-500/60 uppercase tracking-widest font-bold">
-              Discovered Facilities ({hospitals.length})
+        {/* Results */}
+        <div className="space-y-4 pb-12">
+          <div className="flex items-center justify-between">
+            <h2 className="font-mono text-[10px] text-cyan-700 dark:text-cyan-500/50 uppercase tracking-[0.5em] font-black flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-cyan-500" />
+              Real-time Discovery Feed ({hospitals.length})
             </h2>
-            {hospitals.length > 0 && (
-              <span className="text-[10px] font-mono text-emerald-500 font-bold uppercase animate-pulse">Live Feed Active</span>
+            {discoveryState === "FALLBACK" && (
+              <span className="flex items-center gap-1 text-[10px] text-amber-500 font-black uppercase tracking-widest">
+                <AlertCircle className="h-3 w-3" />
+                Low signal area
+              </span>
             )}
           </div>
-          {hospitals.map((h, i) => (
-            <motion.div
-              key={h.id}
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.04 }}
-              whileHover={{ scale: 1.01, x: 4 }}
-              className="liquid-glass flex items-center gap-4 p-4 rounded-2xl border border-cyan-500/10 hover:border-cyan-500/30 transition-all"
-            >
-              <div className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/20">
-                <Hospital className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-mono text-sm font-bold text-foreground leading-tight truncate">{h.name}</p>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <p className="font-mono text-[10px] text-cyan-600 dark:text-cyan-400 font-black">{h.distance?.toFixed(1)} KM AWAY</p>
-                  {i === 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 font-mono text-[8px] font-bold uppercase tracking-widest animate-pulse">
-                      Closest Facility
-                    </span>
-                  )}
-                  {h.distance && h.distance <= 5 && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-mono text-[8px] font-bold uppercase tracking-widest">
-                      Nearby
-                    </span>
-                  )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {hospitals.map((h, i) => (
+              <motion.div
+                key={h.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="liquid-glass flex flex-col p-6 rounded-[2rem] border border-cyan-500/10 hover:border-cyan-500/30 transition-all group relative overflow-hidden"
+              >
+                <div className="flex items-start justify-between mb-5">
+                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center bg-cyan-500/5 border border-cyan-500/20 group-hover:scale-110 transition-transform">
+                    <Hospital className="h-7 w-7 text-cyan-600 dark:text-cyan-400" />
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono text-xs text-emerald-500 font-black">{h.distance?.toFixed(2)} KM</p>
+                    <p className="font-mono text-[8px] text-cyan-500/40 uppercase font-bold mt-1">Localized</p>
+                  </div>
                 </div>
-              </div>
-              <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`}
-                target="_blank" rel="noopener noreferrer">
-                <motion.button
-                  whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.94 }}
-                  className="h-10 w-10 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 transition-colors"
-                >
-                  <Navigation className="h-4 w-4" />
-                </motion.button>
-              </a>
+                
+                <div className="mb-8">
+                  <p className="font-mono text-sm font-black text-foreground uppercase truncate group-hover:text-cyan-500 transition-colors">{h.name}</p>
+                  <p className="font-mono text-[9px] text-cyan-600 dark:text-cyan-400/60 font-bold uppercase mt-1 tracking-wider">{h.type}</p>
+                </div>
+
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="w-full py-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 flex items-center justify-center gap-2 font-mono text-[10px] font-black text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 transition-all uppercase group-hover:border-cyan-500/40">
+                  <Navigation className="h-3 w-3" />
+                  Initiate Navigation
+                </a>
+              </motion.div>
+            ))}
+          </div>
+
+          {!loading && hospitals.length === 0 && discoveryState === "FALLBACK" && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center rounded-[3rem] border-2 border-dashed border-cyan-500/10 bg-cyan-500/5">
+              <AlertCircle className="h-16 w-16 text-cyan-500/20 mx-auto mb-6" />
+              <p className="font-mono text-base text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.4em] font-black">
+                Zero Centers Detected
+              </p>
+              <p className="font-mono text-xs text-cyan-500/40 uppercase mt-3 px-10">No healthcare infrastructure localized within a 30KM operational radius.</p>
+              <Button onClick={handleRefresh} className="mt-10 font-mono text-[10px] uppercase bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 hover:bg-cyan-500/20 px-10 py-7 rounded-2xl">
+                Reset & Force Re-Scan
+              </Button>
             </motion.div>
-          ))}
-          {!loading && hospitals.length === 0 && (
-            <div className="py-12 text-center rounded-2xl border border-dashed border-cyan-500/20 bg-muted/10">
-              <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">{t("map.noFacilities")}</p>
-            </div>
           )}
         </div>
       </div>
