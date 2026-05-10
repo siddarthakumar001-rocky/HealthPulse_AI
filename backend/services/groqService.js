@@ -8,11 +8,11 @@ const queryGroq = async (userInput) => {
   const apiKey = process.env.GROQ_API_KEY;
   
   if (!apiKey || apiKey.trim() === '' || apiKey.includes('your_')) {
-    throw new Error("Groq API Key is missing. Please add it to your .env file.");
+    return { success: false, message: "Groq API Key is missing. Please add GROQ_API_KEY to your .env file." };
   }
 
   const requestBody = {
-    model: "llama3-70b-8192",
+    model: "llama-3.3-70b-versatile",
     messages: [
       {
         role: "system",

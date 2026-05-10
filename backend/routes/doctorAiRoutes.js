@@ -5,9 +5,9 @@ const authMiddleware = require('../config/authMiddleware');
 
 /**
  * POST /api/doctor-ai
- * Consult the Groq-powered AI Doctor
+ * Consult the Groq-powered AI Doctor (Llama-3)
  */
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/doctor-ai', authMiddleware, async (req, res) => {
   const { prompt } = req.body;
   
   if (!prompt) {
