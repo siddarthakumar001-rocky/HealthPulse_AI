@@ -51,6 +51,7 @@ export default function Dashboard() {
   );
   const [bleStatus, setBleStatus] = useState<string>(bleManager.status);
   const [fingerPresent, setFingerPresent] = useState<boolean>(false);
+  const [bleData, setBleData] = useState<any>(null);
 
   // Show guide on first visit
   useEffect(() => {
@@ -65,13 +66,18 @@ export default function Dashboard() {
   useEffect(() => {
     if (connectionMode !== "ble") return;
 
-    // If BLE is connected, mark device as present
+    // Sync initial state
+    setBleStatus(bleManager.status);
     if (bleManager.isConnected()) {
       setHasDevice(true);
-      setDevice({ device_id: "ESP32-BLE-HEALTH" });
+      setDevice({ device_id: bleManager.deviceName || "ESP32-BLE-HEALTH" });
+      setBleData(bleManager.data);
+    } else if (bleManager.status === 'disconnected') {
+      setHasDevice(false);
     }
 
     const unsubData = bleManager.onData((data) => {
+      setBleData(data);
       const newReading: HealthReading = {
         heart_rate: data.heartRate ?? 0,
         spo2: data.spo2 ?? 0,
@@ -209,10 +215,17 @@ export default function Dashboard() {
     try {
       await bleManager.connect();
       setConnectionMode("ble");
+      setBleStatus('connected'); // Force immediate sync
       localStorage.setItem("healthpulse_connection_mode", "ble");
       toast({ title: "Bluetooth Connected!", description: `Connected to ${bleManager.deviceName || "ESP32"}` });
     } catch (err: any) {
-      toast({ title: "Bluetooth Failed", description: err.message, variant: "destructive" });
+      const isWindows = navigator.platform.toLowerCase().includes('win');
+      const helpMsg = isWindows ? "\n\nTip: Remove 'ESP32-Health' from Windows Bluetooth settings before connecting." : "";
+      toast({ 
+        title: "Bluetooth Failed", 
+        description: err.message + helpMsg, 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -308,86 +321,109 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="relative space-y-6 max-w-7xl mx-auto z-10">
+      {/* Dynamic cinematic background */}
+      <style>{`
+        .dark main, .dark [data-sidebar="sidebar"] ~ div > main { background: #050816 !important; }
+      `}</style>
 
+      <div className="relative space-y-6 max-w-[1600px] mx-auto z-10">
 
-        {/* HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 px-2 md:px-0">
-          <div className="space-y-2">
-            <h1 className="font-display text-3xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 drop-shadow-sm">
-              AI HEALTH PULSE
-            </h1>
-            <p className="font-mono text-[10px] md:text-xs text-cyan-800 dark:text-cyan-500/60 uppercase tracking-widest font-bold">Biometric Telemetry HUD</p>
+        {/* ── HERO HEADER ─────────────────────────────────────── */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6 px-2 md:px-0">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <motion.div
+                className="h-3 w-3 rounded-full"
+                style={{ background: "#00E5FF", boxShadow: "0 0 12px #00E5FF" }}
+                animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <h1 className="font-display text-2xl md:text-4xl font-black tracking-[0.15em] text-slate-800 dark:text-[#E2F3FF]"
+                style={{ textShadow: "0 0 30px rgba(0,229,255,0.3)" }}>
+                HEALTH<span className="text-cyan-600 dark:text-[#00E5FF]">PULSE</span> AI
+              </h1>
+            </div>
+            <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-bold pl-6 text-slate-500 dark:text-cyan-100/50">
+              Next-Gen Biometric Intelligence HUD
+            </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-            {connectionMode === "ble" ? (
+          <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
+            {connectionMode === "ble" && bleStatus === 'connected' ? (
               <MagneticWrapper>
-                <Button onClick={() => { bleManager.disconnect(); setConnectionMode("cloud"); localStorage.setItem("healthpulse_connection_mode", "cloud"); }} className="w-full sm:w-auto glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
-                  <BluetoothConnected className="mr-2 h-4 w-4" />
-                  BLE SYNCED
-                </Button>
+                <button onClick={() => { bleManager.disconnect(); setConnectionMode("cloud"); localStorage.setItem("healthpulse_connection_mode", "cloud"); }}
+                  className="glass-button flex items-center gap-2">
+                  <BluetoothConnected className="h-3.5 w-3.5" /> BLE SYNCED
+                </button>
               </MagneticWrapper>
             ) : (
               <>
-                <MagneticWrapper className="w-full sm:w-auto">
-                  <Button onClick={toggleConnectionMode} className="w-full sm:w-auto glass-panel text-blue-700 dark:text-blue-400 border-blue-400/30 hover:bg-blue-900/30">
-                    {connectionMode === "local" ? <Wifi className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
-                    {connectionMode === "local" ? t("dashboard.switchToLocal") : t("dashboard.switchToCloud")}
-                  </Button>
+                <MagneticWrapper>
+                  <button onClick={toggleConnectionMode} className="glass-button flex items-center gap-2">
+                    {connectionMode === "local" ? <Wifi className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
+                    {connectionMode === "local" ? "LOCAL MODE" : "CLOUD MODE"}
+                  </button>
                 </MagneticWrapper>
-                <MagneticWrapper className="w-full sm:w-auto">
-                  <Button onClick={handleBLEConnect} className="w-full sm:w-auto glass-panel text-cyan-700 dark:text-cyan-400 border-cyan-400/30 hover:bg-cyan-900/30">
-                    <Bluetooth className="mr-2 h-4 w-4" />
-                    {t("deviceConnect.connectButton")}
-                  </Button>
+                <MagneticWrapper>
+                  <button onClick={handleBLEConnect} className="glass-button flex items-center gap-2">
+                    <Bluetooth className="h-3.5 w-3.5" /> {connectionMode === "ble" ? "RECONNECT BLE" : "CONNECT BLE"}
+                  </button>
                 </MagneticWrapper>
               </>
             )}
-
             {onboarding && (
-              <MagneticWrapper className="w-full sm:w-auto">
-                <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full sm:w-auto bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.6)] border-none">
-                  {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Brain className="mr-2 h-4 w-4" />}
+              <MagneticWrapper>
+                <button onClick={handleAnalyze} disabled={isAnalyzing}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-widest"
+                  style={{
+                    background: "linear-gradient(135deg, #00E5FF 0%, #00F5D4 100%)",
+                    color: "#050816", boxShadow: "0 0 20px rgba(0,229,255,0.4)",
+                    border: "none", cursor: isAnalyzing ? "wait" : "pointer"
+                  }}>
+                  {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Brain className="h-3.5 w-3.5" />}
                   {t("dashboard.analyzeHealth")}
-                </Button>
+                </button>
               </MagneticWrapper>
             )}
           </div>
         </div>
 
         {hasDevice === false ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 glass-panel rounded-3xl border-dashed border-cyan-500/50 shadow-[0_0_30px_rgba(0,243,255,0.1)]">
-            <div className="h-24 w-24 rounded-full bg-cyan-900/20 flex items-center justify-center mb-6 animate-pulse">
-              <Smartphone className="h-12 w-12 text-cyan-500 neon-text-cyan" />
-            </div>
-            <h2 className="text-3xl font-display font-black tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-3">{t("dashboard.noDevice")}</h2>
-            <p className="max-w-md mx-auto mb-8 font-mono text-sm text-cyan-800 dark:text-cyan-500/60 leading-relaxed uppercase font-bold">
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 rounded-3xl bg-white/60 dark:bg-[#050816]/80 border border-dashed border-cyan-500/30 shadow-[0_0_40px_rgba(0,229,255,0.05)] backdrop-blur-md">
+            <motion.div className="h-24 w-24 rounded-full flex items-center justify-center mb-6 bg-cyan-500/10 border border-cyan-500/20"
+              animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+              <Smartphone className="h-12 w-12 text-cyan-600 dark:text-[#00E5FF]" style={{ filter: "drop-shadow(0 0 10px rgba(0,229,255,0.5))" }} />
+            </motion.div>
+            <h2 className="text-2xl font-display font-black tracking-widest uppercase mb-3 text-cyan-700 dark:text-[#00E5FF]">{t("dashboard.noDevice")}</h2>
+            <p className="max-w-md mx-auto mb-8 font-mono text-xs leading-relaxed uppercase font-bold text-slate-500 dark:text-cyan-100/50">
               {t("dashboard.noDeviceDesc")}
             </p>
             <MagneticWrapper>
-              <Button size="lg" onClick={() => navigate("/device-connect")} className="bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.6)] border-none px-12 h-14 font-display font-bold tracking-widest">
+              <button onClick={() => navigate("/device-connect")}
+                className="px-10 py-3 rounded-xl font-display font-bold tracking-widest text-sm"
+                style={{ background: "linear-gradient(135deg, #00E5FF, #00F5D4)", color: "#050816", boxShadow: "0 0 20px rgba(0,229,255,0.5)" }}>
                 {t("deviceConnect.connectButton")}
-              </Button>
+              </button>
             </MagneticWrapper>
           </div>
         ) : hasDevice === null ? (
           <div className="flex h-[400px] items-center justify-center">
             <div className="flex flex-col items-center gap-6">
               <div className="relative h-20 w-20">
-                <div className="absolute inset-0 rounded-full border-t-2 border-cyan-400 animate-spin shadow-[0_0_15px_rgba(0,243,255,0.5)]"></div>
-                <div className="absolute inset-2 rounded-full border-b-2 border-blue-500 animate-spin animation-delay-150"></div>
+                <motion.div className="absolute inset-0 rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#00E5FF" }}
+                  animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} />
+                <motion.div className="absolute inset-3 rounded-full" style={{ border: "2px solid transparent", borderBottomColor: "#00F5D4" }}
+                  animate={{ rotate: -360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }} />
               </div>
-              <p className="font-mono text-sm text-cyan-700 dark:text-cyan-400 animate-pulse uppercase tracking-widest">{t("dashboard.syncing")}</p>
+              <p className="font-mono text-xs animate-pulse uppercase tracking-widest text-cyan-600 dark:text-[#00E5FF]">{t("dashboard.syncing")}</p>
             </div>
           </div>
         ) : (
           <>
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-              {/* LEFT PANEL: Vitals */}
-              <ParallaxWrapper depth={0.03} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 lg:col-span-1 gap-6 h-full floating-element">
+            {/* ── MAIN 3-PANEL GRID ──────────────────────────── */}
+            <motion.div className="grid grid-cols-1 lg:grid-cols-4 gap-4 xl:gap-6">
+              {/* LEFT: Vitals */}
+              <ParallaxWrapper depth={0.03} className="lg:col-span-1">
                 <VitalsPanel
                   heartRate={latest?.heart_rate || 0}
                   spo2={latest?.spo2 || 0}
@@ -396,8 +432,8 @@ export default function Dashboard() {
                 />
               </ParallaxWrapper>
 
-              {/* CENTER PANEL: Human Body */}
-              <ParallaxWrapper depth={0.05} className="md:col-span-2 lg:col-span-2 h-full">
+              {/* CENTER: Human Body */}
+              <ParallaxWrapper depth={0.05} className="lg:col-span-2">
                 <HumanBodyView
                   heartRate={latest?.heart_rate || 0}
                   fingerPresent={fingerPresent}
@@ -406,8 +442,8 @@ export default function Dashboard() {
                 />
               </ParallaxWrapper>
 
-              {/* RIGHT PANEL: AI Insights */}
-              <ParallaxWrapper depth={0.03} className="md:col-span-2 lg:col-span-1 h-full floating-element" style={{ animationDelay: '1s' }}>
+              {/* RIGHT: AI Insights */}
+              <ParallaxWrapper depth={0.03} className="lg:col-span-1">
                 <AIInsightsPanel
                   healthScore={displayHealthScore}
                   stressLevel={stressLevel}
@@ -417,25 +453,23 @@ export default function Dashboard() {
                   isEmergency={aiAnalysis?.type === 'EMERGENCY'}
                   recommendations={aiAnalysis?.recommendations}
                   onboarding={onboarding}
+                  rmssd={bleData?.rmssd}
+                  rawBleData={bleData?.raw}
                 />
               </ParallaxWrapper>
             </motion.div>
 
-            <motion.div
-              className="flex flex-col gap-6 w-full"
-            >
-              {/* BOTTOM PANEL: Analytics */}
-              <div className="w-full">
-                <AnalyticsPanel chartData={chartData} />
-              </div>
+            {/* ── BOTTOM: Analytics Console ──────────────────── */}
+            <div className="w-full">
+              <AnalyticsPanel chartData={chartData} />
+            </div>
 
-              {/* FEEDBACK SECTION */}
-              <ParallaxWrapper depth={0.02} className="w-full liquid-glass p-4 md:p-8 rounded-3xl relative overflow-hidden mb-12 holographic-edge">
-                <div className="relative z-10">
-                  <Feedback />
-                </div>
-              </ParallaxWrapper>
-            </motion.div>
+            {/* ── FEEDBACK ───────────────────────────────────── */}
+            <ParallaxWrapper depth={0.02} className="w-full rounded-2xl p-4 md:p-8 relative overflow-hidden mb-12 bg-white/60 dark:bg-[#050816]/70 border border-cyan-500/10 shadow-[0_0_20px_rgba(0,229,255,0.04)] backdrop-blur-md">
+              <div className="relative z-10">
+                <Feedback />
+              </div>
+            </ParallaxWrapper>
           </>
         )}
       </div>

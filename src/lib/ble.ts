@@ -34,8 +34,10 @@ export interface BLEHealthData {
   temperature: number | null;
   stressScore: number | null;
   stressLevel: string | null;
+  rmssd: number | null;
   fingerPresent?: boolean;
   timestamp: string;
+  raw?: string;
 }
 
 type BLEListener = (data: BLEHealthData) => void;
@@ -53,6 +55,7 @@ class BLEManager {
     temperature: null,
     stressScore: null,
     stressLevel: null,
+    rmssd: null,
     fingerPresent: false,
     timestamp: new Date().toISOString(),
   };
@@ -99,8 +102,12 @@ class BLEManager {
 
     try {
       currentStep = 'requestDevice';
+      // Improved device discovery with filters
       this.device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
+        filters: [
+          { name: BLE_DEVICE_NAME },
+          { services: [BLE_SERVICE_UUID_V2] }
+        ],
         optionalServices: [BLE_SERVICE_UUID_V2, BLE_SERVICE_UUID_V1],
       });
 
@@ -127,7 +134,7 @@ class BLEManager {
       this.setStatus('disconnected');
 
       if (err.name === 'NotFoundError') {
-        throw new Error('Device not found. Make sure it is turned on and not paired to Windows.');
+        throw new Error('Device not found. Make sure it is turned on, advertising, and not paired to Windows Bluetooth settings.');
       }
       throw new Error(`[${currentStep}] ${err.message}`);
     }
@@ -167,17 +174,34 @@ class BLEManager {
         
         const handleJSONValue = (value: DataView) => {
           try {
-            const raw = new TextDecoder().decode(value);
+            // Remove null characters and trim whitespace which can break JSON.parse
+            const raw = new TextDecoder().decode(value).replace(/\0/g, '').trim();
+            console.log('%c[BLE] DATA RECEIVED FROM ESP32: ' + raw, 'color: #00ff00; font-weight: bold;');
+            
+            if (!raw.startsWith('{')) {
+              console.warn('[BLE] Data is not a JSON object, ignoring.');
+              return;
+            }
+
             const data = JSON.parse(raw);
+            console.log('[BLE] Parsed JSON:', data);
+
             this.emitData({
-              heartRate: data.heartRate ?? data.heart_rate ?? null,
-              spo2: data.spo2 ?? data.SpO2 ?? null,
-              temperature: data.temperature ?? data.temp ?? null,
+              heartRate: (typeof data.heartRate === 'number') ? data.heartRate : 
+                         (typeof data.heart_rate === 'number') ? data.heart_rate : null,
+              spo2: (typeof data.spo2 === 'number') ? data.spo2 : 
+                    (typeof data.SpO2 === 'number') ? data.SpO2 : null,
+              temperature: (typeof data.temperature === 'number') ? data.temperature : 
+                           (typeof data.temp === 'number') ? data.temp : null,
               stressScore: data.stressScore ?? null,
               stressLevel: data.stressLevel ?? null,
+              rmssd: data.rmssd ?? null,
               fingerPresent: data.fingerPresent === true,
+              raw: raw, // Pass raw string for debugging
             });
-          } catch (e) {}
+          } catch (e) {
+            console.error('[BLE] Failed to parse JSON data from device:', e);
+          }
         };
 
         try {
