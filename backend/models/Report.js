@@ -4,7 +4,8 @@ const reportSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   type: {
     type: String,
@@ -66,10 +67,14 @@ const reportSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    index: true
   }
 }, {
   timestamps: true
 });
+
+reportSchema.index({ userId: 1, createdAt: -1 });
+reportSchema.index({ type: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Report', reportSchema);

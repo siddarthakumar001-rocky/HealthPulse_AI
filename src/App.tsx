@@ -18,6 +18,10 @@ import MapPage from "./pages/MapPage";
 import Alerts from "./pages/Alerts";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
+import PHCCommandDashboard from "./pages/PHCCommandDashboard";
+import SmartSupplyChain from "./pages/SmartSupplyChain";
+import AIEpidemicSurge from "./pages/AIEpidemicSurge";
+import EmergencyIntelligence from "./pages/EmergencyIntelligence";
 import NotFound from "./pages/NotFound";
 import { BackButton } from "./components/BackButton";
 import { useEffect } from "react";
@@ -69,6 +73,10 @@ export default function App() {
                 <Route path="/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
                 <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/phc-command" element={<ProtectedRoute><PHCCommandDashboard /></ProtectedRoute>} />
+                <Route path="/supply-chain" element={<ProtectedRoute><SmartSupplyChain /></ProtectedRoute>} />
+                <Route path="/ai-forecasting" element={<ProtectedRoute><AIEpidemicSurge /></ProtectedRoute>} />
+                <Route path="/emergency" element={<ProtectedRoute><EmergencyIntelligence /></ProtectedRoute>} />
                 <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

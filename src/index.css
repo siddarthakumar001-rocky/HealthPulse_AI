@@ -6,109 +6,109 @@
 
 @layer base {
   :root {
-    --background: 180 10% 98%;
-    --foreground: 220 50% 4%;
+    --background: 280 15% 98%;
+    --foreground: 16 44% 17%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 50% 4%;
+    --card-foreground: 16 44% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 50% 4%;
+    --popover-foreground: 16 44% 17%;
 
-    --primary: 186 100% 40%;
+    --primary: 10 76% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 214 100% 50%;
-    --secondary-foreground: 180 10% 98%;
+    --secondary: 348 100% 86%;
+    --secondary-foreground: 16 44% 17%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 220 10% 25%;
+    --muted: 25 35% 96%;
+    --muted-foreground: 16 18% 44%;
 
-    --accent: 142 100% 40%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 126 54% 89%;
+    --accent-foreground: 16 44% 17%;
 
-    --destructive: 0 100% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 85%;
-    --input: 220 13% 85%;
-    --ring: 186 100% 40%;
+    --border: 25 67% 85%;
+    --input: 25 67% 85%;
+    --ring: 10 76% 55%;
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5% 26%;
-    --sidebar-primary: 240 6% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 5% 96%;
-    --sidebar-accent-foreground: 240 6% 10%;
-    --sidebar-border: 220 13% 85%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 16 44% 17%;
+    --sidebar-primary: 10 76% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 126 54% 92%;
+    --sidebar-accent-foreground: 16 44% 17%;
+    --sidebar-border: 25 67% 85%;
+    --sidebar-ring: 10 76% 55%;
 
-    --stress-low: 142 70% 30%;
-    --stress-moderate: 35 80% 40%;
-    --stress-high: 0 80% 50%;
+    --stress-low: 126 54% 40%;
+    --stress-moderate: 25 75% 48%;
+    --stress-high: 10 76% 55%;
 
-    --chart-1: 186 100% 40%;
-    --chart-2: 142 100% 30%;
-    --chart-3: 35 100% 40%;
-    --chart-4: 0 100% 50%;
-    --chart-5: 214 100% 50%;
+    --chart-1: 10 76% 55%;
+    --chart-2: 126 54% 50%;
+    --chart-3: 348 100% 75%;
+    --chart-4: 25 75% 55%;
+    --chart-5: 280 20% 60%;
 
     --glass-bg: 0 0% 100%;
-    --glass-border: 186 100% 40%;
+    --glass-border: 25 67% 85%;
   }
 
   .dark {
-    --background: 220 50% 4%;
-    --foreground: 180 10% 98%;
+    --background: 320 8% 7%;
+    --foreground: 20 45% 93%;
 
-    --card: 220 40% 6%;
-    --card-foreground: 180 10% 98%;
+    --card: 270 6% 14%;
+    --card-foreground: 20 45% 93%;
 
-    --popover: 220 40% 6%;
-    --popover-foreground: 180 10% 98%;
+    --popover: 270 6% 14%;
+    --popover-foreground: 20 45% 93%;
 
-    --primary: 186 100% 50%;
-    --primary-foreground: 220 50% 4%;
+    --primary: 10 77% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 214 100% 50%;
-    --secondary-foreground: 180 10% 98%;
+    --secondary: 327 15% 20%;
+    --secondary-foreground: 348 100% 86%;
 
-    --muted: 220 30% 12%;
-    --muted-foreground: 180 10% 60%;
+    --muted: 270 5% 18%;
+    --muted-foreground: 20 20% 68%;
 
-    --accent: 142 100% 50%;
-    --accent-foreground: 220 50% 4%;
+    --accent: 126 24% 20%;
+    --accent-foreground: 126 54% 89%;
 
-    --destructive: 300 100% 50%;
-    --destructive-foreground: 180 10% 98%;
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 186 100% 50%;
-    --input: 220 30% 20%;
-    --ring: 186 100% 50%;
+    --border: 327 10% 21%;
+    --input: 327 10% 21%;
+    --ring: 10 77% 58%;
     --radius: 1rem;
 
-    --sidebar-background: 220 50% 3%;
-    --sidebar-foreground: 180 10% 98%;
-    --sidebar-primary: 186 100% 50%;
+    --sidebar-background: 270 6% 11%;
+    --sidebar-foreground: 20 45% 93%;
+    --sidebar-primary: 10 77% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 40% 10%;
-    --sidebar-accent-foreground: 180 10% 98%;
-    --sidebar-border: 186 100% 15%;
-    --sidebar-ring: 186 100% 50%;
+    --sidebar-accent: 327 10% 21%;
+    --sidebar-accent-foreground: 20 45% 93%;
+    --sidebar-border: 327 10% 21%;
+    --sidebar-ring: 10 77% 58%;
 
-    --stress-low: 142 100% 50%;
-    --stress-moderate: 35 100% 50%;
-    --stress-high: 330 100% 50%;
+    --stress-low: 126 54% 60%;
+    --stress-moderate: 25 80% 60%;
+    --stress-high: 10 85% 65%;
 
-    --chart-1: 186 100% 50%;
-    --chart-2: 142 100% 50%;
-    --chart-3: 35 100% 50%;
-    --chart-4: 330 100% 50%;
-    --chart-5: 214 100% 50%;
+    --chart-1: 10 77% 58%;
+    --chart-2: 126 45% 55%;
+    --chart-3: 348 80% 70%;
+    --chart-4: 25 70% 60%;
+    --chart-5: 280 20% 65%;
 
-    --glass-bg: 220 50% 10%;
-    --glass-border: 186 100% 50%;
+    --glass-bg: 270 6% 14%;
+    --glass-border: 327 10% 21%;
   }
 }
 
@@ -118,28 +118,38 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden w-full max-w-full;
+    font-family: "Times New Roman", Times, Georgia, serif;
+    @apply bg-background text-foreground antialiased overflow-x-hidden w-full max-w-full;
     background-image:
-      radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.07), transparent 30%),
-      radial-gradient(circle at 85% 30%, rgba(0, 102, 255, 0.07), transparent 30%),
-      radial-gradient(circle at 50% 80%, rgba(120, 0, 255, 0.04), transparent 25%);
+      radial-gradient(ellipse 65% 55% at 10% 15%, rgba(217, 195, 206, 0.45) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 55% at 90% 10%, rgba(220, 233, 244, 0.6) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(225, 239, 227, 0.5) 0%, transparent 70%);
     background-attachment: fixed;
   }
 
-  html, #root {
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 65% 55% at 15% 15%, rgba(46, 31, 39, 0.55) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 55% at 85% 15%, rgba(22, 27, 34, 0.7) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(14, 23, 19, 0.65) 0%, transparent 70%);
+    background-attachment: fixed;
+  }
+
+  html, #root, body, button, input, select, textarea {
+    font-family: "Times New Roman", Times, Georgia, serif;
     @apply overflow-x-hidden w-full max-w-full;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 0.05em;
-    @apply break-words whitespace-normal;
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: "Times New Roman", Times, Georgia, serif;
+    letter-spacing: 0.02em;
+    @apply break-words whitespace-normal text-foreground;
   }
 
-  /* ── Force sidebar always dark (overrides Shadcn's --sidebar-background) ── */
+  /* ── Dark sidebar theme ── */
   .dark [data-sidebar="sidebar"] {
-    background: rgb(5, 10, 20) !important;
-    color: rgba(255, 255, 255, 0.85);
+    background: #19161a !important;
+    color: rgba(245, 235, 230, 0.95);
   }
 }
 
@@ -150,26 +160,25 @@
 
   /* .glass — primary reusable glass class (light+dark aware) */
   .glass {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(0, 180, 200, 0.2);
+    border: 1px solid rgba(243, 213, 192, 0.7);
     border-radius: 16px;
     box-shadow:
-      0 0 20px rgba(0, 180, 200, 0.06),
-      inset 0 0 20px rgba(0, 0, 0, 0.02);
+      0 4px 20px rgba(62, 34, 24, 0.04),
+      inset 0 0 20px rgba(255, 255, 255, 0.4);
     position: relative;
     overflow: hidden;
     color: inherit;
   }
 
   .dark .glass {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(0, 243, 255, 0.15);
+    background: rgba(35, 33, 37, 0.75);
+    border-color: rgba(58, 47, 53, 0.85);
     box-shadow:
-      0 0 20px rgba(0, 243, 255, 0.08),
-      0 0 40px rgba(0, 243, 255, 0.04),
-      inset 0 0 20px rgba(255, 255, 255, 0.03);
+      0 4px 24px rgba(0, 0, 0, 0.35),
+      inset 0 0 20px rgba(255, 255, 255, 0.02);
   }
 
   .glass::before {
@@ -178,9 +187,9 @@
     inset: 0;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.25) 0%,
       transparent 40%,
-      rgba(0, 243, 255, 0.04) 70%,
+      rgba(227, 83, 54, 0.03) 70%,
       transparent 100%
     );
     pointer-events: none;
@@ -189,44 +198,44 @@
 
   /* .glass-panel — subtle variant */
   .glass-panel {
-    @apply bg-glass backdrop-blur-xl border border-glass-border shadow-[0_0_20px_rgba(0,243,255,0.05)];
+    @apply bg-glass backdrop-blur-xl border border-glass-border shadow-[0_4px_20px_rgba(62,34,24,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.35)];
   }
 
   /* .liquid-glass — rich animated variant (light+dark aware) */
   .liquid-glass {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(0, 180, 200, 0.15);
+    border: 1px solid rgba(243, 213, 192, 0.75);
     position: relative;
     overflow: hidden;
     color: inherit;
     box-shadow:
-      0 0 20px rgba(0, 180, 200, 0.05),
-      inset 0 0 20px rgba(0, 0, 0, 0.02);
+      0 4px 20px rgba(62, 34, 24, 0.04),
+      inset 0 0 20px rgba(255, 255, 255, 0.5);
   }
 
   .dark .liquid-glass {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.06);
+    background: rgba(35, 33, 37, 0.75);
+    border-color: rgba(58, 47, 53, 0.8);
     box-shadow:
-      0 0 20px rgba(0, 243, 255, 0.06),
-      inset 0 0 20px rgba(255, 255, 255, 0.03);
+      0 4px 24px rgba(0, 0, 0, 0.35),
+      inset 0 0 20px rgba(255, 255, 255, 0.02);
   }
 
   .liquid-glass::before {
     content: '';
     position: absolute;
     inset: 0;
-    opacity: 0.2;
+    opacity: 0.25;
     pointer-events: none;
     z-index: 0;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.3) 0%,
       transparent 40%,
-      rgba(0, 243, 255, 0.1) 60%,
-      rgba(255, 255, 255, 0.1) 100%
+      rgba(227, 83, 54, 0.08) 60%,
+      rgba(255, 255, 255, 0.2) 100%
     );
   }
 
@@ -239,7 +248,7 @@
     z-index: 0;
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(0, 243, 255, 0.2) 0%,
+      rgba(227, 83, 54, 0.2) 0%,
       transparent 50%
     );
     animation: floating-glow 10s infinite linear;
@@ -247,36 +256,51 @@
 
   /* Glass Button */
   .glass-button {
-    background: rgba(0, 243, 255, 0.08);
+    background: rgba(227, 83, 54, 0.08);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 243, 255, 0.25);
+    border: 1px solid rgba(227, 83, 54, 0.3);
     border-radius: 12px;
-    color: rgba(0, 243, 255, 0.9);
-    font-family: 'Space Mono', monospace;
+    color: #E35336;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    letter-spacing: 0.05em;
     padding: 0.5rem 1.25rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     cursor: pointer;
     box-shadow:
-      0 0 12px rgba(0, 243, 255, 0.1),
-      inset 0 0 12px rgba(0, 243, 255, 0.05);
+      0 0 12px rgba(227, 83, 54, 0.1),
+      inset 0 0 12px rgba(227, 83, 54, 0.05);
   }
 
   .glass-button:hover {
-    background: rgba(0, 243, 255, 0.15);
-    border-color: rgba(0, 243, 255, 0.45);
-    transform: scale(1.03) translateY(-1px);
+    background: #E35336;
+    border-color: #E35336;
+    color: #FFFFFF;
+    transform: scale(1.02) translateY(-1px);
     box-shadow:
-      0 0 20px rgba(0, 243, 255, 0.25),
-      0 0 40px rgba(0, 243, 255, 0.1),
-      inset 0 0 15px rgba(0, 243, 255, 0.1);
-    color: #00f3ff;
+      0 4px 18px rgba(227, 83, 54, 0.3),
+      inset 0 0 15px rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .glass-button {
+    background: rgba(229, 93, 66, 0.14);
+    border-color: rgba(229, 93, 66, 0.4);
+    color: #E55D42;
+  }
+
+  .dark .glass-button:hover {
+    background: #E55D42;
+    border-color: #E55D42;
+    color: #FFFFFF;
+    box-shadow:
+      0 4px 18px rgba(229, 93, 66, 0.45);
+  }
+
+  .glass-button:active {
+    transform: scale(0.98);
   }
 
   .glass-button:active {

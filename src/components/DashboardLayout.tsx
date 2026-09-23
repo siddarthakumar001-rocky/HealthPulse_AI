@@ -44,23 +44,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1 flex flex-col min-w-0">
             {/* ── GLASS HEADER ──────────────────────────────────── */}
             <header
-              className="sticky top-0 z-40 flex h-16 items-center justify-between px-6 transition-all duration-300 bg-background/90 dark:bg-[#050a14]/90"
+              className="sticky top-0 z-40 flex h-16 items-center justify-between px-3 sm:px-6 transition-all duration-300 bg-background/90 border-b border-border/80"
               style={{
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                borderBottom: "1px solid rgba(0, 243, 255, 0.15)",
-                boxShadow: "0 4px 30px rgba(0, 243, 255, 0.06), 0 1px 0 rgba(0,243,255,0.12)",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
               }}
             >
               {/* Left: sidebar trigger */}
               <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
                 <SidebarTrigger
-                  className="text-foreground/90 dark:text-white/90 hover:text-cyan-400 transition-colors"
+                  className="text-foreground/90 hover:text-primary transition-colors h-10 w-10 min-h-[44px] min-w-[44px]"
                 />
               </motion.div>
 
               {/* Right: actions */}
-              <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-3">
                 <LanguageSwitcher />
                 <ThemeToggle />
 
@@ -70,14 +69,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     variant="ghost"
                     size="icon"
                     asChild
-                    className="rounded-full w-9 h-9 text-foreground/70 dark:text-white/70 hover:text-cyan-400 transition-colors"
-                    style={{
-                      background: "rgba(0,243,255,0.08)",
-                      border: "1px solid rgba(0,243,255,0.15)",
-                    }}
+                    className="rounded-full w-9 h-9 min-h-[36px] min-w-[36px] text-foreground/70 hover:text-primary transition-colors bg-card border border-border"
                   >
                     <Link to="/alerts">
-                      <Bell className="h-4 w-4 text-foreground/80 dark:text-white/80" />
+                      <Bell className="h-4 w-4 text-foreground/80" />
                     </Link>
                   </Button>
                 </motion.div>
@@ -86,13 +81,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <motion.div
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold cursor-pointer font-mono"
+                  className="flex h-9 w-9 min-h-[36px] min-w-[36px] items-center justify-center rounded-full text-sm font-bold cursor-pointer font-mono"
                   style={{
-                    background: "linear-gradient(135deg, rgba(0,243,255,0.4) 0%, rgba(0,102,255,0.4) 100%)",
-                    border: "1px solid rgba(0,243,255,0.4)",
-                    boxShadow: "0 0 15px rgba(0,243,255,0.3)",
-                    color: "#00f3ff",
-                    textShadow: "0 0 10px rgba(0,243,255,0.6)",
+                    background: "linear-gradient(135deg, #E35336 0%, #FF7E67 100%)",
+                    border: "1px solid rgba(227,83,54,0.4)",
+                    boxShadow: "0 2px 10px rgba(227,83,54,0.3)",
+                    color: "#FFFFFF",
                   }}
                 >
                   {user?.user_metadata?.name?.[0]?.toUpperCase() || "U"}
@@ -101,7 +95,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </header>
 
             {/* ── PAGE CONTENT ──────────────────────────────────── */}
-            <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+            <main className="flex-1 p-2 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden min-w-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}

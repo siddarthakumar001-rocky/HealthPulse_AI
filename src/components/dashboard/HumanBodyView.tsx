@@ -26,8 +26,8 @@ function HolographicParticles() {
         <motion.circle
           key={p.id}
           cx={p.x} cy={p.y * 2.5} r={p.size * 0.3}
-          fill="rgba(0,229,255,0.5)"
-          animate={{ cy: [p.y * 2.5, p.y * 2.5 - 30, p.y * 2.5], opacity: [0.2, 0.8, 0.2] }}
+          fill="rgba(227,83,54,0.45)"
+          animate={{ cy: [p.y * 2.5, p.y * 2.5 - 30, p.y * 2.5], opacity: [0.2, 0.7, 0.2] }}
           transition={{ duration: p.dur, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
         />
       ))}
@@ -37,11 +37,11 @@ function HolographicParticles() {
 
 /* ── Floating organ labels ────────────────────────────────────── */
 const organLabels = [
-  { label: "BRAIN", x: 50, y: 18, color: "#38BDF8" },
+  { label: "BRAIN", x: 50, y: 18, color: "#E35336" },
   { label: "HEART", x: 22, y: 68, color: "#FF3B5C" },
-  { label: "LUNGS", x: 78, y: 62, color: "#00E5FF" },
-  { label: "LIVER", x: 80, y: 88, color: "#00F5D4" },
-  { label: "SPINE", x: 20, y: 110, color: "#38BDF8" },
+  { label: "LUNGS", x: 78, y: 62, color: "#E35336" },
+  { label: "LIVER", x: 80, y: 88, color: "#DBB06B" },
+  { label: "SPINE", x: 20, y: 110, color: "#9988A1" },
 ];
 
 function FloatingLabels() {
@@ -88,32 +88,30 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
   }, []);
 
   return (
-    <div className="relative w-full h-[400px] md:h-[600px] flex items-center justify-center overflow-hidden rounded-2xl"
+    <div className="relative w-full h-[400px] md:h-[600px] flex items-center justify-center overflow-hidden rounded-2xl bg-card border border-border"
       style={{
-        background: "linear-gradient(180deg, rgba(5,8,22,0.95) 0%, rgba(7,17,31,0.98) 50%, rgba(11,19,43,0.95) 100%)",
-        border: "1px solid rgba(0,229,255,0.15)",
-        boxShadow: "0 0 60px rgba(0,229,255,0.08), inset 0 0 60px rgba(0,229,255,0.03)",
+        boxShadow: "0 4px 30px rgba(0,0,0,0.15), inset 0 0 40px rgba(227,83,54,0.03)",
       }}
     >
       {/* Background medical grid */}
-      <div className="absolute inset-0 opacity-[0.07]" style={{
+      <div className="absolute inset-0 opacity-[0.1]" style={{
         backgroundImage: `
-          linear-gradient(rgba(0,229,255,0.6) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0,229,255,0.6) 1px, transparent 1px)`,
+          linear-gradient(rgba(243,213,192,0.6) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(243,213,192,0.6) 1px, transparent 1px)`,
         backgroundSize: '30px 30px'
       }} />
 
       {/* Radial vignette */}
-      <div className="absolute inset-0" style={{
-        background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,8,22,0.8) 100%)"
+      <div className="absolute inset-0 opacity-40 pointer-events-none" style={{
+        background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%)"
       }} />
 
       {/* Scanning beam */}
       <motion.div
         className="absolute left-0 w-full h-[2px] pointer-events-none z-20"
         style={{
-          background: "linear-gradient(to right, transparent, rgba(0,229,255,0.8), rgba(0,245,212,0.6), rgba(0,229,255,0.8), transparent)",
-          boxShadow: "0 0 20px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.3)",
+          background: "linear-gradient(to right, transparent, rgba(227,83,54,0.8), rgba(255,126,103,0.8), rgba(227,83,54,0.8), transparent)",
+          boxShadow: "0 0 15px rgba(227,83,54,0.6)",
         }}
         animate={{ top: ["0%", "100%"] }}
         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
@@ -125,19 +123,19 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
           viewBox="0 0 100 250"
           preserveAspectRatio="xMidYMid meet"
           className="h-full w-auto max-h-[90%]"
-          style={{ filter: "drop-shadow(0 0 15px rgba(0,229,255,0.3))" }}
+          style={{ filter: "drop-shadow(0 0 15px rgba(227,83,54,0.25))" }}
         >
           <defs>
             {/* Holographic body gradient */}
             <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#00F5D4" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.6" />
+              <stop offset="0%" stopColor="#E35336" stopOpacity="0.75" />
+              <stop offset="50%" stopColor="#FF7E67" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#E35336" stopOpacity="0.75" />
             </linearGradient>
             <linearGradient id="bodyFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.05" />
-              <stop offset="50%" stopColor="#00F5D4" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="#E35336" stopOpacity="0.06" />
+              <stop offset="50%" stopColor="#FF7E67" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#E35336" stopOpacity="0.06" />
             </linearGradient>
             {/* Heart glow */}
             <radialGradient id="heartGlow" cx="50%" cy="50%" r="50%">
@@ -159,13 +157,13 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
           {/* Circular scanner beneath body */}
           <motion.ellipse
             cx="50" cy="235" rx="25" ry="5"
-            fill="none" stroke="#00E5FF" strokeWidth="0.5" opacity="0.4"
+            fill="none" stroke="#E35336" strokeWidth="0.5" opacity="0.4"
             animate={{ rx: [20, 30, 20], opacity: [0.2, 0.5, 0.2] }}
             transition={{ duration: 3, repeat: Infinity }}
           />
           <motion.ellipse
             cx="50" cy="235" rx="18" ry="3"
-            fill="none" stroke="#00F5D4" strokeWidth="0.3" opacity="0.3"
+            fill="none" stroke="#FF7E67" strokeWidth="0.3" opacity="0.3"
             animate={{ rx: [15, 22, 15], opacity: [0.1, 0.4, 0.1] }}
             transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
           />
@@ -175,7 +173,7 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
             <motion.circle
               key={`radar-${i}`}
               cx="50" cy="120" r={r * 0.4}
-              fill="none" stroke="#00E5FF" strokeWidth="0.2"
+              fill="none" stroke="#E35336" strokeWidth="0.2"
               opacity="0.15"
               strokeDasharray="2 4"
               animate={{ r: [r * 0.35, r * 0.45, r * 0.35], opacity: [0.05, 0.2, 0.05] }}
@@ -395,22 +393,22 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
 
       {/* Corner HUD overlays */}
       <div className="absolute top-4 left-4 z-20">
-        <p className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: "#00E5FF", textShadow: "0 0 10px rgba(0,229,255,0.5)" }}>
-          SYS_STATUS: <span className={status === 'connected' ? 'text-green-400' : 'text-yellow-400'}>{status.toUpperCase()}</span>
+        <p className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: "#E35336", textShadow: "0 0 10px rgba(227,83,54,0.5)" }}>
+          SYS_STATUS: <span className={status === 'connected' ? 'text-emerald-500' : 'text-amber-500'}>{status.toUpperCase()}</span>
         </p>
-        <p className="font-mono text-[8px] tracking-widest uppercase" style={{ color: "#8FB8D8" }}>
+        <p className="font-mono text-[8px] tracking-widest uppercase text-muted-foreground">
           SENSOR: {fingerPresent ? 'LOCKED' : 'STANDBY'}
         </p>
-        <p className="font-mono text-[8px] tracking-widest uppercase mt-1" style={{ color: "#8FB8D8" }}>
+        <p className="font-mono text-[8px] tracking-widest uppercase mt-1 text-muted-foreground">
           {heartRate > 0 ? `BPM: ${heartRate}` : 'AWAITING SIGNAL'}
         </p>
       </div>
 
       <div className="absolute bottom-4 right-4 z-20 text-right">
-        <p className="font-mono text-[8px] tracking-widest uppercase" style={{ color: "rgba(143,184,216,0.5)" }}>
+        <p className="font-mono text-[8px] tracking-widest uppercase text-muted-foreground/70">
           HOLOGRAPHIC DIGITAL TWIN v3.1
         </p>
-        <p className="font-mono text-[8px] tracking-widest uppercase" style={{ color: "rgba(143,184,216,0.5)" }}>
+        <p className="font-mono text-[8px] tracking-widest uppercase text-muted-foreground/70">
           AI_SCAN_ENGINE: ACTIVE
         </p>
       </div>
@@ -418,11 +416,11 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
       {/* Top-right: Body rotation indicator */}
       <div className="absolute top-4 right-4 z-20">
         <motion.div
-          className="w-8 h-8 rounded-full border border-cyan-500/30 flex items-center justify-center"
+          className="w-8 h-8 rounded-full border border-primary/30 flex items-center justify-center"
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
-          <div className="w-1 h-1 rounded-full bg-cyan-400" />
+          <div className="w-1 h-1 rounded-full bg-primary" />
         </motion.div>
       </div>
     </div>

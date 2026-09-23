@@ -1,9 +1,15 @@
 import axios from "axios";
 
+const localApiUrl =
+  import.meta.env.VITE_API_URL_LOCAL ||
+  `http://localhost:${import.meta.env.VITE_PORT || 5001}/api`;
+const remoteApiUrl = import.meta.env.VITE_API_URL || "https://health-931r.onrender.com/api";
+
 const API_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:5001/api"
-    : "https://health-931r.onrender.com/api";
+  window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+    ? localApiUrl
+    : remoteApiUrl;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -29,7 +35,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   return config;
 });
 

@@ -18,8 +18,13 @@ try:
     features = joblib.load(os.path.join(MODEL_DIR, 'feature_names.joblib'))
     imputer = joblib.load(os.path.join(MODEL_DIR, 'imputer.joblib'))
     scaler = joblib.load(os.path.join(MODEL_DIR, 'scaler.joblib'))
+    
+    # Load AyurGenix NLP Recommendation Engine
+    ayur_vectorizer = joblib.load(os.path.join(MODEL_DIR, 'ayurvedic_vectorizer.joblib'))
+    ayur_tfidf_matrix = joblib.load(os.path.join(MODEL_DIR, 'ayurvedic_tfidf_matrix.joblib'))
+    ayur_kb = joblib.load(os.path.join(MODEL_DIR, 'ayurvedic_kb.joblib'))
 except Exception as e:
-    print(f"Models not fully loaded: {e}. Please run trainer.py first.")
+    print(f"Models not fully loaded: {e}. Please run trainer.py or ayurveda_trainer.py first.")
 
 @app.route('/ai/predict', methods=['POST'])
 def predict_hybrid():
@@ -140,11 +145,52 @@ def predict_hybrid():
         }
     })
 
+@app.route('/ai/symptoms/analyze', methods=['POST'])
+def analyze_symptoms():
+    data = request.json or {}
+    symptom_text = data.get('symptoms', '')
+    if isinstance(symptom_text, list):
+        symptom_text = ' '.join(symptom_text)
+    
+    if not symptom_text or not symptom_text.strip():
+        return jsonify({"error": "No symptoms provided"}), 400
+    
+    try:
+        from sklearn.metrics.pairwise import cosine_similarity
+        q_vec = ayur_vectorizer.transform([symptom_text.lower()])
+        scores = cosine_similarity(q_vec, ayur_tfidf_matrix)[0]
+        top_indices = scores.argsort()[::-1][:3]
+        
+        matches = []
+        for idx in top_indices:
+            if scores[idx] > 0.05:
+                row = ayur_kb.iloc[idx]
+                matches.append({
+                    "disease": str(row.get('Disease', '')),
+                    "similarity": round(float(scores[idx]), 4),
+                    "doshas": str(row.get('Doshas', 'N/A')),
+                    "herbs": str(row.get('Ayurvedic Herbs', 'N/A')),
+                    "formulation": str(row.get('Formulation', 'N/A')),
+                    "diet_and_lifestyle": str(row.get('Diet and Lifestyle Recommendations', 'N/A')),
+                    "yoga_therapy": str(row.get('Yoga & Physical Therapy', 'N/A')),
+                    "prevention": str(row.get('Prevention', 'N/A'))
+                })
+        
+        primary_match = matches[0] if matches else None
+        return jsonify({
+            "status": "success",
+            "query_symptoms": symptom_text,
+            "primary_diagnosis": primary_match,
+            "top_candidates": matches
+        })
+    except Exception as e:
+        return jsonify({"error": f"Inference failed: {str(e)}"}), 500
+
 # Kept for backward compatibility with frontend/backend
 @app.route('/analyze', methods=['POST'])
 def analyze():
     # Existing compatibility stub
-    data = request.json
+    data = request.json or {}
     symptoms = data.get('symptoms', [])
     onboarding = data.get('onboardingData', {})
     vitals = data.get('vitals', {})
@@ -158,16 +204,38 @@ def analyze():
             'hospitals': get_nearby_hospitals(location.get('lat'), location.get('lng'))
         })
 
-    # Return dummy fallback if old route used
-    return jsonify({
-        'type': 'NORMAL',
-        'predictedDisease': 'Check /ai/predict for robust analysis',
-        'healthScore': 85,
-        'riskLevel': 'low',
-        'dosha': 'Vata',
-        'recommendations': {'medicines': [], 'lifestyle': [], 'diet': []},
-        'hospitals': []
-    })
+    symptom_str = ' '.join(symptoms) if isinstance(symptoms, list) else str(symptoms)
+    try:
+        from sklearn.metrics.pairwise import cosine_similarity
+        q_vec = ayur_vectorizer.transform([symptom_str.lower()])
+        scores = cosine_similarity(q_vec, ayur_tfidf_matrix)[0]
+        best_idx = scores.argmax()
+        best_row = ayur_kb.iloc[best_idx]
+        
+        return jsonify({
+            'type': 'NORMAL',
+            'predictedDisease': str(best_row.get('Disease', 'General Wellness')),
+            'healthScore': 85,
+            'riskLevel': 'low' if scores[best_idx] < 0.8 else 'moderate',
+            'dosha': str(best_row.get('Doshas', 'Vata')),
+            'recommendations': {
+                'medicines': [h.strip() for h in str(best_row.get('Ayurvedic Herbs', '')).split(',') if h.strip()],
+                'lifestyle': [str(best_row.get('Diet and Lifestyle Recommendations', ''))],
+                'diet': [str(best_row.get('Formulation', ''))],
+                'yoga': [str(best_row.get('Yoga & Physical Therapy', ''))]
+            },
+            'hospitals': []
+        })
+    except Exception:
+        return jsonify({
+            'type': 'NORMAL',
+            'predictedDisease': 'Check /ai/predict for robust analysis',
+            'healthScore': 85,
+            'riskLevel': 'low',
+            'dosha': 'Vata',
+            'recommendations': {'medicines': [], 'lifestyle': [], 'diet': []},
+            'hospitals': []
+        })
 
 if __name__ == '__main__':
     if not os.path.exists(MODEL_DIR):

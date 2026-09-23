@@ -12,6 +12,7 @@ router.use(authMiddleware);
 router.use(isAdmin);
 
 router.get('/analytics', adminController.getAnalytics);
+router.get('/funnel', adminController.getFunnelAnalytics);
 router.get('/stats', adminController.getStats);
 router.get('/users', adminController.getUsers);
 router.get('/feedbacks', adminController.getFeedbacks);

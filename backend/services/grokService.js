@@ -1,13 +1,12 @@
 const axios = require('axios');
+const { breakers } = require('./resilienceService');
+const logger = require('../utils/logger');
 
 /**
- * Grok AI Service
+ * Grok AI Service with Circuit Breaker Protection
  * Uses the xAI OpenAI-compatible chat completions endpoint.
  */
 const queryGrok = async (userInput) => {
-  console.log("[Grok] Doctor AI route hit");
-  console.log("[Grok] Prompt:", userInput);
-
   const apiKey = process.env.GROK_API_KEY;
   
   if (!apiKey || apiKey.trim() === '') {
@@ -42,7 +41,7 @@ const queryGrok = async (userInput) => {
     temperature: 0.3
   };
 
-  try {
+  const action = async () => {
     const response = await axios.post(
       'https://api.x.ai/v1/chat/completions',
       requestBody,
@@ -51,14 +50,13 @@ const queryGrok = async (userInput) => {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
-        timeout: 30000
+        timeout: 9000
       }
     );
 
     const aiReply = response.data?.choices?.[0]?.message?.content;
     
     if (!aiReply) {
-      console.error("[Grok] Unexpected response shape:", JSON.stringify(response.data).slice(0, 500));
       return {
         success: false,
         message: "Received empty response from Grok AI."
@@ -69,18 +67,18 @@ const queryGrok = async (userInput) => {
       success: true,
       reply: aiReply
     };
-  } catch (error) {
-    const errData = error.response?.data;
-    const errMsg = typeof errData === 'string'
-      ? errData
-      : errData?.error?.message || errData?.message || error.message || "Unknown Grok API error";
-    
-    console.error("[Grok Service] Error:", errMsg);
+  };
+
+  const fallback = (err) => {
+    logger.warn('[Grok Circuit Breaker Triggered] Returning clinical fallback:', { error: err.message });
     return {
-      success: false,
-      message: `AI request failed: ${errMsg}`
+      success: true,
+      fallback: true,
+      reply: "Disclaimer: HealthPulse Doctor AI is currently operating with offline heuristics. For any concerning symptoms, chest discomfort, or high fever, please seek direct in-person evaluation at your nearest primary health center."
     };
-  }
+  };
+
+  return await breakers.grok.execute(action, fallback);
 };
 
 module.exports = { queryGrok };

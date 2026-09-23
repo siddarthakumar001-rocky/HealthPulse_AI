@@ -1,12 +1,13 @@
 const axios = require('axios');
+const { breakers } = require('./resilienceService');
+const logger = require('../utils/logger');
 
 /**
- * DeepSeek AI Agent Service
+ * DeepSeek AI Agent Service with Circuit Breaker Protection
  * Provides advanced clinical reasoning and conversational health advice.
  */
 const queryDeepSeek = async ({ prompt, context = {} }) => {
   const apiKey = process.env.DEEPSEEK_API_KEY;
-  console.log("[DeepSeek Service] API Key detected:", apiKey ? `${apiKey.substring(0, 5)}***` : "MISSING");
   
   if (!apiKey || apiKey === 'your_deepseek_api_key_here' || apiKey.trim() === '') {
     throw new Error("DeepSeek API Key is missing. Please add it to your .env file.");
@@ -32,7 +33,7 @@ const queryDeepSeek = async ({ prompt, context = {} }) => {
     5. Be concise.
   `;
 
-  try {
+  const action = async () => {
     const response = await axios.post(
       'https://api.deepseek.com/chat/completions',
       {
@@ -48,15 +49,20 @@ const queryDeepSeek = async ({ prompt, context = {} }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
-        }
+        },
+        timeout: 9000
       }
     );
 
     return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("[DeepSeek Service] Error:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.error?.message || "Failed to communicate with DeepSeek AI Agent.");
-  }
+  };
+
+  const fallback = (err) => {
+    logger.warn('[DeepSeek Circuit Breaker Triggered] Returning clinical fallback:', { error: err.message });
+    return "Disclaimer: HealthPulse AI medical services are temporarily operating in offline mode. Please review your extracted diagnostic report parameters in the dashboard, observe prescribed rest, and consult a qualified healthcare provider for personalized prescriptions.";
+  };
+
+  return await breakers.deepseek.execute(action, fallback);
 };
 
 module.exports = { queryDeepSeek };

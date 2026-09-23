@@ -11,6 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+.git_backup
+backend/.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+__pycache__/
+*.py[cod]
 
 # Editor directories and files
 .vscode/*
@@ -23,9 +32,4 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment
-.env
-backend/.env
-node_modules
-dist
-dist-ssr
+

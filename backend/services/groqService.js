@@ -1,7 +1,9 @@
 const axios = require('axios');
+const { breakers } = require('./resilienceService');
+const logger = require('../utils/logger');
 
 /**
- * Groq AI Service
+ * Groq AI Service with Circuit Breaker Protection
  * Provides free, high-speed clinical reasoning using Llama-3.
  */
 const queryGroq = async (userInput) => {
@@ -26,7 +28,7 @@ const queryGroq = async (userInput) => {
     temperature: 0.3
   };
 
-  try {
+  const action = async () => {
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       requestBody,
@@ -34,7 +36,8 @@ const queryGroq = async (userInput) => {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 9000
       }
     );
 
@@ -42,15 +45,18 @@ const queryGroq = async (userInput) => {
       success: true,
       reply: response.data.choices[0].message.content
     };
-  } catch (error) {
-    console.error("[Groq Service] Error:", error.response?.data || error.message);
-    const errorMsg = error.response?.data?.error?.message || error.message;
+  };
+
+  const fallback = (err) => {
+    logger.warn('[Groq Circuit Breaker Triggered] Returning fallback response:', { error: err.message });
     return {
-      success: false,
-      message: "AI request failed",
-      error: errorMsg
+      success: true,
+      fallback: true,
+      reply: "Our primary AI clinical reasoning service is currently experiencing high load. Based on clinical heuristics, please ensure adequate hydration, monitor vitals, and consult a registered medical professional if symptoms persist or escalate."
     };
-  }
+  };
+
+  return await breakers.groq.execute(action, fallback);
 };
 
 module.exports = { queryGroq };

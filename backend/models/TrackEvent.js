@@ -5,7 +5,6 @@ const trackEventSchema = new mongoose.Schema({
   userId: { type: String, index: true }, // Optional, mapped if logged in
   eventType: { 
     type: String, 
-    enum: ['pageview', 'click', 'time'], 
     required: true,
     index: true
   },

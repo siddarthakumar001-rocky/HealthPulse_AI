@@ -41,8 +41,8 @@ export default function LiquidCursor() {
     };
   }, [mouseX, mouseY]);
 
-  const color = theme === "dark" ? "rgba(0, 243, 255, 0.8)" : "rgba(0, 0, 0, 0.6)";
-  const glowColor = theme === "dark" ? "rgba(0, 243, 255, 0.3)" : "rgba(0, 0, 0, 0.15)";
+  const color = theme === "dark" ? "rgba(229, 93, 66, 0.9)" : "rgba(227, 83, 54, 0.85)";
+  const glowColor = theme === "dark" ? "rgba(229, 93, 66, 0.35)" : "rgba(227, 83, 54, 0.2)";
 
   return (
     <>

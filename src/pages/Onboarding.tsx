@@ -164,49 +164,61 @@ export default function Onboarding() {
   if (!currentSection) return null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/30 p-4">
-      <div className="mx-auto w-full max-w-2xl flex-1">
+    <div className="flex min-h-screen flex-col bg-muted/30 p-2 sm:p-4 md:p-6">
+      <div className="mx-auto w-full max-w-2xl flex-1 flex flex-col justify-center">
         {/* Step indicator */}
-        <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
+        <div className="mb-2 flex items-center justify-between text-xs sm:text-sm text-muted-foreground px-1">
           <span>{t("common.step")} {safeStep + 1} {t("common.of")} {totalSteps}</span>
           <span className="font-medium text-foreground">{t(currentSection.title)}</span>
         </div>
-        <Progress value={progress} className="mb-6" />
+        <Progress value={progress} className="mb-4 sm:mb-6" />
 
-        <Card className="flex flex-col h-full max-h-[85vh]">
-          <CardHeader className="flex-shrink-0">
-            <CardTitle className="font-display">{t(currentSection.title)}</CardTitle>
+        <Card className="flex flex-col h-full max-h-[90vh] sm:max-h-[85vh] shadow-xl border border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
+          <CardHeader className="flex-shrink-0 p-4 sm:p-6 pb-2 sm:pb-4 border-b border-slate-800/60">
+            <CardTitle className="text-lg sm:text-xl font-bold">{t(currentSection.title)}</CardTitle>
             {currentSection.subtitle && (
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 {t(currentSection.subtitle)}
               </CardDescription>
             )}
           </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto pt-0 pb-6">
-            <div className="space-y-5">
-              {currentSection.fields.map((field) => (
-                <FieldRenderer
-                  key={field.key}
-                  field={field}
-                  value={(data as any)[field.key]}
-                  onChange={handleChange}
-                  data={data}
-                />
-              ))}
-            </div>
+          <CardContent className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+            {currentSection.fields.map((field) => (
+              <FieldRenderer
+                key={field.key}
+                field={field}
+                value={(data as any)[field.key]}
+                onChange={handleChange}
+                data={data}
+              />
+            ))}
           </CardContent>
-          <div className="p-6 pt-0 border-t bg-background mt-auto flex-shrink-0">
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={safeStep === 0}>
-                <ChevronLeft className="mr-1 h-4 w-4" /> {t('common.back')}
+          <div className="p-4 sm:p-6 border-t border-slate-800/80 bg-slate-950 mt-auto flex-shrink-0">
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+                disabled={safeStep === 0}
+                className="min-h-[44px] px-4 text-xs sm:text-sm font-semibold rounded-xl border-slate-700 hover:bg-slate-900"
+              >
+                <ChevronLeft className="mr-1 h-4 w-4" /> {t("common.back")}
               </Button>
               {isLastStep ? (
-                <Button onClick={handleFinish}>
-                  <Check className="mr-1 h-4 w-4" /> {t('onboarding.completeBtn', 'Complete')}
+                <Button
+                  type="button"
+                  onClick={handleFinish}
+                  className="min-h-[44px] px-6 text-xs sm:text-sm font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 text-slate-950 hover:from-cyan-400 hover:to-teal-300 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+                >
+                  <Check className="mr-1.5 h-4 w-4" /> {t("onboarding.completeBtn", "Complete")}
                 </Button>
               ) : (
-                <Button onClick={() => setStep(s => Math.min(totalSteps - 1, s + 1))}>
-                  {t('common.next')} <ChevronRight className="ml-1 h-4 w-4" />
+                <Button
+                  type="button"
+                  onClick={() => setStep((s) => Math.min(totalSteps - 1, s + 1))}
+                  className="min-h-[44px] px-6 text-xs sm:text-sm font-bold rounded-xl bg-cyan-400 text-slate-950 hover:bg-cyan-300 shadow-[0_0_15px_rgba(0,229,255,0.25)]"
+                >
+                  {t("common.next")} <ChevronRight className="ml-1.5 h-4 w-4" />
                 </Button>
               )}
             </div>

@@ -2,16 +2,37 @@ const mongoose = require('mongoose');
 
 const healthAnalysisSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  condition: { type: String, required: true },
-  healthScore: { type: Number, default: 100 }, // 0-100
-  riskLevel: { type: String, enum: ['low', 'medium', 'high'], default: 'low' },
-  dominantDosha: { type: String },
+  condition: { type: String, required: true, default: 'Optimal Wellness' },
+  healthScore: { type: Number, default: 85 }, // 0-100
+  riskLevel: { type: String, default: 'Low' },
+  dominantDosha: { type: String, default: 'Vata' },
+  confidence: { type: Number, default: 0.92 },
+  mlPrediction: {
+    condition: String,
+    confidence: Number,
+    model: String
+  },
+  predictions: [{
+    condition: String,
+    confidence: Number,
+    severity: String,
+    reason: String
+  }],
+  reportedSymptoms: [{ type: String }],
   type: { type: String, enum: ['NORMAL', 'EMERGENCY'], default: 'NORMAL' },
   recommendations: {
-    medicines: [{ name: String, benefit: String }],
-    lifestyle: [String],
-    diet: [String],
+    medicines: [{
+      name: String,
+      benefit: String,
+      category: String
+    }],
+    lifestyle: [{ type: String }],
+    diet: [{ type: String }],
+    homeRemedies: [{ type: String }],
+    precautions: [{ type: String }],
     doshaAdvice: String,
+    dietAdvice: String,
+    exerciseAdvice: String,
     disclaimer: String
   },
   hospitals: [{
@@ -26,7 +47,7 @@ const healthAnalysisSchema = new mongoose.Schema({
     message: String,
     priority: String
   }],
-  criticalFlags: [String],
+  criticalFlags: [{ type: String }],
   sensorData: {
     heartRate: Number,
     spo2: Number,
@@ -34,7 +55,8 @@ const healthAnalysisSchema = new mongoose.Schema({
   },
   timestamp: { type: Date, default: Date.now }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 // Index for faster lookups
