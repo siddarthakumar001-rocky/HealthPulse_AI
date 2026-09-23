@@ -73,20 +73,32 @@ app.use(
 // 3. CORS Configuration
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  "https://health-pulse-ai-gamma.vercel.app",
   "https://health-sepia-three.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
   "http://localhost:8080",
   "http://localhost:8081",
-];
+].filter(Boolean);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  // Dynamically allow all Vercel production and preview deployments
+  if (/^https:\/\/([a-z0-9-]+)\.vercel\.app$/i.test(origin)) return true;
+  // Allow local development on any port
+  if (/^http:\/\/localhost(:\d+)?$/.test(origin) || /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) return true;
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        logger.warn(`[CORS Blocked] Origin: ${origin}`);
+        callback(null, false);
       }
     },
     credentials: true,

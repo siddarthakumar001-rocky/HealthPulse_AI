@@ -261,20 +261,64 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const fetchData = async () => {
+    const adminToken = localStorage.getItem("admin_token") || localStorage.getItem("token");
+    if (!adminToken) {
+      toast({ title: "Admin Login Required", description: "Please sign in with administrator credentials.", variant: "destructive" });
+      navigate("/admin-login");
+      return;
+    }
+
     try {
-      const [analyticsData, funnelRes, usersData, feedbackData] = await Promise.all([
+      const [analyticsRes, funnelRes, usersRes, feedbackRes] = await Promise.allSettled([
         api.get("/admin/analytics"),
-        api.get("/admin/funnel").catch(() => null),
+        api.get("/admin/funnel"),
         api.get("/admin/users"),
         api.get("/admin/feedbacks"),
       ]);
-      setAnalytics(analyticsData);
-      if (funnelRes) setFunnelData(funnelRes);
-      setUsers(usersData);
-      setFeedbacks(feedbackData);
+
+      if (analyticsRes.status === "fulfilled") {
+        setAnalytics(analyticsRes.value);
+      } else {
+        console.warn("Analytics fetch failed:", analyticsRes.reason);
+      }
+
+      if (funnelRes.status === "fulfilled" && funnelRes.value) {
+        setFunnelData(funnelRes.value);
+      }
+
+      if (usersRes.status === "fulfilled") {
+        const u = usersRes.value;
+        const userList = Array.isArray(u) ? u : (u?.users || u?.data || []);
+        setUsers(userList);
+      } else {
+        console.error("Users fetch failed:", usersRes.reason);
+      }
+
+      if (feedbackRes.status === "fulfilled") {
+        const f = feedbackRes.value;
+        const feedbackList = Array.isArray(f) ? f : (f?.feedbacks || f?.data || []);
+        setFeedbacks(feedbackList);
+      } else {
+        console.error("Feedbacks fetch failed:", feedbackRes.reason);
+      }
+
+      // Check if authentication failed across endpoints
+      const anyAuthError = [analyticsRes, usersRes, feedbackRes].find(
+        (r) => r.status === "rejected" && (
+          r.reason?.message?.includes("token") || 
+          r.reason?.message?.includes("401") || 
+          r.reason?.message?.includes("403") ||
+          r.reason?.message?.includes("Unauthorized")
+        )
+      );
+
+      if (anyAuthError && anyAuthError.status === "rejected") {
+        toast({ title: "Session Expired", description: "Your admin session has expired. Please log in again.", variant: "destructive" });
+        navigate("/admin-login");
+      }
     } catch (err: any) {
-      if (err.status === 403) navigate("/dashboard");
-      else toast({ title: "Error", description: err.message, variant: "destructive" });
+      if (err.status === 403 || err.status === 401) navigate("/admin-login");
+      else toast({ title: "Notice", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

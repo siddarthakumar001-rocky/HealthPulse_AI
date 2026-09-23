@@ -1,13 +1,20 @@
 import axios from "axios";
 
-const localApiUrl =
+let localApiUrl =
   import.meta.env.VITE_API_URL_LOCAL ||
   `http://localhost:${import.meta.env.VITE_PORT || 5001}/api`;
-const remoteApiUrl = import.meta.env.VITE_API_URL || "https://health-931r.onrender.com/api";
+if (localApiUrl && !localApiUrl.endsWith("/api") && !localApiUrl.endsWith("/api/")) {
+  localApiUrl = localApiUrl.replace(/\/+$/, "") + "/api";
+}
+
+let remoteApiUrl = import.meta.env.VITE_API_URL || "https://health-931r.onrender.com/api";
+if (remoteApiUrl && !remoteApiUrl.endsWith("/api") && !remoteApiUrl.endsWith("/api/")) {
+  remoteApiUrl = remoteApiUrl.replace(/\/+$/, "") + "/api";
+}
 
 const API_URL =
-  window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? localApiUrl
     : remoteApiUrl;
 
@@ -54,5 +61,5 @@ api.interceptors.response.use(
   }
 );
 
-export { api };
+export { api, API_URL };
 export default api;
