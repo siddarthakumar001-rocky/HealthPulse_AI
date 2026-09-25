@@ -467,6 +467,9 @@ export default function AdminDashboard() {
               LOGOUT
             </Button>
             <div className="h-4 w-px bg-border hidden md:block" />
+            <Button variant="outline" size="sm" onClick={() => fetchData()} className="hidden md:flex gap-2 glass-button text-xs hover:border-cyan-400">
+              <RefreshCw className="h-3 w-3 text-cyan-400" /> REFRESH
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportUsers} className="hidden md:flex gap-2 glass-button text-xs">
               <Download className="h-3 w-3" /> EXPORT USERS
             </Button>
