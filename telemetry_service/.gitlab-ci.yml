@@ -1,0 +1,89 @@
+stages:
+  - test
+  - quality
+  - package
+  - security
+  - deploy
+
+variables:
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+  DOCKER_IMAGE_NAME: "$CI_REGISTRY_IMAGE/telemetry-service"
+
+cache:
+  paths:
+    - .m2/repository
+
+# ==========================================
+# STAGE: Test & Coverage
+# ==========================================
+unit_test:
+  stage: test
+  image: eclipse-temurin:21-jdk-jammy
+  script:
+    - cd telemetry_service
+    - ./mvnw clean test jacoco:report -B
+  artifacts:
+    when: always
+    reports:
+      junit: telemetry_service/target/surefire-reports/*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: telemetry_service/target/site/jacoco/jacoco.xml
+    paths:
+      - telemetry_service/target/site/jacoco/
+
+# ==========================================
+# STAGE: SonarQube Quality Analysis
+# ==========================================
+sonarqube_check:
+  stage: quality
+  image: eclipse-temurin:21-jdk-jammy
+  needs: ["unit_test"]
+  script:
+    - cd telemetry_service
+    - ./mvnw sonar:sonar -Dsonar.projectKey=healthpulse-telemetry -B
+  rules:
+    - if: '$SONAR_TOKEN'
+
+# ==========================================
+# STAGE: Multi-Stage Docker Package
+# ==========================================
+docker_build:
+  stage: package
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - cd telemetry_service
+    - docker build -t "$DOCKER_IMAGE_NAME:$CI_COMMIT_SHA" -t "$DOCKER_IMAGE_NAME:latest" .
+    - docker push "$DOCKER_IMAGE_NAME:$CI_COMMIT_SHA"
+    - docker push "$DOCKER_IMAGE_NAME:latest"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# ==========================================
+# STAGE: Container Vulnerability Scan
+# ==========================================
+trivy_security_scan:
+  stage: security
+  image: aquasec/trivy:latest
+  needs: ["docker_build"]
+  script:
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL "$DOCKER_IMAGE_NAME:$CI_COMMIT_SHA"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# ==========================================
+# STAGE: Production Deployment
+# ==========================================
+deploy_k8s:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  needs: ["trivy_security_scan"]
+  script:
+    - kubectl set image deployment/telemetry-service telemetry-service="$DOCKER_IMAGE_NAME:$CI_COMMIT_SHA" -n healthpulse
+    - kubectl rollout status deployment/telemetry-service -n healthpulse --timeout=120s
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

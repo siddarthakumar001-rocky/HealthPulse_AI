@@ -43,6 +43,7 @@ const phcRoutes = require("./routes/phcRoutes");
 const trackRoutes = require("./routes/trackRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const healthProbeRoutes = require("./routes/healthProbeRoutes");
+const digitalTwinRoutes = require("./routes/digitalTwinRoutes");
 const { seedPublicHealthData } = require("./services/phcSeedData");
 
 const app = express();
@@ -153,6 +154,7 @@ app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/phc", phcRoutes);
 app.use("/api/track", trackRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/digital-twin", digitalTwinRoutes);
 
 // 9. Static Storage for Report Files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

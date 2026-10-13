@@ -22,6 +22,9 @@ import PHCCommandDashboard from "./pages/PHCCommandDashboard";
 import SmartSupplyChain from "./pages/SmartSupplyChain";
 import AIEpidemicSurge from "./pages/AIEpidemicSurge";
 import EmergencyIntelligence from "./pages/EmergencyIntelligence";
+import AntiGravityDashboard from "./pages/AntiGravityDashboard";
+import EnergyAdvisorHome from "./pages/EnergyAdvisorHome";
+import ResearchEvaluation from "./pages/ResearchEvaluation";
 import NotFound from "./pages/NotFound";
 import { BackButton } from "./components/BackButton";
 import { useEffect } from "react";
@@ -78,6 +81,9 @@ export default function App() {
                 <Route path="/ai-forecasting" element={<ProtectedRoute><AIEpidemicSurge /></ProtectedRoute>} />
                 <Route path="/emergency" element={<ProtectedRoute><EmergencyIntelligence /></ProtectedRoute>} />
                 <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/antigravity" element={<ProtectedRoute><AntiGravityDashboard /></ProtectedRoute>} />
+                <Route path="/research-evaluation" element={<ProtectedRoute><ResearchEvaluation /></ProtectedRoute>} />
+                <Route path="/energy-advisor" element={<EnergyAdvisorHome />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>

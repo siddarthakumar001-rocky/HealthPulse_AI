@@ -32,4 +32,8 @@ __pycache__/
 *.sln
 *.sw?
 
-
+# Java / Maven artifacts
+target/
+*.class
+*.jar
+*.war

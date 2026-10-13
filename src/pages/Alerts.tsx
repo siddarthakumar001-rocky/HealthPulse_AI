@@ -9,12 +9,25 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassModal from "@/components/GlassModal";
 
+import { ProvenanceBadge } from "@/components/health/ProvenanceBadge";
+import { Info, ChevronDown, ChevronUp } from "lucide-react";
+
 interface Alert {
   _id: string;
   message: string;
   severity: string;
   resolved: boolean;
   createdAt: string;
+  // IEEE Context-Aware Sentinel fields
+  vital?: string;
+  value?: string | number;
+  activity?: string;
+  signalQuality?: string;
+  provenance?: string;
+  persistence?: string;
+  reason?: string;
+  decisionRule?: string;
+  recommendedAction?: string;
 }
 
 export default function Alerts() {
@@ -121,34 +134,64 @@ export default function Alerts() {
                     {/* Left severity bar */}
                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-gradient-to-b ${tok.barCls}`} />
 
-                    <div className="flex items-center gap-4 p-4 pl-5">
-                      <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${tok.bgCls} border ${tok.borderCls}`}>
-                        <AlertTriangle className={`h-4 w-4 ${tok.textCls}`} />
+                    <div className="p-4 pl-5 space-y-2">
+                      <div className="flex items-center gap-4">
+                        <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${tok.bgCls} border ${tok.borderCls}`}>
+                          <AlertTriangle className={`h-4 w-4 ${tok.textCls}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium text-foreground leading-tight">{alert.message}</p>
+                            {alert.provenance && (
+                              <ProvenanceBadge provenance={alert.provenance} />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 text-[10px] font-mono text-muted-foreground uppercase tracking-wider flex-wrap">
+                            <span>{new Date(alert.createdAt).toLocaleString()}</span>
+                            {alert.activity && <span>• Activity: <strong className="text-foreground">{alert.activity}</strong></span>}
+                            {alert.signalQuality && <span>• SQI: <strong className="text-foreground">{alert.signalQuality}</strong></span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge className={`font-mono text-[9px] uppercase tracking-widest border ${tok.borderCls} ${tok.textCls} bg-transparent`}>
+                            {alert.severity}
+                          </Badge>
+                          {!alert.resolved ? (
+                            <motion.button
+                              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+                              onClick={() => setResolveModal({ open: true, alertId: alert._id })}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold uppercase tracking-wider transition-all bg-green-500/10 border border-green-500/25 text-green-700 dark:text-green-400 hover:bg-green-500/20"
+                            >
+                              <Check className="h-3 w-3" /> {t("alerts.resolve")}
+                            </motion.button>
+                          ) : (
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                              {t("alerts.resolved")}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground leading-tight">{alert.message}</p>
-                        <p className="text-[10px] font-mono text-muted-foreground mt-0.5 uppercase tracking-wider">
-                          {new Date(alert.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge className={`font-mono text-[9px] uppercase tracking-widest border ${tok.borderCls} ${tok.textCls} bg-transparent`}>
-                          {alert.severity}
-                        </Badge>
-                        {!alert.resolved ? (
-                          <motion.button
-                            whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-                            onClick={() => setResolveModal({ open: true, alertId: alert._id })}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold uppercase tracking-wider transition-all bg-green-500/10 border border-green-500/25 text-green-700 dark:text-green-400 hover:bg-green-500/20"
-                          >
-                            <Check className="h-3 w-3" /> {t("alerts.resolve")}
-                          </motion.button>
-                        ) : (
-                          <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                            {t("alerts.resolved")}
-                          </span>
-                        )}
-                      </div>
+
+                      {/* Explainability Breakdown if reason or decisionRule exists */}
+                      {(alert.reason || alert.decisionRule || alert.recommendedAction) && (
+                        <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground space-y-1">
+                          {alert.reason && (
+                            <p className="text-foreground font-medium">
+                              <strong>Decision Reason:</strong> {alert.reason}
+                            </p>
+                          )}
+                          {alert.recommendedAction && (
+                            <p>
+                              <strong>Recommended Action:</strong> {alert.recommendedAction}
+                            </p>
+                          )}
+                          {alert.decisionRule && (
+                            <p className="text-[10px] font-mono opacity-70">
+                              Sentinel Rule: {alert.decisionRule} • Persistence: {alert.persistence || 'Transient'}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 );

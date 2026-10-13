@@ -1,0 +1,115 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven-3.9'
+        jdk 'JDK-21' // Or JDK-27 tool installation in Jenkins
+    }
+
+    environment {
+        REGISTRY = 'ghcr.io'
+        IMAGE_NAME = 'healthpulse/telemetry-service'
+        IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+        DOCKER_CREDENTIALS_ID = 'container-registry-creds'
+        SONAR_CREDENTIALS_ID = 'sonar-token'
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+        disableConcurrentBuilds()
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('Compile & Unit Test') {
+            steps {
+                dir('telemetry_service') {
+                    sh 'mvn clean test jacoco:report -B'
+                }
+            }
+            post {
+                always {
+                    junit 'telemetry_service/target/surefire-reports/*.xml'
+                    recordCoverage(tools: [[parser: 'JACOCO', pattern: 'telemetry_service/target/site/jacoco/jacoco.xml']])
+                }
+            }
+        }
+
+        stage('Static Analysis (SonarQube)') {
+            steps {
+                dir('telemetry_service') {
+                    withSonarQubeEnv('SonarQubeServer') {
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=healthpulse-telemetry'
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build & Scan Docker Image') {
+            steps {
+                dir('telemetry_service') {
+                    script {
+                        sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                        sh "docker tag ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${IMAGE_NAME}:latest"
+                        
+                        // Trivy Vulnerability Scan
+                        sh """
+                            trivy image --severity HIGH,CRITICAL \
+                                --exit-code 0 \
+                                --format table \
+                                ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Container Image') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "https://${REGISTRY}"]) {
+                        sh "docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Rolling update deployment
+                    sh """
+                        kubectl set image deployment/telemetry-service \
+                            telemetry-service=${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                            -n healthpulse
+                        kubectl rollout status deployment/telemetry-service -n healthpulse --timeout=120s
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Pipeline failed! Notification sent to on-call team."
+        }
+        success {
+            echo "CI/CD Pipeline executed successfully."
+        }
+    }
+}

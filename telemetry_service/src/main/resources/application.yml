@@ -1,0 +1,22 @@
+server:
+  port: 8085
+  shutdown: graceful
+
+spring:
+  application:
+    name: telemetry-service
+  # Java 27 / Spring Boot Virtual Threads configuration
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

@@ -28,6 +28,7 @@ import {
   Radio,
   ShieldCheck,
   PlusCircle,
+  Zap,
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import StressGauge from "@/components/StressGauge";
@@ -47,7 +48,15 @@ import VitalsPanel from "@/components/dashboard/VitalsPanel";
 import AIInsightsPanel from "@/components/dashboard/AIInsightsPanel";
 import AnalyticsPanel from "@/components/dashboard/AnalyticsPanel";
 import Feedback from "@/components/Feedback";
+import TriToneWaveform from "@/components/dashboard/TriToneWaveform";
+import DigitalTwinCard from "@/components/dashboard/DigitalTwinCard";
 import { motion } from "framer-motion";
+import { healthService, HealthCurrentResponse, ReconstructionData } from "@/services/healthService";
+import { ContextAwareAlert } from "@/components/health/ContextAwareAlert";
+import { HumanDigitalTwinState } from "@/components/health/HumanDigitalTwinState";
+import { ReconstructionPanel } from "@/components/health/ReconstructionPanel";
+import { ProvenanceBadge } from "@/components/health/ProvenanceBadge";
+import { AlertCircle, SlidersHorizontal, FlaskConical } from "lucide-react";
 
 interface HealthReading {
   heart_rate: number;
@@ -90,6 +99,11 @@ export default function Dashboard() {
   const [manualTemp, setManualTemp] = useState(36.6);
   const [savingVitals, setSavingVitals] = useState(false);
 
+  // IEEE Paper Mode Switcher: Live Mode vs Research Demo Mode
+  const [monitoringMode, setMonitoringMode] = useState<"live" | "research">("live");
+  const [healthCurrent, setHealthCurrent] = useState<HealthCurrentResponse | null>(null);
+  const [reconstructionData, setReconstructionData] = useState<ReconstructionData | null>(null);
+
   // Show guide on first visit
   useEffect(() => {
     const seen = localStorage.getItem("healthpulse_guide_seen");
@@ -122,6 +136,14 @@ export default function Dashboard() {
         setManualSpO2(mostRecent.spo2 || 98);
         setManualTemp(mostRecent.temperature || 36.6);
       }
+
+      // Fetch IEEE 8-stage state
+      const [currHealth, reconState] = await Promise.all([
+        healthService.getCurrent().catch(() => null),
+        healthService.getReconstructionState().catch(() => null)
+      ]);
+      if (currHealth) setHealthCurrent(currHealth);
+      if (reconState) setReconstructionData(reconState);
     } catch (err) {
       console.error("Dashboard real-time sync failed:", err);
     }
@@ -341,6 +363,32 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* IEEE Paper Mode Switcher */}
+            <div className="flex items-center rounded-xl bg-card border border-border p-1 shadow-sm">
+              <button
+                onClick={() => setMonitoringMode("live")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-wider uppercase transition ${
+                  monitoringMode === "live"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Radio className="h-3 w-3" />
+                LIVE MONITORING
+              </button>
+              <button
+                onClick={() => setMonitoringMode("research")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-wider uppercase transition ${
+                  monitoringMode === "research"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <FlaskConical className="h-3 w-3" />
+                RESEARCH DEMO
+              </button>
+            </div>
+
             {/* Record / Sync Vitals Button */}
             <MagneticWrapper>
               <button
@@ -408,7 +456,41 @@ export default function Dashboard() {
                 {t("dashboard.phcCommandHub", "PHC Command Hub")}
               </button>
             </MagneticWrapper>
+
+            {/* Anti-Gravity Energy/Telemetry Mode Button */}
+            <MagneticWrapper>
+              <button
+                onClick={() => navigate("/antigravity")}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider bg-white/80 dark:bg-slate-900 border border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition shadow-sm"
+              >
+                <Zap className="h-3.5 w-3.5 text-blue-500 animate-pulse" />
+                Anti-Gravity Mode
+              </button>
+            </MagneticWrapper>
           </div>
+        </div>
+
+        {/* ── IEEE MEDICAL DISCLAIMER & DEMO BANNER ─────────────── */}
+        <div className="space-y-2">
+          {monitoringMode === "research" && (
+            <div className="flex items-center gap-2 p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 text-xs">
+              <FlaskConical className="h-4 w-4 shrink-0" />
+              <span>
+                <strong>RESEARCH DEMO MODE ACTIVE:</strong> Using validated offline benchmark evaluation parameters. Real emergency siren dispatch is suppressed during research evaluation.
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/60 bg-muted/30 text-[11px] text-muted-foreground">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+            <span>
+              <strong>Medical Disclaimer:</strong> This system is intended for research and health-monitoring support. It does not replace professional medical diagnosis or emergency medical services.
+            </span>
+          </div>
+
+          {healthCurrent?.contextRisk && (
+            <ContextAwareAlert sentinel={healthCurrent.contextRisk} />
+          )}
         </div>
 
         {/* ── MAIN 3-PANEL GRID ──────────────────────────── */}
@@ -420,6 +502,7 @@ export default function Dashboard() {
               spo2={latest.spo2}
               temperature={latest.temperature}
               onboarding={onboarding}
+              provenance={healthCurrent?.provenance || 'SENSOR'}
             />
           </ParallaxWrapper>
 
@@ -452,6 +535,35 @@ export default function Dashboard() {
             />
           </ParallaxWrapper>
         </motion.div>
+
+        {/* ── IEEE 8-STAGE CORE HUD: HDT Phenotype & CSDI Reconstruction ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 xl:gap-6">
+          <HumanDigitalTwinState
+            vitals={{
+              heartRate: latest.heart_rate,
+              spo2: latest.spo2,
+              temperature: latest.temperature
+            }}
+            activity={healthCurrent?.activity || null}
+            signalQuality={healthCurrent?.signalQuality || null}
+            provenance={healthCurrent?.provenance || 'SENSOR'}
+          />
+          <ReconstructionPanel data={reconstructionData} />
+        </div>
+
+        {/* ── HUMAN DIGITAL TWIN & CSDI DIFFUSION HUD (NEW NOVELTY LAYER) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 xl:gap-6">
+          <div className="lg:col-span-1">
+            <DigitalTwinCard
+              heartRate={latest.heart_rate}
+              spo2={latest.spo2}
+              temperature={latest.temperature}
+            />
+          </div>
+          <div className="lg:col-span-2">
+            <TriToneWaveform currentHR={latest.heart_rate} />
+          </div>
+        </div>
 
         {/* ── BOTTOM: Real-Time Analytics & ECG Console ──────────────────── */}
         <div className="w-full">

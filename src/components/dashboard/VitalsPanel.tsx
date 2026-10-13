@@ -3,11 +3,15 @@ import { Heart, Thermometer, Wind, Activity, Gauge } from "lucide-react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import { useEffect, useRef } from "react";
 
+import { ProvenanceBadge } from "@/components/health/ProvenanceBadge";
+
 interface VitalsPanelProps {
   heartRate: number;
   spo2: number;
   temperature: number;
   onboarding?: any;
+  provenance?: 'SENSOR' | 'CSDI_RECONSTRUCTED' | 'FORECAST';
+  isLiveConnected?: boolean;
 }
 
 /* ── Animated number count-up ────────────────────────────────── */
@@ -80,7 +84,7 @@ function GlassVitalCard({ children, borderColor, glowColor, scanColor }: { child
   );
 }
 
-export default function VitalsPanel({ heartRate, spo2, temperature, onboarding }: VitalsPanelProps) {
+export default function VitalsPanel({ heartRate, spo2, temperature, onboarding, provenance = 'SENSOR', isLiveConnected = true }: VitalsPanelProps) {
   const { t } = useTranslation();
   const hrColor = heartRate > 100 || (heartRate > 0 && heartRate < 50) ? "#FF3B5C" : "#E35336";
   const spo2Color = spo2 > 0 && spo2 < 95 ? "#FF9900" : "#E35336";
@@ -98,6 +102,8 @@ export default function VitalsPanel({ heartRate, spo2, temperature, onboarding }
   // Stress level from onboarding
   const stressLevel = onboarding?.stress_level || "low";
 
+  const hasTelemetry = heartRate > 0 || spo2 > 0 || temperature > 0;
+
   return (
     <div className="flex flex-col gap-4 h-full">
 
@@ -105,19 +111,24 @@ export default function VitalsPanel({ heartRate, spo2, temperature, onboarding }
       <GlassVitalCard borderColor={`${hrColor}40`} glowColor={`${hrColor}20`} scanColor="#E35336">
         <div className="flex justify-between items-start mb-3 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: hrColor, boxShadow: `0 0 6px ${hrColor}` }} />
               <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">
                 {t("dashboard.heartRate", "Heart Rate")}
               </h3>
+              <ProvenanceBadge provenance={provenance} />
             </div>
             <div className="flex items-end gap-2">
-              <AnimatedNumber value={heartRate || 0} className="font-display text-3xl md:text-4xl font-bold" style={{ color: hrColor, textShadow: `0 0 15px ${hrColor}60` } as any} />
-              <span className="font-mono text-[10px] pb-1 font-bold text-muted-foreground">{t("dashboard.bpm", "BPM")}</span>
+              {heartRate > 0 ? (
+                <AnimatedNumber value={heartRate || 0} className="font-display text-3xl md:text-4xl font-bold" style={{ color: hrColor, textShadow: `0 0 15px ${hrColor}60` } as any} />
+              ) : (
+                <span className="text-sm font-semibold text-muted-foreground italic">Waiting for sensor data</span>
+              )}
+              {heartRate > 0 && <span className="font-mono text-[10px] pb-1 font-bold text-muted-foreground">{t("dashboard.bpm", "BPM")}</span>}
             </div>
           </div>
           <motion.div
-            className="h-9 w-9 rounded-full flex items-center justify-center"
+            className="h-9 w-9 rounded-full flex items-center justify-center shrink-0"
             style={{ background: `${hrColor}15`, border: `1px solid ${hrColor}40` }}
             animate={heartRate > 0 ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 60 / Math.max(heartRate, 60), repeat: Infinity, ease: "easeInOut" }}
@@ -130,26 +141,37 @@ export default function VitalsPanel({ heartRate, spo2, temperature, onboarding }
 
       {/* ── SpO2 ───────────────────────────────────────────────── */}
       <GlassVitalCard borderColor={`${spo2Color}40`} glowColor={`${spo2Color}20`} scanColor="#E35336">
-        <div className="flex items-center gap-2 mb-2 relative z-10">
-          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: spo2Color, boxShadow: `0 0 6px ${spo2Color}` }} />
-          <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">{t("dashboard.spo2", "Oxygen Level")}</h3>
+        <div className="flex items-center justify-between mb-2 relative z-10">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: spo2Color, boxShadow: `0 0 6px ${spo2Color}` }} />
+            <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground">{t("dashboard.spo2", "Oxygen Level")}</h3>
+          </div>
+          <ProvenanceBadge provenance={provenance} />
         </div>
         <div className="flex items-center justify-center relative z-10 py-2">
-          <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-24 md:h-24" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="50" cy="50" r="40" fill="none" className="stroke-muted" strokeWidth="6" />
-            <motion.circle
-              cx="50" cy="50" r="40" fill="none" stroke={spo2Color} strokeWidth="6"
-              strokeLinecap="round" strokeDasharray={CIRCUMFERENCE}
-              initial={{ strokeDashoffset: CIRCUMFERENCE }}
-              animate={{ strokeDashoffset: spo2Dash }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              style={{ filter: `drop-shadow(0 0 8px ${spo2Color}60)` }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <AnimatedNumber value={spo2 || 0} className="font-display text-2xl md:text-3xl font-bold" style={{ color: spo2Color, textShadow: `0 0 12px ${spo2Color}60` } as any} />
-            <span className="font-mono text-[8px] font-bold text-muted-foreground">%SpO₂</span>
-          </div>
+          {spo2 > 0 ? (
+            <>
+              <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-24 md:h-24" style={{ transform: "rotate(-90deg)" }}>
+                <circle cx="50" cy="50" r="40" fill="none" className="stroke-muted" strokeWidth="6" />
+                <motion.circle
+                  cx="50" cy="50" r="40" fill="none" stroke={spo2Color} strokeWidth="6"
+                  strokeLinecap="round" strokeDasharray={CIRCUMFERENCE}
+                  initial={{ strokeDashoffset: CIRCUMFERENCE }}
+                  animate={{ strokeDashoffset: spo2Dash }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  style={{ filter: `drop-shadow(0 0 8px ${spo2Color}60)` }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <AnimatedNumber value={spo2 || 0} className="font-display text-2xl md:text-3xl font-bold" style={{ color: spo2Color, textShadow: `0 0 12px ${spo2Color}60` } as any} />
+                <span className="font-mono text-[8px] font-bold text-muted-foreground">%SpO₂</span>
+              </div>
+            </>
+          ) : (
+            <div className="py-4 text-center">
+              <span className="text-sm font-semibold text-muted-foreground italic">Waiting for sensor data</span>
+            </div>
+          )}
         </div>
       </GlassVitalCard>
 

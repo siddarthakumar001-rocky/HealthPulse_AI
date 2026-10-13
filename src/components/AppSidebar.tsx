@@ -14,6 +14,7 @@ import {
   Siren,
   Sparkles,
   Stethoscope,
+  FlaskConical,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,6 +42,7 @@ const personalNavItems = [
   { key: "healthReports", defaultLabel: "Health Reports", url: "/reports", icon: FileText },
   { key: "aiSuggestions", defaultLabel: "AI Suggestions", url: "/ai-suggestions", icon: Stethoscope },
   { key: "emergencyAlerts", defaultLabel: "Emergency Alerts", url: "/alerts", icon: Bell },
+  { key: "researchEval", defaultLabel: "Research Evaluation", url: "/research-evaluation", icon: FlaskConical },
   { key: "healthcareMap", defaultLabel: "Healthcare Map", url: "/map", icon: Map },
   { key: "profile", defaultLabel: "Profile", url: "/profile", icon: User },
 ];

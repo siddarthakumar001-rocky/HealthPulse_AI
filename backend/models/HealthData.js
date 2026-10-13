@@ -22,6 +22,27 @@ const healthDataSchema = new mongoose.Schema({
     type: Number, 
     required: true 
   },
+  // Data Provenance & Diffusion Tracking
+  source: {
+    type: String,
+    enum: ['sensor', 'CSDI_reconstructed'],
+    default: 'sensor'
+  },
+  imputationConfidence: {
+    type: Number,
+    default: 1.0 // 1.0 for true sensor, estimated confidence for CSDI
+  },
+  activity: {
+    type: String,
+    enum: ['resting', 'walking', 'running', 'sleeping', 'exercise', 'unknown'],
+    default: 'resting'
+  },
+  signalQuality: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 100
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 

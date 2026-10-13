@@ -166,6 +166,13 @@ export default function Landing() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <Link
+              to="/energy-advisor"
+              className="text-xs font-mono font-bold text-cyan-500 hover:text-cyan-400 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 transition hidden lg:inline-flex items-center gap-1.5"
+            >
+              <Zap className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Energy Advisor</span>
+            </Link>
             <ThemeToggle />
             <LanguageSwitcher />
             <MagneticButton>
@@ -203,7 +210,7 @@ export default function Landing() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md"
             >
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-mono font-bold text-primary uppercase tracking-widest">System Online v2.4</span>
+              <span className="text-xs font-mono font-bold text-primary uppercase tracking-widest">System Online v2.4 • Digital Twin AI</span>
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl font-black font-display leading-tight tracking-tighter">
@@ -225,7 +232,7 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
               className="text-lg text-muted-foreground max-w-xl leading-relaxed font-light"
             >
-              Merge human biology with artificial intelligence. Connect your telemetry devices for real-time tracking, predictive diagnosis, and instant emergency alerts.
+              Merge human biology with artificial intelligence. Connect your telemetry devices for real-time tracking, Human Digital Twin modeling, and predictive health alerts without false alarms.
             </motion.p>
 
             <motion.div 
@@ -234,13 +241,15 @@ export default function Landing() {
             >
               <MagneticButton className="w-full sm:w-auto">
                 <Button size="lg" asChild className="w-full sm:w-auto h-14 px-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-widest text-sm shadow-[0_4px_20px_rgba(227,83,54,0.35)] hover:shadow-[0_6px_25px_rgba(227,83,54,0.5)] transition-all">
-                  <Link to="/signup" className="flex items-center justify-center">Initialize Scan <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link to="/signup" className="flex items-center justify-center">
+                    Initialize Scan <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </MagneticButton>
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground font-mono">
                 <div className="flex -space-x-3">
-                  {[1,2,3].map(i => (
+                  {[1, 2, 3].map((i) => (
                     <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-card shadow-sm flex items-center justify-center text-xs">
                       <Activity className="h-4 w-4 text-primary" />
                     </div>

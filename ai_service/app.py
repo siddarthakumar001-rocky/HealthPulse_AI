@@ -237,8 +237,77 @@ def analyze():
             'hospitals': []
         })
 
+# =====================================================================
+# HUMAN DIGITAL TWIN & CSDI DIFFUSION ROUTES (NON-DESTRUCTIVE ADDITION)
+# =====================================================================
+try:
+    from csdi.imputer import csdi_imputer
+    from activity.classifier import activity_classifier
+    from context.alert_evaluator import evaluate_contextual_alert
+except ImportError:
+    import sys
+    sys.path.append(os.path.dirname(__file__))
+    from csdi.imputer import csdi_imputer
+    from activity.classifier import activity_classifier
+    from context.alert_evaluator import evaluate_contextual_alert
+
+@app.route('/ai/csdi/impute', methods=['POST'])
+def run_csdi_impute():
+    try:
+        data = request.json or {}
+        hr_seq = data.get('heartRateSeq', [72, 74, None, 76, 78, 80])
+        spo2_seq = data.get('spo2Seq', [98, 98, 97, None, 98, 99])
+        temp_seq = data.get('tempSeq', [36.6, 36.7, 36.6, 36.8, None, 36.7])
+        mask = data.get('mask', None)
+
+        result = csdi_imputer.impute_window(hr_seq, spo2_seq, temp_seq, mask)
+        return jsonify({
+            "status": "success",
+            "model": "CSDI-Conditional-Diffusion",
+            **result
+        })
+    except Exception as e:
+        return jsonify({"error": f"CSDI imputation failed: {str(e)}"}), 500
+
+@app.route('/ai/activity/predict', methods=['POST'])
+def run_activity_predict():
+    try:
+        data = request.json or {}
+        accel_x = data.get('accelX', [0.0, 0.02, -0.01])
+        accel_y = data.get('accelY', [0.01, -0.01, 0.02])
+        accel_z = data.get('accelZ', [0.98, 0.99, 1.01])
+        
+        result = activity_classifier.predict(accel_x, accel_y, accel_z)
+        return jsonify({
+            "status": "success",
+            "model": "RandomForest-ActivityClassifier",
+            **result
+        })
+    except Exception as e:
+        return jsonify({"error": f"Activity classification failed: {str(e)}"}), 500
+
+@app.route('/ai/context-eval', methods=['POST'])
+def run_context_eval():
+    try:
+        data = request.json or {}
+        hr = float(data.get('heartRate', 75))
+        spo2 = float(data.get('spo2', 98))
+        temp = float(data.get('temperature', 36.6))
+        act = str(data.get('activity', 'resting'))
+        sq = float(data.get('signalQuality', 100))
+        pc = int(data.get('persistenceCount', 1))
+
+        res = evaluate_contextual_alert(hr, spo2, temp, act, sq, pc)
+        return jsonify({
+            "status": "success",
+            "evaluation": res
+        })
+    except Exception as e:
+        return jsonify({"error": f"Context evaluation failed: {str(e)}"}), 500
+
 if __name__ == '__main__':
     if not os.path.exists(MODEL_DIR):
         print("Training models...")
         import trainer
     app.run(port=5002, debug=True)
+
