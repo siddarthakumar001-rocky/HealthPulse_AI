@@ -18,7 +18,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/telemetry-service
+  IMAGE_NAME: siddarthakumar001-rocky/healthpulse-telemetry
 
 jobs:
   # ========================================================
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload Security Scan to GitHub Security Tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: success()
         with:
           sarif_file: 'trivy-results.sarif'
 
