@@ -1,20 +1,19 @@
 # ==========================================
 # STAGE 1: Build & Dependency Isolation
 # ==========================================
-FROM eclipse-temurin:27-jdk-jammy AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /build
 
-# Copy Maven Wrapper and POM first to leverage Docker layer caching
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
+# Copy POM first to leverage Docker layer caching for dependencies
+COPY pom.xml ./
 
 # Pre-fetch dependencies in offline mode
-RUN ./mvnw dependency:go-offline -B || true
+RUN mvn dependency:go-offline -B || true
 
 # Copy source code and build production package
 COPY src/ ./src/
-RUN ./mvnw clean package -DskipTests -B
+RUN mvn clean package -DskipTests -B
 
 # Extract Spring Boot layered JAR for efficient cache layers
 RUN java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
@@ -22,10 +21,10 @@ RUN java -Djarmode=layertools -jar target/*.jar extract --destination target/ext
 # ==========================================
 # STAGE 2: Hardened, Minimal Runtime Container
 # ==========================================
-FROM eclipse-temurin:27-jre-jammy AS runtime
+FROM eclipse-temurin:21-jre-jammy AS runtime
 
 LABEL maintainer="HealthPulse DevOps <devops@healthpulse.ai>"
-LABEL description="Java 27 Virtual Threaded Health Telemetry Service"
+LABEL description="Java Virtual Threaded Health Telemetry Service"
 
 # Security hardening: Unprivileged execution user
 RUN groupadd --gid 10001 appgroup && \
