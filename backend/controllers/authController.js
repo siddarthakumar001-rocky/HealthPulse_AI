@@ -55,13 +55,17 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
     
-    // Admin credentials login
-    if (email === 'admin' && password === 'admin@@@123') {
-       let adminUser = await User.findOne({ email: 'admin' });
+    // Configurable Admin credentials with fallback
+    const adminEmail = (process.env.ADMIN_EMAIL || 'admin').toLowerCase().trim();
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin@@@123';
+
+    if (normalizedEmail === adminEmail && password === adminPassword) {
+       let adminUser = await User.findOne({ email: adminEmail });
        if (!adminUser) {
-         adminUser = new User({ email: 'admin', password: await bcrypt.hash(password, SALT_ROUNDS), role: 'admin' });
+         adminUser = new User({ email: adminEmail, password: await bcrypt.hash(password, SALT_ROUNDS), role: 'admin' });
          await adminUser.save();
        }
+
        const token = jwt.sign({ id: adminUser._id, role: 'admin', email: 'admin' }, JWT_SECRET, { expiresIn: '7d' });
        
        await logAudit({
