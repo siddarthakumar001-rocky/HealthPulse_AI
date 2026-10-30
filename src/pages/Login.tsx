@@ -37,7 +37,7 @@ export default function Login() {
       console.log("Login success", role);
       
       if (role === "admin") {
-        navigate("/admin");
+        navigate("/admin/dashboard");
       } else if (onboarding_completed) {
         navigate("/dashboard");
       } else {

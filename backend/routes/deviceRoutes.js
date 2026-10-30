@@ -111,8 +111,9 @@ router.post('/data', deviceLimiter, deviceAuth, async (req, res) => {
 });
 
 // 3. GET /api/device
-// List all registered devices
-router.get('/', async (req, res) => {
+// List all registered devices (Staff / Admin only)
+const { authorizeRoles } = require('../middleware/rbac');
+router.get('/', authMiddleware, authorizeRoles('admin', 'system_admin', 'clinic_admin', 'phc_staff'), async (req, res) => {
   try {
     const devices = await Device.find().sort({ lastSeen: -1 }).limit(100);
     res.json(devices);
@@ -155,9 +156,11 @@ router.get('/:userId', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Safety check: Ensure the requester is viewing their own data
-    if (req.user.id !== userId && req.user.role !== 'admin' && req.user.role !== 'system_admin') {
-      return res.status(403).json({ error: "Access denied" });
+    // Relationship and consent verified access check (Anti-IDOR)
+    const { verifyPatientAccess } = require('../middleware/rbac');
+    const isAllowed = await verifyPatientAccess(req.user, userId, 'vitals_read');
+    if (!isAllowed) {
+      return res.status(403).json({ error: "Access denied: Unauthorized access to patient health records." });
     }
 
     const limit = parseInt(req.query.limit, 10) || 20;

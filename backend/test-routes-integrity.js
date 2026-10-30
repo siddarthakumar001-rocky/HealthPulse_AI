@@ -17,12 +17,18 @@ const PHC = require('./models/phcModel');
 const Inventory = require('./models/inventoryModel');
 const Equipment = require('./models/equipmentModel');
 const Redistribution = require('./models/redistributionModel');
+const Organization = require('./models/Organization');
+const CareRelationship = require('./models/CareRelationship');
+const ConsentRecord = require('./models/ConsentRecord');
 
 async function testModelDefinitions() {
   console.log('🔍 Checking Mongoose Model Definitions & Indexes...');
 
   const models = [
     { name: 'User', model: User },
+    { name: 'Organization', model: Organization },
+    { name: 'CareRelationship', model: CareRelationship },
+    { name: 'ConsentRecord', model: ConsentRecord },
     { name: 'Payment', model: Payment },
     { name: 'Subscription', model: Subscription },
     { name: 'AuditLog', model: AuditLog },

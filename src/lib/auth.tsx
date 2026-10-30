@@ -92,7 +92,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) navigate("/login");
+    if (!loading && !user) navigate("/login", { replace: true });
   }, [user, loading, navigate]);
 
   if (loading) {
@@ -115,7 +115,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     const adminToken = localStorage.getItem("admin_token");
     
     if (!adminToken) {
-      navigate("/admin-login");
+      navigate("/admin-login", { replace: true });
     } else {
       setIsAdmin(true);
     }

@@ -166,13 +166,6 @@ export default function Landing() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Link
-              to="/energy-advisor"
-              className="text-xs font-mono font-bold text-cyan-500 hover:text-cyan-400 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 transition hidden lg:inline-flex items-center gap-1.5"
-            >
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Energy Advisor</span>
-            </Link>
             <ThemeToggle />
             <LanguageSwitcher />
             <MagneticButton>

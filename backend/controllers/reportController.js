@@ -323,7 +323,24 @@ exports.manualEntry = async (req, res) => {
  */
 exports.getReports = async (req, res) => {
   try {
-    const reports = await Report.find({ userId: req.user.id }).sort({ createdAt: -1 }).limit(20);
+    const targetUserId = req.query.patientId || req.user.id;
+    const isSelf = targetUserId.toString() === req.user.id.toString();
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'system_admin';
+
+    if (!isSelf && !isAdmin) {
+      const CareRelationship = require('../models/CareRelationship');
+      const hasRelation = await CareRelationship.findOne({
+        patientId: targetUserId,
+        partnerId: req.user.id,
+        status: 'active',
+        scopes: 'reports_read'
+      });
+      if (!hasRelation) {
+        return res.status(403).json({ success: false, message: 'Access denied: You do not have permission to view this patient\'s reports.' });
+      }
+    }
+
+    const reports = await Report.find({ userId: targetUserId }).sort({ createdAt: -1 }).limit(20);
     const enrichedReports = reports.map(r => {
       const obj = r.toObject();
       if (obj.analysis) {
@@ -336,3 +353,49 @@ exports.getReports = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to fetch reports.' });
   }
 };
+
+/**
+ * GET /api/reports/:id/download
+ * Secure authenticated stream of the patient clinical report file
+ */
+exports.downloadReportFile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid report ID.' });
+    }
+
+    const report = await Report.findById(id);
+    if (!report) {
+      return res.status(404).json({ success: false, message: 'Report not found.' });
+    }
+
+    const isOwner = report.userId && report.userId.toString() === req.user.id.toString();
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'system_admin';
+
+    let hasConsent = false;
+    if (!isOwner && !isAdmin) {
+      const CareRelationship = require('../models/CareRelationship');
+      const relation = await CareRelationship.findOne({
+        patientId: report.userId,
+        partnerId: req.user.id,
+        status: 'active',
+        scopes: 'reports_read'
+      });
+      if (relation) hasConsent = true;
+    }
+
+    if (!isOwner && !isAdmin && !hasConsent) {
+      return res.status(403).json({ success: false, message: 'Access denied: You are not authorized to download this report.' });
+    }
+
+    if (!report.filePath || !fs.existsSync(report.filePath)) {
+      return res.status(404).json({ success: false, message: 'Report document not found on storage.' });
+    }
+
+    res.sendFile(path.resolve(report.filePath));
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to stream report file.', error: err.message });
+  }
+};
+

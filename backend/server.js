@@ -156,8 +156,9 @@ app.use("/api/track", trackRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/digital-twin", digitalTwinRoutes);
 
-// 9. Static Storage for Report Files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// 9. Protected Storage for Report Files (Authenticated only to prevent clinical document leakage)
+const authMiddleware = require("./config/authMiddleware");
+app.use("/uploads", authMiddleware, express.static(path.join(__dirname, "uploads")));
 
 // 10. Root Landing Route
 app.get("/", (req, res) => {
