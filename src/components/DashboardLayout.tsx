@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1 flex flex-col min-w-0">
             {/* ── GLASS HEADER ──────────────────────────────────── */}
             <header
-              className="sticky top-0 z-40 flex h-16 items-center justify-between px-3 sm:px-6 transition-all duration-300 bg-background/90 border-b border-border/80"
+              className="sticky top-0 z-40 flex h-16 items-center justify-between px-3 sm:px-6 transition-all duration-300 bg-background/90 border-b border-border/80 pt-[env(safe-area-inset-top)]"
               style={{
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",

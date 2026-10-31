@@ -87,8 +87,9 @@ const isOriginAllowed = (origin) => {
   if (allowedOrigins.includes(origin)) return true;
   // Dynamically allow all Vercel production and preview deployments
   if (/^https:\/\/([a-z0-9-]+)\.vercel\.app$/i.test(origin)) return true;
-  // Allow local development on any port
-  if (/^http:\/\/localhost(:\d+)?$/.test(origin) || /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) return true;
+  // Allow local development and Capacitor native origins on any port
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:\d+)?$/i.test(origin)) return true;
+  if (/^capacitor:\/\/(localhost|10\.0\.2\.2)$/i.test(origin)) return true;
   return false;
 };
 
@@ -170,7 +171,7 @@ app.use(errorHandler);
 
 const connectDB = require("./config/db");
 
-const PORT = Number(process.env.PORT) || 5001;
+const PORT = Number(process.env.PORT) || 5000;
 const MAX_PORT_ATTEMPTS = 3;
 
 const startServer = (port) => {

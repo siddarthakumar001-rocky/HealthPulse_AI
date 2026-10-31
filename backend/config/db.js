@@ -1,3 +1,9 @@
+const dns = require('dns');
+// Reliable public DNS servers for resolving MongoDB Atlas SRV records
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (_) {}
+
 const mongoose = require('mongoose');
 const path = require('path');
 const logger = require('../utils/logger');

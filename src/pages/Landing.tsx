@@ -154,7 +154,7 @@ export default function Landing() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
-        className="fixed top-0 w-full z-50 border-b border-border/60 bg-background/70 backdrop-blur-xl shadow-sm"
+        className="fixed top-0 w-full z-50 border-b border-border/60 bg-background/70 backdrop-blur-xl shadow-sm pt-[env(safe-area-inset-top)]"
       >
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-3 cursor-pointer group">

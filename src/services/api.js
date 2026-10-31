@@ -1,8 +1,9 @@
 import axios from "axios";
+import { Capacitor } from "@capacitor/core";
 
 let localApiUrl =
   import.meta.env.VITE_API_URL_LOCAL ||
-  `http://localhost:${import.meta.env.VITE_PORT || 5001}/api`;
+  `http://localhost:${import.meta.env.VITE_PORT || 5000}/api`;
 if (localApiUrl && !localApiUrl.endsWith("/api") && !localApiUrl.endsWith("/api/")) {
   localApiUrl = localApiUrl.replace(/\/+$/, "") + "/api";
 }
@@ -12,15 +13,23 @@ if (remoteApiUrl && !remoteApiUrl.endsWith("/api") && !remoteApiUrl.endsWith("/a
   remoteApiUrl = remoteApiUrl.replace(/\/+$/, "") + "/api";
 }
 
-const API_URL =
-  typeof window !== "undefined" &&
+const isNative = typeof Capacitor !== "undefined" && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+const platform = typeof Capacitor !== "undefined" ? Capacitor.getPlatform() : 'web';
+
+if (platform === 'android' && localApiUrl.includes('localhost')) {
+  localApiUrl = localApiUrl.replace('localhost', '10.0.2.2');
+}
+
+const API_URL = isNative
+  ? (import.meta.env.VITE_USE_LOCAL === 'true' ? localApiUrl : remoteApiUrl)
+  : typeof window !== "undefined" &&
   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? localApiUrl
     : remoteApiUrl;
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: !isNative,
   headers: {
     "Content-Type": "application/json",
   },
