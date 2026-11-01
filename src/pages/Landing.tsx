@@ -24,9 +24,20 @@ import {
   Layers,
   ArrowUpRight,
   AlertTriangle,
-  Globe
+  Globe,
+  CheckCircle2,
+  Lock,
+  ChevronDown,
+  RefreshCw,
+  Clock,
+  Compass,
+  FileText,
+  Smartphone,
+  Eye,
+  Hospital
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -115,60 +126,57 @@ export default function Landing() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<SimulationMode>("resting");
   const [selectedOrgan, setSelectedOrgan] = useState<string>("heart");
+  const [signalMode, setSignalMode] = useState<"denoised" | "corrupted">("denoised");
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const current = PRESETS[mode];
 
   // ── SCROLL SCRUB HOOKS ──
   const { scrollY } = useScroll();
   
-  // 1. Sticky Navigation Bar Transition: transparent -> subtle frosted-glass blur (backdrop-filter: blur(12px) + border)
+  // 1. Sticky Navigation Bar Transition: transparent -> subtle frosted-glass blur
   const navBackground = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(7, 10, 13, 0)", "rgba(7, 10, 13, 0.78)"]
+    ["rgba(7, 10, 13, 0)", "rgba(7, 10, 13, 0.88)"]
   );
   const navBorder = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.08)"]
+    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.12)"]
   );
   const navShadow = useTransform(
     scrollY,
     [0, 100],
-    ["none", "0 20px 40px -15px rgba(0,0,0,0.7)"]
+    ["none", "0 20px 40px -15px rgba(0,0,0,0.8)"]
   );
 
-  // 2. Hero Cinematic Scroll-Scrub Reveal: Scale down & background typography wraps/fades out
+  // 2. Hero Cinematic Scroll-Scrub Reveal
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"]
   });
 
-  const heroScale = useTransform(heroProgress, [0, 1], [1, 0.88]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.75], [1, 0.15]);
-  const heroY = useTransform(heroProgress, [0, 1], [0, -60]);
-  const curtainClip = useTransform(
-    heroProgress,
-    [0, 0.8],
-    ["inset(0% 0% 0% 0% round 32px)", "inset(6% 3% 6% 3% round 48px)"]
-  );
+  const heroScale = useTransform(heroProgress, [0, 1], [1, 0.94]);
+  const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0.4]);
+  const heroY = useTransform(heroProgress, [0, 1], [0, -30]);
 
-  // 3. Pinned Horizontal Gallery Section
+  // 3. Pinned Horizontal Gallery Section: tight, responsive scrub
   const horizontalSectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: horizontalProgress } = useScroll({
     target: horizontalSectionRef,
     offset: ["start start", "end end"]
   });
 
-  // Smooth spring scrub for horizontal translation
   const smoothHorizontal = useSpring(horizontalProgress, {
-    stiffness: 100,
-    damping: 24,
+    stiffness: 120,
+    damping: 26,
     mass: 0.2
   });
 
-  // Moves 4 cards horizontally (-75% total track)
-  const horizontalX = useTransform(smoothHorizontal, [0, 1], ["0%", "-75%"]);
+  // Moves 4 modular cards horizontally across screen width
+  const horizontalX = useTransform(smoothHorizontal, [0, 1], ["0%", "-68%"]);
+  const activeStep = useTransform(smoothHorizontal, [0, 0.33, 0.66, 1], [1, 2, 3, 4]);
 
   return (
     <div className="relative min-h-screen w-full bg-[#070A0D] text-[#F8FAFC] font-sans selection:bg-[#00F5D4]/25 overflow-x-hidden">
@@ -179,8 +187,8 @@ export default function Landing() {
 
       {/* Subtle Dark Luxury Obsidian Grain & Radial Light */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-[#00F5D4]/10 via-[#0D9488]/5 to-transparent blur-[140px] opacity-70" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-[#05D3B3]/5 blur-[160px] opacity-40" />
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-[#00F5D4]/12 via-[#0D9488]/6 to-transparent blur-[140px] opacity-70" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-[#05D3B3]/8 blur-[160px] opacity-40" />
       </div>
 
       {/* ════════════════════════════════════════════════════════════
@@ -194,9 +202,9 @@ export default function Landing() {
         }}
         className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 h-20 flex items-center justify-between border-b backdrop-blur-md transition-colors duration-300"
       >
-        {/* Brand Logo */}
+        {/* Brand Logo & Editorial Wordmark */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#00F5D4] group-hover:border-[#00F5D4]/40 transition-colors">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00F5D4]/20 via-[#0D9488]/30 to-black/60 border border-[#00F5D4]/40 flex items-center justify-center shadow-lg shadow-[#00F5D4]/15 group-hover:scale-105 transition-transform duration-300">
             <Heart className="w-5 h-5 text-[#00F5D4] animate-pulse drop-shadow-[0_0_10px_#00F5D4]" />
           </div>
           <div className="flex flex-col">
@@ -210,7 +218,7 @@ export default function Landing() {
         </Link>
 
         {/* Center Live Node Indicator */}
-        <div className="hidden lg:flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 font-mono text-[11px] tracking-wider text-[#94A3B8]">
+        <div className="hidden lg:flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 font-mono text-[11px] tracking-wider text-[#94A3B8]">
           <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
           <span>IOMT BLE TELEMETRY ACTIVE • 250 HZ</span>
         </div>
@@ -245,15 +253,14 @@ export default function Landing() {
       ════════════════════════════════════════════════════════════ */}
       <section
         ref={heroRef}
-        className="relative min-h-[140vh] pt-32 sm:pt-40 px-4 sm:px-8 max-w-7xl mx-auto"
+        className="relative pt-28 sm:pt-36 pb-16 px-4 sm:px-8 max-w-7xl mx-auto"
       >
         <motion.div
           style={{
             scale: heroScale,
             opacity: heroOpacity,
             y: heroY,
-            clipPath: curtainClip,
-            willChange: "transform, opacity, clip-path"
+            willChange: "transform, opacity"
           }}
           className="relative mermaid-glass p-6 sm:p-12 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
         >
@@ -377,9 +384,9 @@ export default function Landing() {
                 </div>
 
                 {/* Central Anatomical SVG with Orbiting Telemetry Cards */}
-                <div className="relative h-[360px] sm:h-[400px] flex items-center justify-center">
+                <div className="relative h-[340px] sm:h-[380px] flex items-center justify-center">
                   
-                  <svg viewBox="0 0 240 400" className="w-full h-full max-h-[360px] drop-shadow-[0_0_25px_rgba(0,245,212,0.3)]">
+                  <svg viewBox="0 0 240 400" className="w-full h-full max-h-[340px] drop-shadow-[0_0_25px_rgba(0,245,212,0.3)]">
                     {/* Head / Brain Cortex */}
                     <circle
                       cx="120"
@@ -508,11 +515,11 @@ export default function Landing() {
                   {/* ── ORBITING TELEMETRY POD 3: TEMPERATURE ── */}
                   <motion.div
                     animate={{ y: [0, -8, 0] }}
-                    transition={{ repeat: Infinity, duration: 4.2, ease: "easeInOut", delay: 1 }}
+                    transition={{ repeat: Infinity, duration: 4.1, ease: "easeInOut", delay: 1 }}
                     className="absolute bottom-2 left-0 mermaid-glass p-3 rounded-2xl shadow-xl w-36 border border-white/10"
                   >
                     <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                      <span>BODY TEMP</span>
+                      <span>CORE TEMP</span>
                       <Thermometer className="w-3.5 h-3.5 text-amber-400" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
@@ -570,125 +577,181 @@ export default function Landing() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════
-          3. FEATURES: PINNED HORIZONTAL LAYOUT (SCROLLYTELLING)
+          3. PINNED HORIZONTAL LAYOUT (SCROLLYTELLING ARCHITECTURE)
           Container pinned vertically with position: sticky;
-          As user scrolls down, inner container translates horizontally (transform: translateX).
+          Translates horizontally as user scrolls down.
+          Filled symmetrically with cards + live bottom telemetry dock!
       ════════════════════════════════════════════════════════════ */}
       <section
         ref={horizontalSectionRef}
-        className="relative h-[320vh] w-full"
+        className="relative h-[240vh] w-full"
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center px-4 sm:px-8">
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-24 pb-8 sm:pt-28 sm:pb-10 px-4 sm:px-8">
           
-          {/* Pinned Section Header */}
-          <div className="max-w-7xl mx-auto w-full mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-5">
+          {/* Pinned Section Header & Live Step Indicators */}
+          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-4">
             <div>
-              <div className="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-[#00F5D4] uppercase mb-1">
-                02 // SCROLLYTELLING ARCHITECTURE
+              <div className="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-[#00F5D4] uppercase mb-1 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
+                02 // SCROLLYTELLING CLINICAL ARCHITECTURE
               </div>
-              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-                Clinical Core Modules.
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                Four Modular Clinical Tiers.
               </h2>
             </div>
-            <div className="font-mono text-xs text-[#94A3B8] tracking-widest uppercase">
-              SCROLL DOWN TO REVEAL // 4 TIERS
+            
+            {/* Step Indicators */}
+            <div className="flex items-center gap-2 font-mono text-xs">
+              {["01 FUSION", "02 CSDI", "03 DISPATCH", "04 VAULT"].map((step, idx) => (
+                <div
+                  key={idx}
+                  className="px-3 py-1 rounded-lg border border-white/10 bg-white/[0.03] text-[#94A3B8] text-[10px] font-bold"
+                >
+                  {step}
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Horizontally Translating Card Gallery */}
-          <div className="max-w-7xl mx-auto w-full overflow-visible">
+          <div className="max-w-7xl mx-auto w-full my-auto overflow-visible">
             <motion.div
               style={{ x: horizontalX, willChange: "transform" }}
-              className="flex gap-6 sm:gap-8 w-[400%]"
+              className="flex gap-6 sm:gap-8 w-max"
             >
               
               {/* Card 1: Optical Sensor Fusion */}
-              <div className="w-[85vw] max-w-[540px] mermaid-glass p-8 sm:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-4">
+              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
                     <Activity className="w-6 h-6" />
                   </div>
-                  <div className="font-mono text-[11px] tracking-widest text-[#00F5D4] uppercase">
+                  <div className="font-mono text-[10px] tracking-widest text-[#00F5D4] uppercase">
                     MODULE // 01 • SENSOR FUSION
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
+                  <h3 className="text-xl sm:text-2xl font-black text-white">
                     250 Hz Continuous Optical Telemetry
                   </h3>
-                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
                     Dual-channel photoplethysmography (PPG) fused with 16-bit Sigma-Delta ADC sampling extracts systemic vascular resistance and pulse transit time without clinical cuffs.
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+                {/* Micro Visual inside Card */}
+                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+                    <span>PPG IR/RED ABSORPTION</span>
+                    <span className="text-[#00F5D4]">SNR: 48 dB</span>
+                  </div>
+                  <div className="h-8 w-full flex items-center">
+                    <svg className="w-full h-full" viewBox="0 0 200 30" preserveAspectRatio="none">
+                      <path d="M 0 15 Q 25 0 50 15 T 100 15 T 150 15 T 200 15" fill="none" stroke="#00F5D4" strokeWidth="2" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
                   <span>MAX30102 • MLX90614</span>
-                  <span className="text-[#00F5D4]">JITTER &lt; 0.4 MS</span>
+                  <span className="text-[#00F5D4] font-bold">JITTER &lt; 0.4 MS</span>
                 </div>
               </div>
 
               {/* Card 2: CSDI Neural Diffusion Imputation */}
-              <div className="w-[85vw] max-w-[540px] mermaid-glass p-8 sm:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-4">
+              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
                     <Cpu className="w-6 h-6" />
                   </div>
-                  <div className="font-mono text-[11px] tracking-widest text-cyan-400 uppercase">
+                  <div className="font-mono text-[10px] tracking-widest text-cyan-400 uppercase">
                     MODULE // 02 • NEURAL DIFFUSION
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
+                  <h3 className="text-xl sm:text-2xl font-black text-white">
                     CSDI Signal Imputation & Denoising
                   </h3>
-                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
                     Motion artifacts and perspiration lead to false emergency alarms. Our Conditional Score-based Diffusion model reconstructs lost sensor telemetry packets with 98.55% fidelity.
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+                {/* Micro Visual inside Card */}
+                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+                    <span>RESTORED LOST PACKETS</span>
+                    <span className="text-cyan-400">DIFFUSION PASS 10</span>
+                  </div>
+                  <div className="grid grid-cols-6 gap-1.5 h-6 items-center">
+                    {[1,1,1,0,1,1].map((ok, i) => (
+                      <div key={i} className={`h-full rounded ${ok ? "bg-cyan-500/40" : "bg-rose-500/80 animate-pulse"} border border-white/10 flex items-center justify-center text-[8px] font-mono`}>
+                        {ok ? "✓" : "IMP"}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
                   <span>RECONSTRUCTION MAE</span>
                   <span className="text-cyan-400 font-bold">1.45% OPTIMAL</span>
                 </div>
               </div>
 
               {/* Card 3: Autonomous PHC Emergency Dispatch */}
-              <div className="w-[85vw] max-w-[540px] mermaid-glass p-8 sm:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-4">
+              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
-                  <div className="font-mono text-[11px] tracking-widest text-rose-400 uppercase">
+                  <div className="font-mono text-[10px] tracking-widest text-rose-400 uppercase">
                     MODULE // 03 • EMERGENCY GEOFENCE
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
+                  <h3 className="text-xl sm:text-2xl font-black text-white">
                     Sub-Second PHC Dispatch Network
                   </h3>
-                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
                     Automated geofencing immediately alerts the nearest Primary Health Centre (PHC) ambulance network when severe hypoxia or ventricular arrhythmia is detected.
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+                {/* Micro Visual inside Card */}
+                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between text-[11px] font-mono">
+                  <div className="flex items-center gap-2 text-rose-400">
+                    <Hospital className="w-4 h-4" />
+                    <span>Indiranagar Urban PHC</span>
+                  </div>
+                  <span className="text-white font-bold">2.4 km • 6 min</span>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
                   <span>LATENCY TO DISPATCH</span>
                   <span className="text-rose-400 font-bold">&lt; 800 MS</span>
                 </div>
               </div>
 
               {/* Card 4: FHIR R4 Sovereign Biometric Vault */}
-              <div className="w-[85vw] max-w-[540px] mermaid-glass p-8 sm:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-4">
+              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
                     <ShieldCheck className="w-6 h-6" />
                   </div>
-                  <div className="font-mono text-[11px] tracking-widest text-[#00F5D4] uppercase">
-                    MODULE // 04 • SECURITY
+                  <div className="font-mono text-[10px] tracking-widest text-[#00F5D4] uppercase">
+                    MODULE // 04 • SOVEREIGN SECURITY
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white">
+                  <h3 className="text-xl sm:text-2xl font-black text-white">
                     FHIR R4 Sovereign Data Vault
                   </h3>
-                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
                     Zero-knowledge biometric storage with AES-GCM-256 cryptographic hardware isolation ensures sensitive telemetry remains entirely under your sovereign control.
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+                {/* Micro Visual inside Card */}
+                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between text-[11px] font-mono text-emerald-400">
+                  <span className="flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5" /> AES-256 ENCRYPTED
+                  </span>
+                  <span>ZERO-KNOWLEDGE</span>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
                   <span>STANDARDS</span>
                   <span className="text-[#00F5D4] font-bold">FHIR • HL7 • HIPAA</span>
                 </div>
@@ -696,13 +759,247 @@ export default function Landing() {
 
             </motion.div>
           </div>
+
+          {/* ── LIVE SCROLLYTELLING TELEMETRY DOCK (FILLS BOTTOM VIEWPORT) ── */}
+          <div className="max-w-7xl mx-auto w-full pt-4 border-t border-white/10">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Sampling Rate</span>
+                  <span className="text-sm font-black font-mono text-white">250 Hz Real-Time</span>
+                </div>
+                <Activity className="w-4 h-4 text-[#00F5D4]" />
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Diffusion Inference</span>
+                  <span className="text-sm font-black font-mono text-cyan-400">&lt; 8.2 ms Edge</span>
+                </div>
+                <Cpu className="w-4 h-4 text-cyan-400" />
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">PHC Dispatch</span>
+                  <span className="text-sm font-black font-mono text-rose-400">Sub-Second Ring</span>
+                </div>
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Data Compliance</span>
+                  <span className="text-sm font-black font-mono text-[#00F5D4]">FHIR R4 / HL7</span>
+                </div>
+                <ShieldCheck className="w-4 h-4 text-[#00F5D4]" />
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════
-          4. METRIC PERFORMANCE COUNTERS (EDITORIAL GRID)
+          4. INTERACTIVE SIGNAL DENOISING & WAVEFORM LABORATORY
       ════════════════════════════════════════════════════════════ */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-8">
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
+        <div className="mermaid-glass p-8 sm:p-12 rounded-[2.5rem] border border-white/10 shadow-2xl space-y-8">
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
+            <div className="space-y-2">
+              <div className="font-mono text-xs tracking-[0.25em] text-[#00F5D4] uppercase flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>03 // NEURAL RECONSTRUCTION ENGINE</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white">
+                Live Waveform Denoising Laboratory.
+              </h2>
+              <p className="text-sm text-[#94A3B8] max-w-xl">
+                Compare raw motion-corrupted photoplethysmography against the CSDI neural diffusion output in real-time.
+              </p>
+            </div>
+
+            {/* Toggle Switch */}
+            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-black/60 border border-white/15">
+              <button
+                onClick={() => setSignalMode("corrupted")}
+                className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                  signalMode === "corrupted"
+                    ? "bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm"
+                    : "text-[#94A3B8] hover:text-white"
+                }`}
+              >
+                Corrupted (Motion Noise)
+              </button>
+              <button
+                onClick={() => setSignalMode("denoised")}
+                className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                  signalMode === "denoised"
+                    ? "bg-[#00F5D4]/20 text-[#00F5D4] border border-[#00F5D4]/40 shadow-sm"
+                    : "text-[#94A3B8] hover:text-white"
+                }`}
+              >
+                CSDI Denoised (98.5% Fidelity)
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Oscilloscope Display */}
+          <div className="p-6 rounded-2xl bg-black/70 border border-white/10 space-y-4">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="flex items-center gap-2 text-white">
+                <span className={`w-2 h-2 rounded-full ${signalMode === "denoised" ? "bg-[#00F5D4]" : "bg-rose-500"} animate-pulse`} />
+                MODE: {signalMode === "denoised" ? "CSDI_DIFFUSION_RECONSTRUCTED" : "RAW_ANALOG_MOTION_NOISE"}
+              </span>
+              <span className="text-[#94A3B8]">
+                {signalMode === "denoised" ? "RECONSTRUCTION LOSS: 0.0145" : "MISSING PACKETS: 14.2%"}
+              </span>
+            </div>
+
+            <div className="h-32 w-full bg-[#05080C] rounded-xl border border-white/10 overflow-hidden relative flex items-center">
+              <svg className="w-full h-full" viewBox="0 0 800 120" preserveAspectRatio="none">
+                {signalMode === "denoised" ? (
+                  <motion.path
+                    d="M 0 60 Q 50 10 100 60 T 200 60 T 300 60 T 400 60 T 500 60 T 600 60 T 700 60 T 800 60"
+                    fill="none"
+                    stroke="#00F5D4"
+                    strokeWidth="3"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                  />
+                ) : (
+                  <motion.path
+                    d="M 0 60 L 40 40 L 70 90 L 100 20 L 140 100 L 180 30 L 220 80 L 260 10 L 300 110 L 350 50 L 400 90 L 450 30 L 500 100 L 550 40 L 600 85 L 650 20 L 700 95 L 750 35 L 800 60"
+                    fill="none"
+                    stroke="#F43F5E"
+                    strokeWidth="2.5"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                  />
+                )}
+              </svg>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-mono text-[#94A3B8]">
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                <span className="block text-[10px] uppercase font-bold text-white">Artifact Suppression</span>
+                <p className="mt-0.5 text-[#00F5D4]">99.2% Motion Rejection</p>
+              </div>
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                <span className="block text-[10px] uppercase font-bold text-white">False Alarm Reduction</span>
+                <p className="mt-0.5 text-cyan-400">Zero False Emergency Calls</p>
+              </div>
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                <span className="block text-[10px] uppercase font-bold text-white">Clinical Validation</span>
+                <p className="mt-0.5 text-emerald-400">Hospital-Grade Conformity</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          5. FOUR-PILLAR CLINICAL ECOSYSTEM (BENTO GRID)
+      ════════════════════════════════════════════════════════════ */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
+        <div className="space-y-4 mb-10 text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 font-mono text-[10px] text-[#00F5D4] uppercase">
+            <Layers className="w-3.5 h-3.5" />
+            <span>04 // FULL-STACK BIOMETRIC INFRASTRUCTURE</span>
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-black text-white">
+            Built For Clinical Rigor.
+          </h2>
+          <p className="text-sm sm:text-base text-[#94A3B8]">
+            An end-to-end medical architecture linking wearable physical hardware to local emergency response centres.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          {/* Bento Card 1 */}
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-[#00F5D4]/40 transition-all duration-300">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
+                <Smartphone className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-white">
+                Wearable IoMT Node
+              </h3>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                ESP32-S3 microcontroller with dual optical pulse sensors and skin-temperature thermopile, running 72 hours on a single 300mAh LiPo cell.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-[#00F5D4]">
+              BLE 5.2 GATT • ULTRA-LOW POWER
+            </div>
+          </div>
+
+          {/* Bento Card 2 */}
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-cyan-400/40 transition-all duration-300">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
+                <Brain className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-white">
+                Human Digital Twin
+              </h3>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                Synchronized computational model mirroring organ stress (Heart, Lungs, Brain) with allostatic load scoring and autonomic balance indicators.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-cyan-400">
+              AUC-ROC 0.994 PREDICTIVE SCORE
+            </div>
+          </div>
+
+          {/* Bento Card 3 */}
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-amber-400/40 transition-all duration-300">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400">
+                <Hospital className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-white">
+                PHC Command Mesh
+              </h3>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                Autonomous medical supply chain forecasting, cold-chain temperature telemetry, and epidemic surge early warning for district health centers.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-amber-400">
+              DENGUE & FLU SURGE WARNING
+            </div>
+          </div>
+
+          {/* Bento Card 4 */}
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-emerald-400/40 transition-all duration-300">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
+                <FileText className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-white">
+                Clinical Health Passport
+              </h3>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                Aggregates patient onboarding symptoms, pain mapping, and uploaded lab report biomarkers into a verified, cryptographically signed profile.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-emerald-400">
+              ONE-CLICK LAB REPORT VAULT
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          6. METRIC PERFORMANCE COUNTERS (EDITORIAL GRID)
+      ════════════════════════════════════════════════════════════ */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
         <div className="mermaid-glass p-8 sm:p-14 rounded-[3rem] border border-white/10 shadow-2xl grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div className="space-y-1">
             <div className="text-4xl sm:text-6xl font-black font-mono text-white tracking-tight">
@@ -743,7 +1040,71 @@ export default function Landing() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════
-          5. FINAL CTA PORTAL
+          7. CLINICAL ARCHITECTURE FAQ ACCORDION
+      ════════════════════════════════════════════════════════════ */}
+      <section className="py-20 max-w-4xl mx-auto px-4 sm:px-8">
+        <div className="text-center space-y-3 mb-10">
+          <div className="font-mono text-xs tracking-[0.25em] text-[#00F5D4] uppercase">
+            05 // FREQUENTLY ASKED QUESTIONS
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-white">
+            Clinical Verification & Standards.
+          </h2>
+        </div>
+
+        <div className="space-y-4">
+          {[
+            {
+              q: "How does CSDI neural diffusion eliminate false emergency alarms?",
+              a: "Standard wearable monitors trigger false positive alerts whenever a user walks, types, or perspires, because motion artifacts corrupt the optical PPG signal. HealthPulse AI utilizes Conditional Score-based Diffusion Models (CSDI) trained on millions of clinical ECG/PPG wave sequences to impute missing or motion-degraded packets, restoring true cardiac morphology before threshold triggers fire."
+            },
+            {
+              q: "How does HealthPulse AI connect with Primary Health Centres (PHCs)?",
+              a: "Our platform features an automated geofenced public health network. In the event of confirmed critical arrhythmias or acute hypoxia, the system calculates proximity to the nearest Primary Health Centre (PHC) and automatically notifies emergency response dispatchers with live GPS telemetry, user medical baseline, and vital trends."
+            },
+            {
+              q: "Is patient biometric data private and HIPAA/FHIR R4 compliant?",
+              a: "Yes. All personal telemetry is encrypted at rest using AES-GCM-256 and structured in accordance with HL7 FHIR R4 interoperability specifications. Health records and lab findings are strictly isolated to the user's sovereign account."
+            },
+            {
+              q: "Can I view my complete medical history and uploaded lab reports?",
+              a: "Yes. Visiting the Profile page grants full access to your personalized Health Passport, including every symptom, chronic condition, and pain map point logged during onboarding, as well as extracted biomarkers and PDF downloads of all diagnostic reports."
+            }
+          ].map((item, idx) => {
+            const isOpen = activeFaq === idx;
+            return (
+              <div
+                key={idx}
+                className="mermaid-glass rounded-2xl border border-white/10 overflow-hidden transition-all duration-300"
+              >
+                <button
+                  onClick={() => setActiveFaq(isOpen ? null : idx)}
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-white text-sm sm:text-base hover:text-[#00F5D4] transition-colors"
+                >
+                  <span>{item.q}</span>
+                  <ChevronDown className={`w-4 h-4 text-[#00F5D4] transition-transform duration-300 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="px-5 pb-5 text-xs sm:text-sm text-[#94A3B8] leading-relaxed border-t border-white/5 pt-3"
+                    >
+                      {item.a}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          8. FINAL CTA PORTAL
       ════════════════════════════════════════════════════════════ */}
       <section className="py-20 max-w-5xl mx-auto px-4 sm:px-8">
         <div className="relative mermaid-glass p-12 sm:p-20 rounded-[3rem] text-center shadow-2xl border border-white/10 overflow-hidden">

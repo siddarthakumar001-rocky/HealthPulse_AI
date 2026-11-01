@@ -30,7 +30,8 @@ import {
   Layers,
   ChevronRight,
   TrendingUp,
-  FileDown
+  FileDown,
+  Zap
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/services/api";
