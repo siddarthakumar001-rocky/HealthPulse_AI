@@ -203,6 +203,10 @@ export const phcService = {
     return api.patch(`/phc/redistribution/${transferId}/approve`, payload);
   },
 
+  async updateTransferStatus(transferId: string, action: 'APPROVE' | 'DISPATCH' | 'RECEIVE' | string, approvedBy?: string) {
+    return api.patch(`/phc/redistribution/${transferId}/approve`, { action, approvedBy });
+  },
+
   // 7. Digital Twin
   async getDigitalTwin(phcId: string) {
     return api.get(`/phc/digital-twin/${phcId}`);
