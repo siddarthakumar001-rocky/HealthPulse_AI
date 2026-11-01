@@ -171,7 +171,7 @@ export default function Landing() {
   const heroY = useTransform(heroProgress, [0, 1], [0, -30]);
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 dark:bg-[#070A0D] dark:text-[#F8FAFC] font-sans selection:bg-[#00F5D4]/25 overflow-x-hidden transition-colors duration-300">
+    <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 dark:bg-[#070A0D] dark:text-[#F8FAFC] font-sans selection:bg-[#00F5D4]/25 overflow-x-clip transition-colors duration-300">
       <LiquidCursor />
 
       {/* ── AMBIENT ORGANIC BACKGROUND CANVAS ── */}

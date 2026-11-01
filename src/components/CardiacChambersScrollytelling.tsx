@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useSpring, AnimatePresence, useMotionValueEvent } from "framer-motion";
 import {
   Activity,
   Heart,
@@ -14,7 +14,6 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 
 interface ChamberData {
   id: number;
@@ -38,32 +37,26 @@ interface ChamberData {
 export default function CardiacChambersScrollytelling() {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [manualChamber, setManualChamber] = useState<number | null>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
 
-  // Scroll scrub tracking
+  // Scroll scrub tracking across the section
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 90,
-    damping: 24,
-    mass: 0.3
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
   });
 
-  // Calculate active chamber based on scroll position (0..3)
-  const scrollChamberIndex = useTransform(smoothProgress, [0, 0.28, 0.62, 0.95], [0, 1, 2, 3]);
-  const [activeIdx, setActiveIdx] = useState(0);
-
-  React.useEffect(() => {
-    return scrollChamberIndex.on("change", (latest) => {
-      if (manualChamber === null) {
-        const idx = Math.min(3, Math.max(0, Math.round(latest)));
-        setActiveIdx(idx);
-      }
-    });
-  }, [scrollChamberIndex, manualChamber]);
+  // Smoothly advance chamber index based on scroll position (0..3)
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    // 4 equal quadrants across scroll track
+    const idx = Math.min(3, Math.max(0, Math.floor(latest * 4)));
+    setActiveIdx(idx);
+  });
 
   const chambers: ChamberData[] = [
     {
@@ -119,35 +112,35 @@ export default function CardiacChambersScrollytelling() {
     {
       id: 2,
       key: "chamber3",
-      name: t("phc.chamber3Name", "Chamber III: Left Atrium & Mitral Valve"),
-      role: t("phc.chamber3Role", "Oxygenated Blood Return & Microvascular Vitals"),
-      anatomicalName: "Atrium Sinistrum & Valva Bicuspidalis",
-      pressure: "4 – 12 mmHg",
-      oxygen: "99% Pure Arterial",
-      electricalPhase: "Pre-Systolic Influx • Atrial Kick",
-      clinicalTier: "TIER 03: CLINICAL DIGITAL TWIN",
+      name: t("phc.chamber3Name", "Chamber III: Left Atrium & Oxygenated Reservoir"),
+      role: t("phc.chamber3Role", "Oxygen-Rich Reservoir & Digital Twin Synthesis"),
+      anatomicalName: "Atrium Sinistrum & Venae Pulmonales",
+      pressure: "6 – 12 mmHg",
+      oxygen: "98% Fully Oxygenated",
+      electricalPhase: "PR-Interval • Interatrial Conduction",
+      clinicalTier: "TIER 03: AUTONOMOUS DIGITAL TWIN",
       accentColor: "#F43F5E",
       glowColor: "rgba(244, 63, 94, 0.45)",
       bgGlow: "from-rose-500/20 via-pink-600/10 to-transparent",
-      ecgSegment: "T",
+      ecgSegment: "PR",
       description: t(
         "phc.chamber3Desc",
-        "Receives purified oxygenated blood from lungs. System dynamically calibrates 99% SpO2 levels and systemic vascular resistance across all peripheral sensors."
+        "Receives freshly oxygenated blood from pulmonary veins. HealthPulse AI computes personalized Digital Twin parameters to simulate real-time cardiac workload."
       ),
-      clinicalImpact: "Calculates real-time allostatic stress, arterial compliance, and cellular oxygen transport efficiency.",
+      clinicalImpact: "Calculates stroke volume indices and warns 48 hours prior to acute decompensation events.",
       metrics: [
-        { label: "SPO2 SATURATION", value: "99", unit: "%" },
-        { label: "CORE STRESS", value: "18", unit: "/100" },
-        { label: "END-DIASTOLIC VOL", value: "120", unit: "mL" }
+        { label: "OXYGEN SAT (SpO2)", value: "99", unit: "%" },
+        { label: "ATRIAL PRESSURE", value: "8.4", unit: "mmHg" },
+        { label: "DIGITAL TWIN FIT", value: "99.4", unit: "%" }
       ]
     },
     {
       id: 3,
       key: "chamber4",
-      name: t("phc.chamber4Name", "Chamber IV: Left Ventricle & Aorta Systemic Delivery"),
-      role: t("phc.chamber4Role", "High-Pressure Systolic Surge & Sub-Second Dispatch"),
-      anatomicalName: "Ventriculus Sinister & Arcus Aortae",
-      pressure: "120 / 80 mmHg",
+      name: t("phc.chamber4Name", "Chamber IV: Left Ventricle & Systemic Aorta"),
+      role: t("phc.chamber4Role", "Systemic High-Pressure Engine & PHC Dispatch"),
+      anatomicalName: "Ventriculus Sinister & Aorta Ascendens",
+      pressure: "100 – 140 mmHg",
       oxygen: "99% Peak Arterial Surge",
       electricalPhase: "QRS Complex • Giant Systolic Contraction",
       clinicalTier: "TIER 04: AUTONOMOUS PHC DISPATCH",
@@ -168,86 +161,104 @@ export default function CardiacChambersScrollytelling() {
     }
   ];
 
-  const currentChamber = chambers[manualChamber !== null ? manualChamber : activeIdx];
+  const currentChamber = chambers[activeIdx];
 
   const handleSelectChamber = (idx: number) => {
-    setManualChamber(idx);
     setActiveIdx(idx);
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const containerTop = rect.top + scrollTop;
+      const totalScrollable = containerRef.current.offsetHeight - window.innerHeight;
+      if (totalScrollable > 0) {
+        // Target points within the 4 quadrants: 0.12, 0.37, 0.62, 0.88
+        const targets = [0.12, 0.37, 0.62, 0.88];
+        window.scrollTo({
+          top: containerTop + targets[idx] * totalScrollable,
+          behavior: "smooth"
+        });
+      }
+    }
   };
 
   return (
     <section
       ref={containerRef}
-      className="relative h-[280vh] w-full transition-colors duration-300"
+      className="relative h-[260vh] w-full transition-colors duration-300"
     >
       {/* ── STICKY VIEWPORT CONTAINER ── */}
-      <div className="sticky top-20 h-[calc(100vh-5rem)] w-full overflow-hidden flex flex-col justify-between py-4 px-4 sm:px-8 max-w-7xl mx-auto">
+      <div className="sticky top-20 h-[calc(100vh-5rem)] w-full overflow-hidden flex flex-col justify-between py-2 sm:py-3 px-4 sm:px-8 max-w-7xl mx-auto">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2 shrink-0">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-[10px] sm:text-xs font-mono font-bold tracking-widest text-[#0D9488] dark:text-[#00F5D4] uppercase">
-              <Heart className="w-3.5 h-3.5 animate-pulse text-[#00F5D4]" />
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-[10px] font-mono font-bold tracking-widest text-[#0D9488] dark:text-[#00F5D4] uppercase">
+              <Heart className="w-3 h-3 animate-pulse text-[#00F5D4]" />
               <span>02 // CARDIAC CONDUCTION SCROLLYTELLING</span>
             </div>
-            <h2 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white mt-1">
+            <h2 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white mt-0.5">
               {t("phc.heartChambersTitle", "Cardiovascular 4-Chamber Conduction Architecture")}
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-medium max-w-2xl hidden sm:block">
-              {t("phc.heartChambersSubtitle", "Scroll to journey through the cardiac cycle — from Sinoatrial pacemaker pulse to systemic aortic AI dispatch")}
-            </p>
           </div>
 
           {/* Chamber Switcher Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/80 dark:bg-black/60 border border-slate-200 dark:border-white/10 font-mono text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100/90 dark:bg-black/60 border border-slate-200 dark:border-white/10 font-mono text-xs">
             {chambers.map((c, i) => {
-              const isActive = (manualChamber !== null ? manualChamber : activeIdx) === i;
+              const isActive = activeIdx === i;
               return (
                 <button
                   key={c.id}
                   onClick={() => handleSelectChamber(i)}
-                  className={`px-3 py-1.5 rounded-xl font-bold text-[10px] transition-all duration-300 ${
+                  className={`px-2.5 py-1 rounded-lg font-bold text-[10px] sm:text-xs transition-all duration-300 ${
                     isActive
                       ? "bg-slate-900 text-white dark:bg-[#00F5D4] dark:text-slate-950 shadow-md scale-105"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  CHAMBER {i + 1}
+                  CH {i + 1}
                 </button>
               );
             })}
           </div>
         </div>
 
+        {/* Dynamic Scroll Progress Bar */}
+        <div className="w-full h-1 bg-slate-200/60 dark:bg-white/10 rounded-full overflow-hidden shrink-0 my-1">
+          <motion.div
+            style={{ scaleX }}
+            className="h-full bg-gradient-to-r from-[#00F5D4] via-[#38BDF8] via-[#F43F5E] to-[#A855F7] origin-left"
+          />
+        </div>
+
         {/* ── CENTRAL SCROLLYTELLING STAGE: ANATOMICAL HEART + CLINICAL HUD ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center my-auto py-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center my-auto py-1">
           
           {/* Left Column (5 Cols): Animated Glowing SVG Anatomical Heart with 4 Distinct Chambers */}
           <div className="lg:col-span-5 relative flex flex-col items-center justify-center">
             
             {/* Ambient Bioluminescent Chamber Aura */}
             <div
-              className="absolute inset-0 rounded-full blur-[90px] opacity-40 pointer-events-none transition-all duration-700"
+              className="absolute inset-0 rounded-full blur-[80px] opacity-35 pointer-events-none transition-all duration-700"
               style={{ background: currentChamber.glowColor }}
             />
 
             {/* Heart Glass Shield */}
-            <div className="relative w-full max-w-[340px] sm:max-w-[400px] p-4 sm:p-6 rounded-[2.5rem] bg-white/70 dark:bg-black/50 border border-slate-200/90 dark:border-white/15 shadow-2xl backdrop-blur-xl">
+            <div className="relative w-full max-w-[320px] sm:max-w-[360px] p-3 sm:p-5 rounded-[2rem] bg-white/80 dark:bg-black/60 border border-slate-200/90 dark:border-white/15 shadow-2xl backdrop-blur-xl">
               
               {/* Badge above Heart */}
-              <div className="flex items-center justify-between text-[10px] font-mono mb-2 border-b border-slate-200/60 dark:border-white/10 pb-2">
-                <span className="flex items-center gap-1.5 font-bold text-[#0D9488] dark:text-[#00F5D4]">
+              <div className="flex items-center justify-between text-[10px] font-mono mb-1.5 border-b border-slate-200/60 dark:border-white/10 pb-1.5">
+                <span className="flex items-center gap-1 font-bold text-[#0D9488] dark:text-[#00F5D4]">
                   <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
                   BIO_CARDIAC_3D // 4-CHAMBER
                 </span>
-                <span className="text-slate-500 dark:text-slate-400">ACTIVE: CH-{currentChamber.id + 1}</span>
+                <span className="text-slate-500 dark:text-slate-400">CH-{currentChamber.id + 1} OF 4</span>
               </div>
 
               {/* ── ANATOMICAL SVG HEART WITH 4 INTERACTIVE GLOWING CHAMBERS ── */}
-              <div className="relative h-[250px] sm:h-[300px] flex items-center justify-center">
+              <div className="relative h-[190px] sm:h-[220px] md:h-[250px] flex items-center justify-center">
                 <svg
                   viewBox="0 0 360 400"
-                  className="w-full h-full drop-shadow-[0_0_35px_rgba(0,245,212,0.25)] select-none"
+                  className="w-full h-full drop-shadow-[0_0_30px_rgba(0,245,212,0.25)] select-none"
                 >
                   {/* Outer Background Myocardium Contour */}
                   <path
@@ -373,7 +384,7 @@ export default function CardiacChambersScrollytelling() {
               </div>
 
               {/* Synchronized ECG Waveform Ribbon */}
-              <div className="mt-3 p-2.5 rounded-2xl bg-slate-900 dark:bg-black/80 border border-slate-800 dark:border-white/10 text-white">
+              <div className="mt-2.5 p-2 rounded-xl bg-slate-900 dark:bg-black/80 border border-slate-800 dark:border-white/10 text-white">
                 <div className="flex items-center justify-between text-[9px] font-mono mb-1">
                   <span className="flex items-center gap-1 font-bold text-[#00F5D4]">
                     <Activity className="w-3 h-3 text-[#00F5D4]" />
@@ -381,7 +392,7 @@ export default function CardiacChambersScrollytelling() {
                   </span>
                   <span className="text-slate-400">LEAD-II ECG WAVE</span>
                 </div>
-                <div className="h-8 w-full flex items-center overflow-hidden">
+                <div className="h-6 sm:h-7 w-full flex items-center overflow-hidden">
                   <svg className="w-full h-full" viewBox="0 0 400 40" preserveAspectRatio="none">
                     <path
                       d="M 0 20 L 60 20 L 75 10 L 85 20 L 130 20 L 140 28 L 150 4 L 160 34 L 170 20 L 210 20 L 230 12 L 250 20 L 400 20"
@@ -397,22 +408,22 @@ export default function CardiacChambersScrollytelling() {
           </div>
 
           {/* Right Column (7 Cols): Dynamic Chamber Clinical Intelligence Card */}
-          <div className="lg:col-span-7 space-y-4">
+          <div className="lg:col-span-7">
             
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentChamber.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/90 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-2xl space-y-5"
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+                className="p-4 sm:p-6 rounded-[2rem] bg-white/90 dark:bg-[#0D131A]/95 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-2xl space-y-3.5"
               >
                 {/* Header Tag & Clinical Tier */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2.5">
                   <div className="flex items-center gap-2">
                     <span
-                      className="w-3 h-3 rounded-full animate-ping"
+                      className="w-2.5 h-2.5 rounded-full animate-ping"
                       style={{ backgroundColor: currentChamber.accentColor }}
                     />
                     <span
@@ -422,17 +433,17 @@ export default function CardiacChambersScrollytelling() {
                       {currentChamber.clinicalTier}
                     </span>
                   </div>
-                  <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 italic">
+                  <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 italic">
                     {currentChamber.anatomicalName}
                   </span>
                 </div>
 
-                {/* Big Editorial Chamber Title */}
+                {/* Editorial Chamber Title */}
                 <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {currentChamber.name}
                   </h3>
-                  <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mt-1">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mt-0.5">
                     {currentChamber.role}
                   </p>
                 </div>
@@ -443,17 +454,17 @@ export default function CardiacChambersScrollytelling() {
                 </p>
 
                 {/* Real-Time Chamber Telemetry Metrics Grid */}
-                <div className="grid grid-cols-3 gap-3 pt-1">
+                <div className="grid grid-cols-3 gap-2.5 pt-0.5">
                   {currentChamber.metrics.map((m, idx) => (
                     <div
                       key={idx}
-                      className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-black/50 border border-slate-200/80 dark:border-white/10"
+                      className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-black/50 border border-slate-200/80 dark:border-white/10"
                     >
                       <span className="block text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-slate-400">
                         {m.label}
                       </span>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <span className="text-xl sm:text-2xl font-black font-mono text-slate-900 dark:text-white">
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className="text-lg sm:text-xl font-black font-mono text-slate-900 dark:text-white">
                           {m.value}
                         </span>
                         <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
@@ -465,7 +476,7 @@ export default function CardiacChambersScrollytelling() {
                 </div>
 
                 {/* Physiological Action Footer */}
-                <div className="p-3.5 rounded-2xl bg-teal-500/10 border border-teal-500/25 flex items-center justify-between text-xs text-slate-800 dark:text-slate-200">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-teal-500/10 border border-teal-500/25 flex items-center justify-between text-xs text-slate-800 dark:text-slate-200">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#0D9488] dark:text-[#00F5D4] shrink-0" />
                     <span className="font-medium text-[11px]">{currentChamber.clinicalImpact}</span>
@@ -483,12 +494,14 @@ export default function CardiacChambersScrollytelling() {
         </div>
 
         {/* Bottom Status Bar */}
-        <div className="border-t border-slate-200/80 dark:border-white/10 pt-3 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+        <div className="border-t border-slate-200/80 dark:border-white/10 pt-2 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
           <span className="flex items-center gap-2">
             <Activity className="w-3.5 h-3.5 text-[#00F5D4]" />
             CARDIAC SYSTOLE / DIASTOLE TELEMETRY HARNESSED IN REAL TIME
           </span>
-          <span className="hidden sm:inline">CYCLE STAGE: {currentChamber.id + 1} OF 4</span>
+          <span className="font-bold text-[#0D9488] dark:text-[#00F5D4]">
+            CYCLE STAGE: {currentChamber.id + 1} OF 4
+          </span>
         </div>
 
       </div>
