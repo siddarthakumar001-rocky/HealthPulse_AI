@@ -65,7 +65,7 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
   };
 
   return (
-    <div className="rounded-2xl p-5 border border-border bg-card/80 backdrop-blur-xl shadow-lg relative overflow-hidden">
+    <div className="rounded-3xl p-5 mermaid-glass border border-teal-400/35 shadow-xl relative overflow-hidden">
       {/* Subtle background glow */}
       <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 

@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -8,38 +7,22 @@ export function BackButton() {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Hide on Landing page, Auth pages, Onboarding or Admin views (since they have their own header back buttons)
-  if (
-    location.pathname === "/" ||
-    location.pathname === "/dashboard" ||
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/admin-login" ||
-    location.pathname === "/onboarding" ||
-    location.pathname.startsWith("/admin")
-  ) {
+  // Hide on Landing page or main Dashboard root where top/bottom nav handles context
+  if (location.pathname === "/" || location.pathname === "/dashboard") {
     return null;
   }
 
   const handleBack = () => {
-    // 1. Auth pages: Always take the user back to Landing page ("/")
     if (
       location.pathname === "/login" ||
       location.pathname === "/signup" ||
-      location.pathname === "/admin-login"
+      location.pathname === "/admin-login" ||
+      location.pathname === "/onboarding"
     ) {
       navigate("/");
       return;
     }
 
-    // 2. Main Dashboard: Return to Landing page ("/")
-    if (location.pathname === "/dashboard") {
-      navigate("/");
-      return;
-    }
-
-    // 3. For any other inner page:
-    // Check if there is active history within this browser session
     const hasHistory =
       typeof window !== "undefined" &&
       Boolean(window.history?.state && typeof window.history.state.idx === "number" && window.history.state.idx > 0);
@@ -47,22 +30,19 @@ export function BackButton() {
     if (hasHistory) {
       navigate(-1);
     } else {
-      // Safe fallback based on session state
       navigate(user ? "/dashboard" : "/");
     }
   };
 
   return (
-    <Button 
+    <button
       type="button"
-      variant="outline" 
-      size="icon" 
-      onClick={handleBack} 
-      className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-40 rounded-full shadow-premium bg-background/80 backdrop-blur-md hover:scale-105 active:scale-95 transition-all w-12 h-12 border-primary/20 cursor-pointer pointer-events-auto"
+      onClick={handleBack}
+      className="fixed top-4 left-4 z-40 w-11 h-11 min-h-[44px] min-w-[44px] rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/10 shadow-lg backdrop-blur-xl flex items-center justify-center text-foreground hover:scale-105 active:scale-95 transition-all pointer-events-auto"
       title="Go back"
       aria-label="Go back"
     >
-      <ArrowLeft className="h-6 w-6 text-primary" />
-    </Button>
+      <ArrowLeft className="h-5 w-5 text-primary" />
+    </button>
   );
 }

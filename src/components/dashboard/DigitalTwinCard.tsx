@@ -65,7 +65,7 @@ export default function DigitalTwinCard({ heartRate, spo2, temperature, classNam
   };
 
   return (
-    <div className={`rounded-2xl p-5 border border-border bg-card/85 backdrop-blur-xl shadow-lg relative overflow-hidden ${className}`}>
+    <div className={`rounded-3xl p-5 mermaid-glass border border-teal-400/35 shadow-xl relative overflow-hidden ${className}`}>
       {/* Top Banner */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">

@@ -285,12 +285,12 @@ function GlassNeumorphCard({
       onClick={onClick}
       className={`relative cursor-pointer rounded-3xl p-5 sm:p-6 border transition-all duration-300 backdrop-blur-xl ${
         isSelected
-          ? "border-[#2563EB]/40 bg-white/60 dark:bg-slate-800/60"
-          : "border-white/80 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 hover:bg-white/50"
+          ? "border-teal-400/60 bg-teal-500/10 dark:bg-teal-950/40"
+          : "border-teal-300/30 dark:border-teal-500/15 bg-white/55 dark:bg-slate-900/40 hover:bg-white/65"
       }`}
       style={{
         boxShadow: isSelected
-          ? "inset 1px 1px 3px rgba(255,255,255,0.9), 0 0 20px rgba(37,99,235,0.15), 10px 14px 28px rgba(148,163,184,0.22)"
+          ? "inset 1px 1px 3px rgba(255,255,255,0.9), 0 0 24px rgba(6,214,160,0.3), 10px 14px 28px rgba(148,163,184,0.22)"
           : "inset 2px 2px 4px rgba(255,255,255,0.9), 8px 12px 24px rgba(148,163,184,0.18)",
       }}
       whileHover={{ y: -4, scale: 1.01 }}

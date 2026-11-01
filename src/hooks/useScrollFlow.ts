@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
 
-export interface ScrollFlowState {
-  scrollDirection: "up" | "down";
-  scrollY: number;
-  isScrolled: boolean;
-}
-
-export function useScrollFlow(threshold: number = 14): ScrollFlowState {
+export function useScrollFlow(threshold = 10) {
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
-  const [scrollY, setScrollY] = useState<number>(0);
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     let lastScrollY = typeof window !== "undefined" ? window.pageYOffset : 0;
@@ -41,4 +35,3 @@ export function useScrollFlow(threshold: number = 14): ScrollFlowState {
 
   return { scrollDirection, scrollY, isScrolled };
 }
-

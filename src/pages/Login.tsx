@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, Activity, ArrowLeft } from "lucide-react";
+import { Heart, Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "react-i18next";
@@ -61,19 +61,10 @@ export default function Login() {
     <div className="relative min-h-screen w-full bg-[#F8FAFC] dark:bg-[#090D16] text-[#0F172A] dark:text-slate-100 flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <AntiGravityBackground />
 
-      {/* Top HUD Controls */}
-      <header className="relative z-10 w-full max-w-md mx-auto flex items-center justify-between pt-2">
-        <Link
-          to="/"
-          className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 flex items-center justify-center text-foreground hover:bg-white shadow-sm transition active:scale-95"
-          title="Return to Home"
-        >
-          <ArrowLeft className="w-5 h-5 text-foreground/80" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-        </div>
+      {/* Top Controls: Right Anchored Language & Theme */}
+      <header className="relative z-30 w-full max-w-md mx-auto flex items-center justify-end pt-2 gap-2">
+        <LanguageSwitcher />
+        <ThemeToggle />
       </header>
 
       {/* Center Form Card */}
@@ -106,12 +97,14 @@ export default function Login() {
               <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                 {t("login.email", "Email Address")}
               </Label>
-              <div className="relative flex items-center">
-                <Mail className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+              <div className="relative w-full">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                 <Input
                   id="email"
                   type="email"
-                  className="antigravity-input pl-10 h-12 text-sm font-medium"
+                  inputMode="email"
+                  autoComplete="email"
+                  className="antigravity-input pl-10 h-12 text-sm font-medium w-full"
                   placeholder="Enter email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -129,6 +122,7 @@ export default function Login() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   className="antigravity-input pl-10 pr-12 h-12 text-sm font-medium w-full"
                   placeholder="Enter password"
                   value={password}
@@ -137,8 +131,13 @@ export default function Login() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  tabIndex={-1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowPassword(!showPassword);
+                  }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-auto p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

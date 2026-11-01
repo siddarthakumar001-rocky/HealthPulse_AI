@@ -461,10 +461,10 @@ export default function Dashboard() {
             <MagneticWrapper>
               <button
                 onClick={() => navigate("/antigravity")}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider bg-white/80 dark:bg-slate-900 border border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition shadow-sm"
+                className="mermaid-chip px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer border-teal-400/50 bg-teal-500/15 text-teal-800 dark:text-teal-200"
               >
-                <Zap className="h-3.5 w-3.5 text-blue-500 animate-pulse" />
-                Anti-Gravity Mode
+                <Zap className="h-3.5 w-3.5 text-teal-500 animate-pulse" />
+                Anti-Gravity HUD
               </button>
             </MagneticWrapper>
           </div>
