@@ -195,22 +195,28 @@ export function AppSidebar() {
         description="Are you sure you want to end your session?"
       >
         <div className="flex gap-3 mt-4">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSignOut}
-            className="flex-1 py-2.5 rounded-xl font-sans text-xs font-extrabold uppercase tracking-widest text-white bg-destructive hover:bg-destructive/90 shadow-md"
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSignOut();
+            }}
+            className="flex-1 py-3 rounded-xl font-sans text-xs font-extrabold uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all shadow-md z-30 cursor-pointer pointer-events-auto"
           >
             Confirm
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowSignOutModal(false)}
-            className="flex-1 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowSignOutModal(false);
+            }}
+            className="flex-1 py-3 rounded-xl font-sans text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 transition-all z-30 cursor-pointer pointer-events-auto"
           >
             Cancel
-          </motion.button>
+          </button>
         </div>
       </GlassModal>
     </>

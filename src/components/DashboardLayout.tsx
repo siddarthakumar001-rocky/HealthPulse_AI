@@ -1,9 +1,18 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/lib/auth";
-import { Bell, Moon, Sun } from "lucide-react";
+import { Bell, Moon, Sun, User, LogOut, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/context/ThemeContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,7 +24,9 @@ import { useScrollFlow } from "@/hooks/useScrollFlow";
 import { useState } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const { isScrolled } = useScrollFlow(10);
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
@@ -82,20 +93,65 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </Button>
                 </motion.div>
 
-                {/* Avatar */}
-                <motion.div
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex h-9 w-9 min-h-[36px] min-w-[36px] items-center justify-center rounded-full text-sm font-bold cursor-pointer font-mono"
-                  style={{
-                    background: "linear-gradient(135deg, #E35336 0%, #FF7E67 100%)",
-                    border: "1px solid rgba(227,83,54,0.4)",
-                    boxShadow: "0 2px 10px rgba(227,83,54,0.3)",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  {user?.user_metadata?.name?.[0]?.toUpperCase() || "U"}
-                </motion.div>
+                {/* Interactive Profile Avatar & User Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex h-9 w-9 min-h-[36px] min-w-[36px] items-center justify-center rounded-full text-sm font-bold cursor-pointer font-mono outline-none shadow-md transition-transform"
+                      style={{
+                        background: 'linear-gradient(135deg, #05D3B3 0%, #0D9488 100%)',
+                        border: '1.5px solid rgba(255,255,255,0.4)',
+                        boxShadow: '0 2px 12px rgba(13,148,136,0.35)',
+                        color: '#FFFFFF',
+                      }}
+                      title="User Profile Menu"
+                    >
+                      {user?.user_metadata?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                    </motion.button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={8}
+                    className="w-60 p-2 rounded-2xl mermaid-glass shadow-2xl border border-white/20 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl"
+                  >
+                    <DropdownMenuLabel className="px-3 py-2">
+                      <p className="text-xs font-extrabold text-foreground truncate">
+                        {user?.user_metadata?.name || 'Patient Account'}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-mono truncate">
+                        {user?.email || 'patient@healthpulse.ai'}
+                      </p>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="my-1 bg-border/60" />
+                    <DropdownMenuItem
+                      onClick={() => navigate('/profile')}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-xl cursor-pointer hover:bg-teal-500/15 transition-colors"
+                    >
+                      <User className="w-4 h-4 text-teal-500" />
+                      <span>{t('nav.profile', 'My Profile')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/dashboard')}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-xl cursor-pointer hover:bg-teal-500/15 transition-colors"
+                    >
+                      <Activity className="w-4 h-4 text-teal-500" />
+                      <span>{t('nav.dashboard', 'Dashboard')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1 bg-border/60" />
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await signOut();
+                        navigate('/login', { replace: true });
+                      }}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>{t('nav.signOut', 'Log Out')}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </header>
 

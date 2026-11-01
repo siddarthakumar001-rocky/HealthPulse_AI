@@ -47,7 +47,7 @@ export default function SmartSupplyChain() {
   const [selectedFacility, setSelectedFacility] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
-  
+
   // Redistribution state
   const [aiRecs, setAiRecs] = useState<RedistributionRec[]>([]);
   const [activeTransfers, setActiveTransfers] = useState<ActiveTransfer[]>([]);
@@ -351,11 +351,10 @@ export default function SmartSupplyChain() {
                           <td className="p-3">
                             {item.coldChainRequired ? (
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-mono inline-flex items-center gap-1 ${
-                                  item.storageTemperature < item.minTemperature || item.storageTemperature > item.maxTemperature
+                                className={`px-2 py-0.5 rounded text-[10px] font-mono inline-flex items-center gap-1 ${item.storageTemperature < item.minTemperature || item.storageTemperature > item.maxTemperature
                                     ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                                     : "bg-cyan-500/20 text-cyan-300"
-                                }`}
+                                  }`}
                               >
                                 <Snowflake className="h-2.5 w-2.5" /> {item.storageTemperature}°C
                               </span>
@@ -370,10 +369,10 @@ export default function SmartSupplyChain() {
                                 item.stockHealth === "Critical"
                                   ? "border-rose-500 text-rose-400 bg-rose-950/30 text-[10px]"
                                   : item.stockHealth === "Low"
-                                  ? "border-amber-500 text-amber-400 bg-amber-950/30 text-[10px]"
-                                  : item.stockHealth === "Excess"
-                                  ? "border-blue-500 text-blue-400 bg-blue-950/30 text-[10px]"
-                                  : "border-emerald-500 text-emerald-400 bg-emerald-950/30 text-[10px]"
+                                    ? "border-amber-500 text-amber-400 bg-amber-950/30 text-[10px]"
+                                    : item.stockHealth === "Excess"
+                                      ? "border-blue-500 text-blue-400 bg-blue-950/30 text-[10px]"
+                                      : "border-emerald-500 text-emerald-400 bg-emerald-950/30 text-[10px]"
                               }
                             >
                               {item.stockHealth}
@@ -397,9 +396,8 @@ export default function SmartSupplyChain() {
                 return (
                   <Card
                     key={item._id}
-                    className={`bg-slate-900/80 border ${
-                      isBreach ? "border-rose-500/50 bg-rose-950/10" : "border-cyan-500/30"
-                    }`}
+                    className={`bg-slate-900/80 border ${isBreach ? "border-rose-500/50 bg-rose-950/10" : "border-cyan-500/30"
+                      }`}
                   >
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-center justify-between">
@@ -546,8 +544,8 @@ export default function SmartSupplyChain() {
                                 tr.status === "Completed"
                                   ? "border-emerald-500 text-emerald-400 bg-emerald-950/30"
                                   : tr.status === "In Transit"
-                                  ? "border-blue-500 text-blue-400 bg-blue-950/30"
-                                  : "border-amber-500 text-amber-400 bg-amber-950/30"
+                                    ? "border-blue-500 text-blue-400 bg-blue-950/30"
+                                    : "border-amber-500 text-amber-400 bg-amber-950/30"
                               }
                             >
                               {tr.status}

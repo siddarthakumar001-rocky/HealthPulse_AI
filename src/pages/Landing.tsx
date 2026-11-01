@@ -216,21 +216,21 @@ export default function Landing() {
         </div>
 
         {/* Actions & Locale Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
           <LanguageSwitcher />
 
           <Button
             variant="ghost"
             asChild
-            className="text-xs font-mono tracking-widest uppercase text-[#94A3B8] hover:text-white hover:bg-white/[0.05] hidden sm:inline-flex rounded-xl"
+            className="text-xs font-mono tracking-widest uppercase text-[#94A3B8] hover:text-white hover:bg-white/[0.05] hidden md:inline-flex rounded-xl"
           >
             <Link to="/login">{t("landing.logIn", "SIGN IN")}</Link>
           </Button>
 
           <Button
             asChild
-            className="mermaid-btn text-xs font-mono tracking-widest uppercase h-10 px-5 rounded-xl text-black font-extrabold shadow-lg shadow-[#00F5D4]/20 hover:scale-105 active:scale-95 transition-all"
+            className="mermaid-btn text-xs font-mono tracking-widest uppercase h-10 px-5 rounded-xl text-black font-extrabold shadow-lg shadow-[#00F5D4]/20 hover:scale-105 active:scale-95 transition-all hidden md:inline-flex"
           >
             <Link to="/signup">
               <span>{t("landing.getStarted", "ACCESS HUD")}</span>

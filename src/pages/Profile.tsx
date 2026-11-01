@@ -145,6 +145,26 @@ export default function Profile() {
             </div>
           </GlassSection>
         )}
+
+        {/* Quick Session Sign Out */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="pt-2"
+        >
+          <button
+            type="button"
+            onClick={async () => {
+              const { signOut } = useAuth();
+              await signOut();
+              window.location.href = "/";
+            }}
+            className="w-full py-3.5 px-4 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 font-extrabold text-xs uppercase tracking-wider hover:bg-rose-500/20 active:scale-98 transition-all flex items-center justify-center gap-2 shadow-sm"
+          >
+            Sign Out Of HealthPulse AI
+          </button>
+        </motion.div>
       </div>
     </DashboardLayout>
   );
