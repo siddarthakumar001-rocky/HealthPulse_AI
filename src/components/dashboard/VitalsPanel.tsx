@@ -51,7 +51,7 @@ function MiniECG({ color, active, speed = 1 }: { color: string; active: boolean;
 function GlassVitalCard({ children, borderColor, glowColor, scanColor }: { children: React.ReactNode; borderColor: string; glowColor: string; scanColor?: string }) {
   return (
     <motion.div
-      className="relative rounded-2xl p-5 overflow-hidden cursor-default bg-card/90 border border-border backdrop-blur-xl shadow-md"
+      className="relative rounded-3xl p-5 overflow-hidden cursor-default mermaid-glass border border-teal-400/30 transition-all duration-300 shadow-lg"
       style={{
         boxShadow: `0 4px 20px ${glowColor}`,
       }}

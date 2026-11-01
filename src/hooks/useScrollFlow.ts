@@ -41,3 +41,4 @@ export function useScrollFlow(threshold: number = 14): ScrollFlowState {
 
   return { scrollDirection, scrollY, isScrolled };
 }
+

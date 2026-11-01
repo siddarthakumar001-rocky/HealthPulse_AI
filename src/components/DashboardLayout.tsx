@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import CursorTrail from "@/components/dashboard/CursorTrail";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { AntiGravityBackground } from "@/components/AntiGravityBackground";
 import { useScrollFlow } from "@/hooks/useScrollFlow";
 import { useState } from "react";
 
@@ -40,6 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ))}
 
         <CursorTrail />
+        <AntiGravityBackground />
 
         <div className="min-h-screen flex w-full bg-background selection:bg-primary/20">
           <AppSidebar />

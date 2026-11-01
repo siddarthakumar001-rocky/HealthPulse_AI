@@ -207,11 +207,11 @@ export default function Signup() {
               <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                 {t("login.password", "Password")}
               </Label>
-              <div className="relative flex items-center">
-                <Lock className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+              <div className="relative w-full">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                 <Input
                   type={showPassword ? "text" : "password"}
-                  className="antigravity-input pl-10 pr-12 h-11 text-sm font-medium"
+                  className="antigravity-input pl-10 pr-12 h-11 text-sm font-medium w-full"
                   placeholder="Enter password"
                   value={form.password}
                   onChange={(e) => update("password", e.target.value)}
@@ -221,7 +221,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
