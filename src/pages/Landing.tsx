@@ -43,6 +43,8 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
 import LiquidCursor from "@/components/LiquidCursor";
 import { AntiGravityBackground } from "@/components/AntiGravityBackground";
+import CardiacChambersScrollytelling from "@/components/CardiacChambersScrollytelling";
+import { useTheme } from "@/context/ThemeContext";
 
 // Biometric Simulation Presets for live interactive demonstration
 type SimulationMode = "resting" | "exercise" | "arrhythmia" | "sleep";
@@ -123,6 +125,7 @@ const PRESETS: Record<SimulationMode, PresetState> = {
 
 export default function Landing() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [mode, setMode] = useState<SimulationMode>("resting");
   const [selectedOrgan, setSelectedOrgan] = useState<string>("heart");
@@ -137,17 +140,23 @@ export default function Landing() {
   const navBackground = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(7, 10, 13, 0)", "rgba(7, 10, 13, 0.88)"]
+    theme === "light"
+      ? ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.92)"]
+      : ["rgba(7, 10, 13, 0)", "rgba(7, 10, 13, 0.88)"]
   );
   const navBorder = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.12)"]
+    theme === "light"
+      ? ["rgba(0, 0, 0, 0)", "rgba(226, 232, 240, 0.85)"]
+      : ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.12)"]
   );
   const navShadow = useTransform(
     scrollY,
     [0, 100],
-    ["none", "0 20px 40px -15px rgba(0,0,0,0.8)"]
+    theme === "light"
+      ? ["none", "0 10px 30px -10px rgba(0,0,0,0.08)"]
+      : ["none", "0 20px 40px -15px rgba(0,0,0,0.8)"]
   );
 
   // 2. Hero Cinematic Scroll-Scrub Reveal
@@ -161,25 +170,8 @@ export default function Landing() {
   const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0.4]);
   const heroY = useTransform(heroProgress, [0, 1], [0, -30]);
 
-  // 3. Pinned Horizontal Gallery Section: tight, responsive scrub
-  const horizontalSectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: horizontalProgress } = useScroll({
-    target: horizontalSectionRef,
-    offset: ["start start", "end end"]
-  });
-
-  const smoothHorizontal = useSpring(horizontalProgress, {
-    stiffness: 120,
-    damping: 26,
-    mass: 0.2
-  });
-
-  // Moves 4 modular cards horizontally across screen width
-  const horizontalX = useTransform(smoothHorizontal, [0, 1], ["0%", "-68%"]);
-  const activeStep = useTransform(smoothHorizontal, [0, 0.33, 0.66, 1], [1, 2, 3, 4]);
-
   return (
-    <div className="relative min-h-screen w-full bg-[#070A0D] text-[#F8FAFC] font-sans selection:bg-[#00F5D4]/25 overflow-x-hidden">
+    <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 dark:bg-[#070A0D] dark:text-[#F8FAFC] font-sans selection:bg-[#00F5D4]/25 overflow-x-hidden transition-colors duration-300">
       <LiquidCursor />
 
       {/* ── AMBIENT ORGANIC BACKGROUND CANVAS ── */}
@@ -208,17 +200,17 @@ export default function Landing() {
             <Heart className="w-5 h-5 text-[#00F5D4] animate-pulse drop-shadow-[0_0_10px_#00F5D4]" />
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1">
-              HEALTHPULSE <span className="text-[#00F5D4]">AI</span>
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+              HEALTHPULSE <span className="text-[#0D9488] dark:text-[#00F5D4]">AI</span>
             </span>
-            <span className="font-mono text-[9px] tracking-[0.25em] text-[#94A3B8] uppercase">
+            <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500 dark:text-[#94A3B8] uppercase">
               BIOMETRIC SCROLLYTELLING
             </span>
           </div>
         </Link>
 
         {/* Center Live Node Indicator */}
-        <div className="hidden lg:flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 font-mono text-[11px] tracking-wider text-[#94A3B8]">
+        <div className="hidden lg:flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-200/60 dark:bg-white/[0.04] border border-slate-300 dark:border-white/10 font-mono text-[11px] tracking-wider text-slate-700 dark:text-[#94A3B8]">
           <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
           <span>IOMT BLE TELEMETRY ACTIVE • 250 HZ</span>
         </div>
@@ -231,7 +223,7 @@ export default function Landing() {
           <Button
             variant="ghost"
             asChild
-            className="text-xs font-mono tracking-widest uppercase text-[#94A3B8] hover:text-white hover:bg-white/[0.05] hidden md:inline-flex rounded-xl"
+            className="text-xs font-mono tracking-widest uppercase text-slate-700 dark:text-[#94A3B8] hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.05] hidden md:inline-flex rounded-xl"
           >
             <Link to="/login">{t("landing.logIn", "SIGN IN")}</Link>
           </Button>
@@ -262,7 +254,7 @@ export default function Landing() {
             y: heroY,
             willChange: "transform, opacity"
           }}
-          className="relative mermaid-glass p-6 sm:p-12 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
+          className="relative mermaid-glass p-6 sm:p-12 rounded-[2.5rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-2xl overflow-hidden"
         >
           {/* Subtle Scanning Laser Line */}
           <motion.div
@@ -277,33 +269,33 @@ export default function Landing() {
             <div className="lg:col-span-6 space-y-6">
               
               {/* Monospace Metadata Tag */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 font-mono text-[10px] sm:text-xs tracking-[0.2em] text-[#00F5D4] uppercase">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/30 font-mono text-[10px] sm:text-xs tracking-[0.2em] text-[#0D9488] dark:text-[#00F5D4] uppercase">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>01 // DIGITAL TWIN • CLINICAL TELEMETRY</span>
               </div>
 
               {/* Bold Oversized Editorial Display Heading */}
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-[-0.035em] leading-[0.98] text-white">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-[-0.035em] leading-[0.98] text-slate-900 dark:text-white">
                 Autonomous <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F5D4] via-[#05D3B3] to-white drop-shadow-[0_4px_30px_rgba(0,245,212,0.35)]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F5D4] via-[#05D3B3] to-slate-900 dark:to-white drop-shadow-[0_4px_30px_rgba(0,245,212,0.35)]">
                   Biological
                 </span> <br />
                 Intelligence.
               </h1>
 
               {/* Editorial Body Text */}
-              <p className="text-base sm:text-lg text-[#94A3B8] font-light leading-relaxed max-w-lg">
+              <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 font-normal leading-relaxed max-w-lg">
                 Continuous physiological sensor fusion merges raw Lead-II optical wave telemetry with CSDI neural diffusion imputation to predict and stop health anomalies before symptoms manifest.
               </p>
 
               {/* ── INTERACTIVE SIMULATOR PRESETS ── */}
               <div className="space-y-2.5 pt-2">
-                <div className="flex items-center justify-between font-mono text-[11px] tracking-wider text-[#94A3B8]">
+                <div className="flex items-center justify-between font-mono text-[11px] tracking-wider text-slate-600 dark:text-[#94A3B8]">
                   <span className="flex items-center gap-1.5">
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[#00F5D4]" />
                     SIMULATE PHYSIOLOGY:
                   </span>
-                  <span className="text-[#00F5D4] font-bold">{current.label}</span>
+                  <span className="text-[#0D9488] dark:text-[#00F5D4] font-bold">{current.label}</span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -316,8 +308,8 @@ export default function Landing() {
                         onClick={() => setMode(key)}
                         className={`p-2.5 rounded-2xl text-left transition-all duration-300 border ${
                           active
-                            ? "bg-[#00F5D4]/10 border-[#00F5D4] text-white shadow-lg shadow-[#00F5D4]/15 scale-[1.02]"
-                            : "bg-white/[0.02] border-white/10 text-[#94A3B8] hover:bg-white/[0.05]"
+                            ? "bg-[#00F5D4]/15 border-[#00F5D4] text-slate-900 dark:text-white shadow-lg shadow-[#00F5D4]/15 scale-[1.02]"
+                            : "bg-slate-100/90 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-[#94A3B8] hover:bg-slate-200/70 dark:hover:bg-white/[0.05]"
                         }`}
                       >
                         <div className="text-[11px] font-bold truncate">{preset.label}</div>
@@ -345,7 +337,7 @@ export default function Landing() {
                   size="lg"
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
-                  className="h-14 px-6 rounded-2xl text-xs font-mono tracking-widest uppercase border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+                  className="h-14 px-6 rounded-2xl text-xs font-mono tracking-widest uppercase border-slate-300 dark:border-white/15 bg-white/80 dark:bg-white/[0.03] text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08]"
                 >
                   VIEW CLINICAL HUD
                 </Button>
@@ -372,11 +364,11 @@ export default function Landing() {
               />
 
               {/* Bio-Twin Stage Container */}
-              <div className="relative rounded-[2rem] bg-black/40 border border-white/10 p-5 sm:p-7 backdrop-blur-2xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-[2rem] bg-white/90 dark:bg-black/50 border border-slate-200/90 dark:border-white/10 p-5 sm:p-7 backdrop-blur-2xl overflow-hidden shadow-2xl">
                 
                 {/* Header Metadata */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4 text-[10px] font-mono text-[#94A3B8]">
-                  <span className="flex items-center gap-2 text-white font-bold">
+                <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-3 mb-4 text-[10px] font-mono text-slate-500 dark:text-[#94A3B8]">
+                  <span className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
                     <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
                     HDT_MODEL // LIVE_TELEMETRY
                   </span>
@@ -577,256 +569,39 @@ export default function Landing() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════
-          3. PINNED HORIZONTAL LAYOUT (SCROLLYTELLING ARCHITECTURE)
-          Container pinned below the navbar (top-20 h-[calc(100vh-5rem)])
-          Translates horizontally as user scrolls down with zero top clipping!
+          3. CARDIOVASCULAR 4-CHAMBER CONDUCTION SCROLLYTELLING ENGINE
+          Interactive Anatomical Heart with 4 Distinct Living Chambers
       ════════════════════════════════════════════════════════════ */}
-      <section
-        ref={horizontalSectionRef}
-        className="relative h-[220vh] w-full"
-      >
-        <div className="sticky top-20 h-[calc(100vh-5rem)] w-full overflow-hidden flex flex-col justify-between py-5 px-4 sm:px-8">
-          
-          {/* Pinned Section Header & Live Step Indicators */}
-          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-white/10 pb-3">
-            <div>
-              <div className="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-[#00F5D4] uppercase mb-1 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
-                02 // SCROLLYTELLING CLINICAL ARCHITECTURE
-              </div>
-              <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white">
-                Four Modular Clinical Tiers.
-              </h2>
-            </div>
-            
-            {/* Step Indicators */}
-            <div className="flex items-center gap-2 font-mono text-xs">
-              {["01 FUSION", "02 CSDI", "03 DISPATCH", "04 VAULT"].map((step, idx) => (
-                <div
-                  key={idx}
-                  className="px-2.5 py-0.5 rounded-lg border border-white/10 bg-white/[0.03] text-[#94A3B8] text-[10px] font-bold"
-                >
-                  {step}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Horizontally Translating Card Gallery */}
-          <div className="max-w-7xl mx-auto w-full my-auto overflow-visible">
-            <motion.div
-              style={{ x: horizontalX, willChange: "transform" }}
-              className="flex gap-5 sm:gap-6 w-max"
-            >
-              
-              {/* Card 1: Optical Sensor Fusion */}
-              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
-                    <Activity className="w-5 h-5" />
-                  </div>
-                  <div className="font-mono text-[10px] tracking-widest text-[#00F5D4] uppercase">
-                    MODULE // 01 • SENSOR FUSION
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-black text-white">
-                    250 Hz Continuous Optical Telemetry
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Dual-channel photoplethysmography (PPG) fused with 16-bit Sigma-Delta ADC sampling extracts systemic vascular resistance and pulse transit time.
-                  </p>
-                </div>
-
-                {/* Micro Visual inside Card */}
-                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                    <span>PPG IR/RED ABSORPTION</span>
-                    <span className="text-[#00F5D4]">SNR: 48 dB</span>
-                  </div>
-                  <div className="h-7 w-full flex items-center">
-                    <svg className="w-full h-full" viewBox="0 0 200 30" preserveAspectRatio="none">
-                      <path d="M 0 15 Q 25 0 50 15 T 100 15 T 150 15 T 200 15" fill="none" stroke="#00F5D4" strokeWidth="2" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                  <span>MAX30102 • MLX90614</span>
-                  <span className="text-[#00F5D4] font-bold">JITTER &lt; 0.4 MS</span>
-                </div>
-              </div>
-
-              {/* Card 2: CSDI Neural Diffusion Imputation */}
-              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
-                    <Cpu className="w-5 h-5" />
-                  </div>
-                  <div className="font-mono text-[10px] tracking-widest text-cyan-400 uppercase">
-                    MODULE // 02 • NEURAL DIFFUSION
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-black text-white">
-                    CSDI Signal Imputation & Denoising
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Motion artifacts and perspiration lead to false emergency alarms. Our Conditional Diffusion model reconstructs lost telemetry with 98.55% fidelity.
-                  </p>
-                </div>
-
-                {/* Micro Visual inside Card */}
-                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                    <span>RESTORED LOST PACKETS</span>
-                    <span className="text-cyan-400">PASS 10</span>
-                  </div>
-                  <div className="grid grid-cols-6 gap-1 h-5 items-center">
-                    {[1,1,1,0,1,1].map((ok, i) => (
-                      <div key={i} className={`h-full rounded ${ok ? "bg-cyan-500/40" : "bg-rose-500/80 animate-pulse"} border border-white/10 flex items-center justify-center text-[7px] font-mono`}>
-                        {ok ? "✓" : "IMP"}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                  <span>RECONSTRUCTION MAE</span>
-                  <span className="text-cyan-400 font-bold">1.45% OPTIMAL</span>
-                </div>
-              </div>
-
-              {/* Card 3: Autonomous PHC Emergency Dispatch */}
-              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                    <AlertTriangle className="w-5 h-5" />
-                  </div>
-                  <div className="font-mono text-[10px] tracking-widest text-rose-400 uppercase">
-                    MODULE // 03 • EMERGENCY GEOFENCE
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-black text-white">
-                    Sub-Second PHC Dispatch Network
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Automated geofencing immediately alerts the nearest Primary Health Centre (PHC) ambulance network when severe hypoxia or arrhythmia is detected.
-                  </p>
-                </div>
-
-                {/* Micro Visual inside Card */}
-                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between text-[10px] font-mono">
-                  <div className="flex items-center gap-1.5 text-rose-400">
-                    <Hospital className="w-3.5 h-3.5" />
-                    <span className="truncate max-w-[140px]">Indiranagar Urban PHC</span>
-                  </div>
-                  <span className="text-white font-bold">2.4 km • 6 min</span>
-                </div>
-
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                  <span>LATENCY TO DISPATCH</span>
-                  <span className="text-rose-400 font-bold">&lt; 800 MS</span>
-                </div>
-              </div>
-
-              {/* Card 4: FHIR R4 Sovereign Biometric Vault */}
-              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div className="font-mono text-[10px] tracking-widest text-[#00F5D4] uppercase">
-                    MODULE // 04 • SOVEREIGN SECURITY
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-black text-white">
-                    FHIR R4 Sovereign Data Vault
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Zero-knowledge biometric storage with AES-GCM-256 cryptographic hardware isolation ensures sensitive telemetry remains entirely under your sovereign control.
-                  </p>
-                </div>
-
-                {/* Micro Visual inside Card */}
-                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between text-[10px] font-mono text-emerald-400">
-                  <span className="flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> AES-256 ENCRYPTED
-                  </span>
-                  <span>ZERO-KNOWLEDGE</span>
-                </div>
-
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                  <span>STANDARDS</span>
-                  <span className="text-[#00F5D4] font-bold">FHIR • HL7 • HIPAA</span>
-                </div>
-              </div>
-
-            </motion.div>
-          </div>
-
-          {/* ── LIVE SCROLLYTELLING TELEMETRY DOCK (FILLS BOTTOM VIEWPORT) ── */}
-          <div className="max-w-7xl mx-auto w-full pt-3 border-t border-white/10">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Sampling Rate</span>
-                  <span className="text-xs font-black font-mono text-white">250 Hz Real-Time</span>
-                </div>
-                <Activity className="w-3.5 h-3.5 text-[#00F5D4]" />
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Diffusion Inference</span>
-                  <span className="text-xs font-black font-mono text-cyan-400">&lt; 8.2 ms Edge</span>
-                </div>
-                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">PHC Dispatch</span>
-                  <span className="text-xs font-black font-mono text-rose-400">Sub-Second Ring</span>
-                </div>
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Data Compliance</span>
-                  <span className="text-xs font-black font-mono text-[#00F5D4]">FHIR R4 / HL7</span>
-                </div>
-                <ShieldCheck className="w-3.5 h-3.5 text-[#00F5D4]" />
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
+      <CardiacChambersScrollytelling />
 
       {/* ════════════════════════════════════════════════════════════
           4. INTERACTIVE SIGNAL DENOISING & WAVEFORM LABORATORY
       ════════════════════════════════════════════════════════════ */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="mermaid-glass p-8 sm:p-12 rounded-[2.5rem] border border-white/10 shadow-2xl space-y-8">
+        <div className="mermaid-glass p-8 sm:p-12 rounded-[2.5rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-2xl space-y-8">
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200/80 dark:border-white/10 pb-6">
             <div className="space-y-2">
-              <div className="font-mono text-xs tracking-[0.25em] text-[#00F5D4] uppercase flex items-center gap-2">
+              <div className="font-mono text-xs tracking-[0.25em] text-[#0D9488] dark:text-[#00F5D4] uppercase flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>03 // NEURAL RECONSTRUCTION ENGINE</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-white">
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
                 Live Waveform Denoising Laboratory.
               </h2>
-              <p className="text-sm text-[#94A3B8] max-w-xl">
+              <p className="text-sm text-slate-700 dark:text-[#94A3B8] max-w-xl">
                 Compare raw motion-corrupted photoplethysmography against the CSDI neural diffusion output in real-time.
               </p>
             </div>
 
             {/* Toggle Switch */}
-            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-black/60 border border-white/15">
+            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-black/60 border border-slate-200/90 dark:border-white/15">
               <button
                 onClick={() => setSignalMode("corrupted")}
                 className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
                   signalMode === "corrupted"
-                    ? "bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm"
-                    : "text-[#94A3B8] hover:text-white"
+                    ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border border-rose-500/40 shadow-sm"
+                    : "text-slate-600 hover:text-slate-950 dark:text-[#94A3B8] dark:hover:text-white"
                 }`}
               >
                 Corrupted (Motion Noise)
@@ -835,8 +610,8 @@ export default function Landing() {
                 onClick={() => setSignalMode("denoised")}
                 className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
                   signalMode === "denoised"
-                    ? "bg-[#00F5D4]/20 text-[#00F5D4] border border-[#00F5D4]/40 shadow-sm"
-                    : "text-[#94A3B8] hover:text-white"
+                    ? "bg-[#00F5D4]/20 text-[#0D9488] dark:text-[#00F5D4] border border-[#00F5D4]/40 shadow-sm"
+                    : "text-slate-600 hover:text-slate-950 dark:text-[#94A3B8] dark:hover:text-white"
                 }`}
               >
                 CSDI Denoised (98.5% Fidelity)
@@ -845,13 +620,13 @@ export default function Landing() {
           </div>
 
           {/* Interactive Oscilloscope Display */}
-          <div className="p-6 rounded-2xl bg-black/70 border border-white/10 space-y-4">
+          <div className="p-6 rounded-2xl bg-slate-900 dark:bg-black/80 border border-slate-800 dark:border-white/10 space-y-4 text-white">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="flex items-center gap-2 text-white">
                 <span className={`w-2 h-2 rounded-full ${signalMode === "denoised" ? "bg-[#00F5D4]" : "bg-rose-500"} animate-pulse`} />
                 MODE: {signalMode === "denoised" ? "CSDI_DIFFUSION_RECONSTRUCTED" : "RAW_ANALOG_MOTION_NOISE"}
               </span>
-              <span className="text-[#94A3B8]">
+              <span className="text-slate-400">
                 {signalMode === "denoised" ? "RECONSTRUCTION LOSS: 0.0145" : "MISSING PACKETS: 14.2%"}
               </span>
             </div>
@@ -882,16 +657,16 @@ export default function Landing() {
               </svg>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-mono text-[#94A3B8]">
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-mono text-slate-400">
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10">
                 <span className="block text-[10px] uppercase font-bold text-white">Artifact Suppression</span>
                 <p className="mt-0.5 text-[#00F5D4]">99.2% Motion Rejection</p>
               </div>
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10">
                 <span className="block text-[10px] uppercase font-bold text-white">False Alarm Reduction</span>
                 <p className="mt-0.5 text-cyan-400">Zero False Emergency Calls</p>
               </div>
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10">
                 <span className="block text-[10px] uppercase font-bold text-white">Clinical Validation</span>
                 <p className="mt-0.5 text-emerald-400">Hospital-Grade Conformity</p>
               </div>
@@ -906,14 +681,14 @@ export default function Landing() {
       ════════════════════════════════════════════════════════════ */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
         <div className="space-y-4 mb-10 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 font-mono text-[10px] text-[#00F5D4] uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 font-mono text-[10px] text-[#0D9488] dark:text-[#00F5D4] uppercase">
             <Layers className="w-3.5 h-3.5" />
             <span>04 // FULL-STACK BIOMETRIC INFRASTRUCTURE</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-white">
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white">
             Built For Clinical Rigor.
           </h2>
-          <p className="text-sm sm:text-base text-[#94A3B8]">
+          <p className="text-sm sm:text-base text-slate-700 dark:text-[#94A3B8]">
             An end-to-end medical architecture linking wearable physical hardware to local emergency response centres.
           </p>
         </div>
@@ -921,73 +696,73 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Bento Card 1 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-[#00F5D4]/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-[#00F5D4]/40 transition-all duration-300">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
+              <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#0D9488] dark:text-[#00F5D4]">
                 <Smartphone className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-black text-white">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 Wearable IoMT Node
               </h3>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 ESP32-S3 microcontroller with dual optical pulse sensors and skin-temperature thermopile, running 72 hours on a single 300mAh LiPo cell.
               </p>
             </div>
-            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-[#00F5D4]">
+            <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 text-[11px] font-mono text-[#0D9488] dark:text-[#00F5D4] font-bold">
               BLE 5.2 GATT • ULTRA-LOW POWER
             </div>
           </div>
 
           {/* Bento Card 2 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-cyan-400/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-cyan-400/40 transition-all duration-300">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
                 <Brain className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-black text-white">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 Human Digital Twin
               </h3>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Synchronized computational model mirroring organ stress (Heart, Lungs, Brain) with allostatic load scoring and autonomic balance indicators.
               </p>
             </div>
-            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-cyan-400">
+            <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 text-[11px] font-mono text-cyan-600 dark:text-cyan-400 font-bold">
               AUC-ROC 0.994 PREDICTIVE SCORE
             </div>
           </div>
 
           {/* Bento Card 3 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-amber-400/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-amber-400/40 transition-all duration-300">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-500 dark:text-amber-400">
                 <Hospital className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-black text-white">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 PHC Command Mesh
               </h3>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Autonomous medical supply chain forecasting, cold-chain temperature telemetry, and epidemic surge early warning for district health centers.
               </p>
             </div>
-            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-amber-400">
+            <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 text-[11px] font-mono text-amber-500 dark:text-amber-400 font-bold">
               DENGUE & FLU SURGE WARNING
             </div>
           </div>
 
           {/* Bento Card 4 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-emerald-400/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-emerald-400/40 transition-all duration-300">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-black text-white">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 Clinical Health Passport
               </h3>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Aggregates patient onboarding symptoms, pain mapping, and uploaded lab report biomarkers into a verified, cryptographically signed profile.
               </p>
             </div>
-            <div className="pt-4 border-t border-white/10 text-[11px] font-mono text-emerald-400">
+            <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
               ONE-CLICK LAB REPORT VAULT
             </div>
           </div>
@@ -999,39 +774,39 @@ export default function Landing() {
           6. METRIC PERFORMANCE COUNTERS (EDITORIAL GRID)
       ════════════════════════════════════════════════════════════ */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="mermaid-glass p-8 sm:p-14 rounded-[3rem] border border-white/10 shadow-2xl grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+        <div className="mermaid-glass p-8 sm:p-14 rounded-[3rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-2xl grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div className="space-y-1">
-            <div className="text-4xl sm:text-6xl font-black font-mono text-white tracking-tight">
-              99.4<span className="text-[#00F5D4]">%</span>
+            <div className="text-4xl sm:text-6xl font-black font-mono text-slate-900 dark:text-white tracking-tight">
+              99.4<span className="text-[#0D9488] dark:text-[#00F5D4]">%</span>
             </div>
-            <div className="text-[11px] font-mono tracking-widest text-[#94A3B8] uppercase">
+            <div className="text-[11px] font-mono tracking-widest text-slate-500 dark:text-[#94A3B8] uppercase">
               HDT Model Sync Fidelity
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-4xl sm:text-6xl font-black font-mono text-white tracking-tight">
-              &lt;12<span className="text-[#00F5D4]">ms</span>
+            <div className="text-4xl sm:text-6xl font-black font-mono text-slate-900 dark:text-white tracking-tight">
+              &lt;12<span className="text-[#0D9488] dark:text-[#00F5D4]">ms</span>
             </div>
-            <div className="text-[11px] font-mono tracking-widest text-[#94A3B8] uppercase">
+            <div className="text-[11px] font-mono tracking-widest text-slate-500 dark:text-[#94A3B8] uppercase">
               BLE Telemetry Latency
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-4xl sm:text-6xl font-black font-mono text-white tracking-tight">
-              10<span className="text-[#00F5D4]">k+</span>
+            <div className="text-4xl sm:text-6xl font-black font-mono text-slate-900 dark:text-white tracking-tight">
+              10<span className="text-[#0D9488] dark:text-[#00F5D4]">k+</span>
             </div>
-            <div className="text-[11px] font-mono tracking-widest text-[#94A3B8] uppercase">
+            <div className="text-[11px] font-mono tracking-widest text-slate-500 dark:text-[#94A3B8] uppercase">
               Connected IoMT Nodes
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-4xl sm:text-6xl font-black font-mono text-white tracking-tight">
-              0<span className="text-[#00F5D4]">%</span>
+            <div className="text-4xl sm:text-6xl font-black font-mono text-slate-900 dark:text-white tracking-tight">
+              0<span className="text-[#0D9488] dark:text-[#00F5D4]">%</span>
             </div>
-            <div className="text-[11px] font-mono tracking-widest text-[#94A3B8] uppercase">
+            <div className="text-[11px] font-mono tracking-widest text-slate-500 dark:text-[#94A3B8] uppercase">
               False Emergency Alarms
             </div>
           </div>
@@ -1043,10 +818,10 @@ export default function Landing() {
       ════════════════════════════════════════════════════════════ */}
       <section className="py-20 max-w-4xl mx-auto px-4 sm:px-8">
         <div className="text-center space-y-3 mb-10">
-          <div className="font-mono text-xs tracking-[0.25em] text-[#00F5D4] uppercase">
+          <div className="font-mono text-xs tracking-[0.25em] text-[#0D9488] dark:text-[#00F5D4] uppercase">
             05 // FREQUENTLY ASKED QUESTIONS
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-white">
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
             Clinical Verification & Standards.
           </h2>
         </div>
@@ -1074,28 +849,20 @@ export default function Landing() {
             return (
               <div
                 key={idx}
-                className="mermaid-glass rounded-2xl border border-white/10 overflow-hidden transition-all duration-300"
+                className="mermaid-glass rounded-2xl bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 overflow-hidden shadow-sm transition-all duration-300"
               >
                 <button
                   onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-white text-sm sm:text-base hover:text-[#00F5D4] transition-colors"
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 dark:text-white text-sm sm:text-base hover:text-[#0D9488] dark:hover:text-[#00F5D4] transition-colors"
                 >
                   <span>{item.q}</span>
-                  <ChevronDown className={`w-4 h-4 text-[#00F5D4] transition-transform duration-300 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-4 h-4 text-[#0D9488] dark:text-[#00F5D4] transition-transform duration-300 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
                 </button>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="px-5 pb-5 text-xs sm:text-sm text-[#94A3B8] leading-relaxed border-t border-white/5 pt-3"
-                    >
-                      {item.a}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {isOpen && (
+                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/70 dark:border-white/10">
+                    {item.a}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -1106,19 +873,19 @@ export default function Landing() {
           8. FINAL CTA PORTAL
       ════════════════════════════════════════════════════════════ */}
       <section className="py-20 max-w-5xl mx-auto px-4 sm:px-8">
-        <div className="relative mermaid-glass p-12 sm:p-20 rounded-[3rem] text-center shadow-2xl border border-white/10 overflow-hidden">
+        <div className="relative mermaid-glass p-12 sm:p-20 rounded-[3rem] bg-white/85 dark:bg-[#0D131A]/85 text-center shadow-2xl border border-slate-200/90 dark:border-white/10 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,245,212,0.18)_0%,_transparent_75%)] pointer-events-none" />
 
           <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
-            <div className="w-16 h-16 rounded-3xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 mx-auto flex items-center justify-center text-[#00F5D4] shadow-lg shadow-[#00F5D4]/20">
+            <div className="w-16 h-16 rounded-3xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 mx-auto flex items-center justify-center text-[#0D9488] dark:text-[#00F5D4] shadow-lg shadow-[#00F5D4]/20">
               <Zap className="w-8 h-8 animate-pulse" />
             </div>
 
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
               Deploy Your Human Digital Twin.
             </h2>
 
-            <p className="text-base text-[#94A3B8] font-light">
+            <p className="text-base text-slate-700 dark:text-[#94A3B8] font-normal">
               Connect your telemetry devices, run an instant AI biometric assessment, and track your physiological resilience with clinical clarity.
             </p>
 
@@ -1138,7 +905,7 @@ export default function Landing() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="h-14 px-8 rounded-2xl text-xs font-mono tracking-widest uppercase border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+                className="h-14 px-8 rounded-2xl text-xs font-mono tracking-widest uppercase border-slate-300 dark:border-white/15 bg-white/80 dark:bg-white/[0.03] text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08]"
               >
                 <Link to="/login">SIGN IN TO EXISTING HUD</Link>
               </Button>
@@ -1148,26 +915,26 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/10 bg-[#070A0D]/90 backdrop-blur-2xl py-12 px-4 sm:px-8">
+      <footer className="border-t border-slate-200/80 dark:border-white/10 bg-slate-100/90 dark:bg-[#070A0D]/90 backdrop-blur-2xl py-12 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
-              <Heart className="w-4 h-4 text-[#00F5D4]" />
+            <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center">
+              <Heart className="w-4 h-4 text-[#0D9488] dark:text-[#00F5D4]" />
             </div>
-            <span className="font-extrabold text-sm tracking-tight text-white">
+            <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">
               HEALTHPULSE AI • SCROLLYTELLING MEDICAL ARCHITECTURE
             </span>
           </div>
 
-          <div className="text-xs font-mono text-[#94A3B8]">
+          <div className="text-xs font-mono text-slate-600 dark:text-[#94A3B8]">
             © 2026 HealthPulse Intelligence Inc. All systems nominal.
           </div>
 
           <div className="flex items-center gap-6 text-xs font-mono tracking-wider">
-            <Link to="/login" className="text-[#00F5D4] hover:underline">
+            <Link to="/login" className="text-[#0D9488] dark:text-[#00F5D4] hover:underline font-bold">
               CLINICIAN PORTAL
             </Link>
-            <Link to="/admin-login" className="text-[#94A3B8] hover:text-white">
+            <Link to="/admin-login" className="text-slate-600 hover:text-slate-900 dark:text-[#94A3B8] dark:hover:text-white">
               PHC ADMIN
             </Link>
           </div>
@@ -1175,8 +942,8 @@ export default function Landing() {
       </footer>
 
       {/* Mobile Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-[#070A0D]/95 backdrop-blur-2xl border-t border-white/10 z-40 md:hidden flex items-center gap-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl">
-        <Button asChild variant="outline" className="flex-1 h-12 rounded-2xl font-mono text-xs uppercase border-white/15 bg-white/[0.04] text-white">
+      <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-[#070A0D]/95 backdrop-blur-2xl border-t border-slate-200 dark:border-white/10 z-40 md:hidden flex items-center gap-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl">
+        <Button asChild variant="outline" className="flex-1 h-12 rounded-2xl font-mono text-xs uppercase border-slate-300 dark:border-white/15 bg-white dark:bg-white/[0.04] text-slate-900 dark:text-white">
           <Link to="/login">Sign In</Link>
         </Button>
         <Button asChild className="mermaid-btn flex-1 h-12 rounded-2xl font-mono text-xs uppercase font-extrabold text-black shadow-lg shadow-[#00F5D4]/25">

@@ -93,33 +93,43 @@ export default function EmergencyIntelligence() {
 
   const translateAlertTitle = (title: string) => {
     if (!title) return "";
-    if (title.includes("Critical Medicine Stockout") || title.includes("Medicine Stockout")) {
-      return title
+    let res = title;
+    if (res.includes("Critical Medicine Stockout") || res.includes("Medicine Stockout")) {
+      res = res
         .replace(/Critical Medicine Stockout:/i, t("phc.alertStockoutPrefix", "Critical Medicine Stockout") + ":")
         .replace(/\bat\b/g, t("phc.atFacility", "at"));
-    }
-    if (title.includes("Potential Vector-Borne Surge") || title.includes("Potential Dengue Surge")) {
-      return title
+    } else if (res.includes("Low Stock Warning")) {
+      res = res
+        .replace(/Low Stock Warning:/i, t("phc.alertLowStockWarningPrefix", "Low Stock Warning") + ":")
+        .replace(/\bat\b/g, t("phc.atFacility", "at"));
+    } else if (res.includes("Potential Vector-Borne Surge") || res.includes("Potential Dengue Surge")) {
+      res = res
         .replace(/Potential Vector-Borne Surge Signal at|Potential Dengue Surge Detected at/i, t("phc.alertDenguePrefix", "Potential Vector-Borne Surge Signal at"))
         .replace(/\bat\b/g, t("phc.atFacility", "at"));
-    }
-    if (title.includes("Critical Cold Chain Breach")) {
-      return title
+    } else if (res.includes("Critical Cold Chain Breach")) {
+      res = res
         .replace(/Critical Cold Chain Breach:/i, t("phc.alertColdChainPrefix", "Critical Cold Chain Breach") + ":")
         .replace(/\bat\b/g, t("phc.atFacility", "at"));
-    }
-    if (title.includes("Patient Capacity Overload")) {
-      return title
+    } else if (res.includes("Patient Capacity Overload")) {
+      res = res
         .replace(/Patient Capacity Overload/i, t("phc.alertCapacityPrefix", "Patient Capacity Overload"))
         .replace(/\bat\b/g, t("phc.atFacility", "at"));
     }
-    return title;
+    
+    // Also translate common medicine combinations inside titles if present
+    res = res.replace(/Amoxicillin & Oxytocin/g, t("phc.amoxicillinOxytocin", "Amoxicillin & Oxytocin"));
+    res = res.replace(/Amoxicillin 500mg/g, t("phc.amoxicillin500mg", "Amoxicillin 500mg"));
+    res = res.replace(/Paracetamol & IV Saline/g, t("phc.paracetamolSaline", "Paracetamol & IV Saline"));
+    return res;
   };
 
   const translateAlertDesc = (desc: string) => {
     if (!desc) return "";
     if (desc.includes("Amoxicillin 500mg down to 15 capsules")) {
       return t("phc.alertAmoxDesc", "Amoxicillin 500mg down to 15 capsules (Daily demand: 25). Zero buffer safety remaining.");
+    }
+    if (desc.includes("Current stock has fallen below the 50% safe buffer threshold") || desc.includes("Depletion window: 3 ± 1 days")) {
+      return t("phc.alertLowStockDesc", "Current stock has fallen below the 50% safe buffer threshold. Depletion window: 3 ± 1 days.");
     }
     if (desc.includes("Dengue & Fever symptom cases increased") || desc.includes("compared to historical 3-week baseline")) {
       return t("phc.alertDengueCasesDesc", "Dengue & Fever symptom cases increased by +48% compared to historical 3-week baseline.");
@@ -135,6 +145,9 @@ export default function EmergencyIntelligence() {
 
   const translateAlertAction = (action: string) => {
     if (!action) return "";
+    if (action.includes("Initiate Inter-Facility stock transfer from Jayanagar General Hospital") || action.includes("Surplus: 820 units")) {
+      return t("phc.alertActionInitiateTransfer", "Initiate Inter-Facility stock transfer from Jayanagar General Hospital (Surplus: 820 units, Distance: 5.2 km).");
+    }
     if (action.includes("Execute AI Inter-Facility Redistribution") || action.includes("350 units available")) {
       return t("phc.alertActionRedistribution", "Execute AI Inter-Facility Redistribution: 350 units available at nearby CHC within 14 km.");
     }
@@ -152,8 +165,10 @@ export default function EmergencyIntelligence() {
 
   const translateTrigger = (source: string) => {
     if (!source) return "";
+    if (source.includes("IoT Smart Weight Sensor")) return t("phc.triggerWeightSensor", "IoT Smart Weight Sensor");
     if (source.includes("IoT Smart Scale")) return t("phc.triggerIoTScale", "IoT Smart Scale & Inventory Engine");
-    if (source.includes("AI Epidemiological")) return t("phc.triggerAIEpidemic", "AI Epidemiological Anomaly Engine");
+    if (source.includes("AI Epidemiological Baseline Engine")) return t("phc.triggerAIBaseline", "AI Epidemiological Baseline Engine");
+    if (source.includes("AI Epidemiological Anomaly Engine") || source.includes("AI Epidemiological")) return t("phc.triggerAIEpidemic", "AI Epidemiological Anomaly Engine");
     if (source.includes("Fridge") || source.includes("Probe")) return t("phc.triggerFridge", "IoT Smart Fridge Probe");
     return source;
   };

@@ -17,7 +17,8 @@
     "map": "Map",
     "alerts": "Alerts",
     "reports": "Reports",
-    "device": "Device"
+    "device": "Device",
+    "researchEval": "Research Evaluation"
   },
   "landing": {
     "appName": "HealthPulse AI",
@@ -728,6 +729,28 @@
     "triggerAIEpidemic": "AI Epidemiological Anomaly Engine",
     "triggerFridge": "IoT Smart Fridge Probe",
     "surplus": "Surplus",
-    "noActiveIncidents": "No active incidents matching the selected severity level."
+    "noActiveIncidents": "No active incidents matching the selected severity level.",
+    "alertLowStockWarningPrefix": "Low Stock Warning",
+    "triggerWeightSensor": "IoT Smart Weight Sensor",
+    "triggerAIBaseline": "AI Epidemiological Baseline Engine",
+    "alertLowStockDesc": "Current stock has fallen below the 50% safe buffer threshold. Depletion window: 3 ± 1 days.",
+    "alertActionInitiateTransfer": "Initiate Inter-Facility stock transfer from Jayanagar General Hospital (Surplus: 820 units, Distance: 5.2 km).",
+    "amoxicillinOxytocin": "Amoxicillin & Oxytocin",
+    "amoxicillin500mg": "Amoxicillin 500mg",
+    "paracetamolSaline": "Paracetamol & IV Saline",
+    "heartChambersTitle": "Cardiovascular 4-Chamber Conduction Architecture",
+    "heartChambersSubtitle": "Scroll to journey through the cardiac cycle — from Sinoatrial pacemaker pulse to systemic aortic AI dispatch",
+    "chamber1Name": "Chamber I: Right Atrium & SA Node",
+    "chamber1Role": "Bioelectric Pulse Trigger & Pacemaker",
+    "chamber1Desc": "Sinoatrial node generates natural 60–100 BPM rhythm. HealthPulse AI taps optical photoplethysmography (PPG) at 250 Hz to monitor beat-to-beat HRV variability.",
+    "chamber2Name": "Chamber II: Right Ventricle & Pulmonary Circuit",
+    "chamber2Role": "Deoxygenated Blood to Lungs & Diffusion Imputation",
+    "chamber2Desc": "Pumps venous blood to pulmonary capillaries. CSDI Neural Diffusion algorithm detects motion artifacts and reconstructs missing telemetry with 98.55% fidelity.",
+    "chamber3Name": "Chamber III: Left Atrium & Mitral Valve",
+    "chamber3Role": "Oxygenated Blood Return & Microvascular Vitals",
+    "chamber3Desc": "Receives purified oxygenated blood from lungs. System dynamically calibrates 99% SpO2 levels and systemic vascular resistance across all peripheral sensors.",
+    "chamber4Name": "Chamber IV: Left Ventricle & Aorta Systemic Delivery",
+    "chamber4Role": "High-Pressure Systolic Surge & Sub-Second Dispatch",
+    "chamber4Desc": "Massive muscular contraction pumps life-saving oxygen to the entire body. If arrhythmia or hypoxia spikes, autonomous PHC geofencing mobilizes emergency dispatch."
   }
 }
