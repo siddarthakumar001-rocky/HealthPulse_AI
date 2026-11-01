@@ -189,7 +189,7 @@ export default function Onboarding() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="antigravity-card p-4 sm:p-8 space-y-4 flex flex-col max-h-[82vh]"
+          className="mermaid-glass p-4 sm:p-8 space-y-4 flex flex-col max-h-[82vh]"
         >
           {/* Progress Header */}
           <div className="space-y-2 flex-shrink-0">
@@ -241,7 +241,7 @@ export default function Onboarding() {
               <Button
                 type="button"
                 onClick={handleFinish}
-                className="antigravity-btn h-11 px-6 text-xs sm:text-sm font-black uppercase tracking-wider flex items-center gap-1.5"
+                className="mermaid-btn h-11 px-6 text-xs sm:text-sm font-black uppercase tracking-wider flex items-center gap-1.5 shadow-[0_4px_20px_rgba(13,148,136,0.35)]"
               >
                 <Check className="h-4 w-4" /> {t("onboarding.completeBtn", "Complete Profile")}
               </Button>
@@ -249,7 +249,7 @@ export default function Onboarding() {
               <Button
                 type="button"
                 onClick={() => setStep((s) => Math.min(totalSteps - 1, s + 1))}
-                className="antigravity-btn h-11 px-6 text-xs sm:text-sm font-black uppercase tracking-wider flex items-center gap-1.5"
+                className="mermaid-btn h-11 px-6 text-xs sm:text-sm font-black uppercase tracking-wider flex items-center gap-1.5 shadow-[0_4px_20px_rgba(13,148,136,0.35)]"
               >
                 {t("common.next", "Next")} <ChevronRight className="h-4 w-4" />
               </Button>

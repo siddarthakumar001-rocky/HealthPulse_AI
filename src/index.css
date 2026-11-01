@@ -20,7 +20,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 16 44% 17%;
 
-    --primary: 10 76% 55%;
+    --primary: 174 84% 36%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 348 100% 86%;
@@ -37,12 +37,12 @@
 
     --border: 25 67% 85%;
     --input: 25 67% 85%;
-    --ring: 10 76% 55%;
+    --ring: 174 84% 36%;
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 16 44% 17%;
-    --sidebar-primary: 10 76% 55%;
+    --sidebar-primary: 174 84% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 126 54% 92%;
     --sidebar-accent-foreground: 16 44% 17%;
@@ -73,7 +73,7 @@
     --popover: 270 6% 14%;
     --popover-foreground: 20 45% 93%;
 
-    --primary: 10 77% 58%;
+    --primary: 171 90% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 327 15% 20%;
@@ -90,12 +90,12 @@
 
     --border: 327 10% 21%;
     --input: 327 10% 21%;
-    --ring: 10 77% 58%;
+    --ring: 171 90% 45%;
     --radius: 1rem;
 
     --sidebar-background: 270 6% 11%;
     --sidebar-foreground: 20 45% 93%;
-    --sidebar-primary: 10 77% 58%;
+    --sidebar-primary: 171 90% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 327 10% 21%;
     --sidebar-accent-foreground: 20 45% 93%;
@@ -126,17 +126,17 @@
     font-family: "Times New Roman", Times, Georgia, serif;
     @apply bg-background text-foreground antialiased overflow-x-hidden w-full max-w-full;
     background-image:
-      radial-gradient(ellipse 65% 55% at 10% 15%, rgba(217, 195, 206, 0.45) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 55% at 10% 15%, rgba(204, 251, 241, 0.65) 0%, transparent 65%),
       radial-gradient(ellipse 65% 55% at 90% 10%, rgba(220, 233, 244, 0.6) 0%, transparent 65%),
-      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(225, 239, 227, 0.5) 0%, transparent 70%);
+      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(209, 250, 229, 0.65) 0%, transparent 70%);
     background-attachment: fixed;
   }
 
   .dark body {
     background-image:
-      radial-gradient(ellipse 65% 55% at 15% 15%, rgba(46, 31, 39, 0.55) 0%, transparent 65%),
-      radial-gradient(ellipse 65% 55% at 85% 15%, rgba(22, 27, 34, 0.7) 0%, transparent 65%),
-      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(14, 23, 19, 0.65) 0%, transparent 70%);
+      radial-gradient(ellipse 65% 55% at 15% 15%, rgba(4, 47, 46, 0.55) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 55% at 85% 15%, rgba(6, 26, 32, 0.7) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(2, 44, 34, 0.65) 0%, transparent 70%);
     background-attachment: fixed;
   }
 
@@ -153,7 +153,10 @@
 
   /* ── Dark sidebar theme ── */
   .dark [data-sidebar="sidebar"] {
-    background: #19161a !important;
+    background: rgba(4, 25, 29, 0.96) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-right: 1px solid rgba(45, 212, 191, 0.2) !important;
     color: rgba(245, 235, 230, 0.95);
   }
 }

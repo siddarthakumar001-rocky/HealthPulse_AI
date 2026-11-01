@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
+import { AntiGravityLoading } from "@/components/AntiGravityLoading";
+
 
 export interface User {
   id: string;
@@ -87,6 +89,8 @@ export function useAuth() {
   return context;
 }
 
+
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -96,11 +100,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, [user, loading, navigate]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <AntiGravityLoading label="Authenticating Telemetry..." />;
   }
 
   return user ? <>{children}</> : null;
@@ -123,11 +123,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
   }, [navigate]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <AntiGravityLoading label="Verifying Admin Privileges..." />;
   }
 
   return isAdmin ? <>{children}</> : null;

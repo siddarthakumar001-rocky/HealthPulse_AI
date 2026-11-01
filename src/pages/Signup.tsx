@@ -76,14 +76,14 @@ export default function Signup() {
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, ease: "out" }}
-          className="antigravity-card p-6 sm:p-8 space-y-6"
+          className="mermaid-glass p-6 sm:p-8 space-y-6"
         >
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-inner">
-              <Heart className="h-7 w-7 text-primary animate-pulse" />
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/15 border border-teal-400/35 text-teal-600 dark:text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.25)] shadow-inner">
+              <Heart className="h-7 w-7 text-teal-600 dark:text-teal-400 animate-pulse" />
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">
+            <div className="mermaid-chip text-[10px] font-bold tracking-wider uppercase border-teal-400/40 bg-teal-500/10 text-teal-700 dark:text-teal-300">
               <ShieldCheck className="w-3 h-3" /> Digital Twin Profile Setup
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-display">
@@ -233,7 +233,7 @@ export default function Signup() {
 
             <Button
               type="submit"
-              className="antigravity-btn w-full h-12 text-sm uppercase tracking-wider font-extrabold flex items-center justify-center gap-2 mt-2"
+              className="mermaid-btn w-full h-12 text-sm uppercase tracking-wider font-extrabold flex items-center justify-center gap-2 mt-2 shadow-[0_8px_25px_rgba(13,148,136,0.35)]"
               disabled={loading}
             >
               {loading ? (
