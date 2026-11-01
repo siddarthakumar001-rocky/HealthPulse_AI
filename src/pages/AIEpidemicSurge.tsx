@@ -9,35 +9,28 @@ import {
   Area,
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from "recharts";
 import { phcService, PHCFacility } from "@/services/phcService";
 import { toast } from "sonner";
 import {
   Activity,
-  AlertTriangle,
   ArrowUpRight,
   BrainCircuit,
-  CheckCircle2,
-  ChevronRight,
   Flame,
   LineChart as ChartIcon,
   Pill,
   RefreshCw,
-  ShieldAlert,
-  Sparkles,
   TrendingUp,
   Users,
-  Zap,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function AIEpidemicSurge() {
+  const { t } = useTranslation();
   const [facilities, setFacilities] = useState<PHCFacility[]>([]);
   const [selectedPHCId, setSelectedPHCId] = useState<string>("");
   const [predictionData, setPredictionData] = useState<any>(null);
@@ -85,53 +78,63 @@ export default function AIEpidemicSurge() {
   const footfallForecast = predictionData?.footfallForecast;
   const medicineForecasts = predictionData?.medicineForecasts || [];
   const outbreakSignals = predictionData?.outbreakSignals || [];
-  const decisions = predictionData?.decisionEvaluation?.decisions || [];
 
   // Chart data: Combine historical baseline + 7-day projected trajectory
   const chartData = [
     { day: "Day -6 (Hist)", actual: 110, lowerBound: null, upperBound: null, projected: null },
     { day: "Day -4 (Hist)", actual: 118, lowerBound: null, upperBound: null, projected: null },
     { day: "Day -2 (Hist)", actual: 122, lowerBound: null, upperBound: null, projected: null },
-    { day: "Today (Actual)", actual: footfallForecast?.currentDailyFootfall || 125, lowerBound: footfallForecast?.currentDailyFootfall || 125, upperBound: footfallForecast?.currentDailyFootfall || 125, projected: footfallForecast?.currentDailyFootfall || 125 },
-    ...(footfallForecast?.timeSeries?.map((t: any) => ({
-      day: t.day,
+    {
+      day: "Today (Actual)",
+      actual: footfallForecast?.currentDailyFootfall || 120,
+      lowerBound: footfallForecast?.currentDailyFootfall || 120,
+      upperBound: footfallForecast?.currentDailyFootfall || 120,
+      projected: footfallForecast?.currentDailyFootfall || 120,
+    },
+    ...(footfallForecast?.timeSeries?.map((tItem: any) => ({
+      day: tItem.day,
       actual: null,
-      projected: t.projected,
-      lowerBound: t.lowerBound,
-      upperBound: t.upperBound
-    })) || [])
+      projected: tItem.projected,
+      lowerBound: tItem.lowerBound,
+      upperBound: tItem.upperBound,
+    })) || []),
   ];
 
   return (
     <DashboardLayout>
       <div className="space-y-6 pb-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cyan-500/20 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 tracking-wide uppercase flex items-center gap-1">
-                <BrainCircuit className="h-3 w-3" /> Predictive AI Engine
+        {/* Header Strip in AntiGravity Style */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-teal-500/20 pb-5">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="mermaid-chip text-[11px] font-bold">
+                <BrainCircuit className="h-3.5 w-3.5 text-[#05D3B3]" />
+                {t("phc.predictiveEngine", "PREDICTIVE AI ENGINE")}
               </span>
-              <span className="text-xs text-slate-400">
-                • Statistical Time-Series & Anomaly Detection
+              <span className="text-xs text-muted-foreground font-mono">
+                • {t("phc.statisticalTimeSeries", "Statistical Time-Series & Anomaly Detection")}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-indigo-200 to-purple-300 mt-1">
-              AI Demand & Outbreak Early Warning Engine
+            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+              {t("phc.engineTitle", "AI Demand & Outbreak Early Warning Engine")}
             </h1>
-            <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-              Forecasting patient footfall, medicine consumption trajectories, and early detection of epidemic symptom spikes
+            <p className="text-xs md:text-sm text-muted-foreground max-w-3xl leading-relaxed">
+              {t(
+                "phc.engineSubtitle",
+                "Forecasting patient footfall, medicine consumption trajectories, and early detection of epidemic symptom spikes"
+              )}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Controls: PHC Switcher & Recalculate */}
+          <div className="flex items-center gap-2.5 flex-wrap">
             <select
               value={selectedPHCId}
               onChange={(e) => handleSelectPHC(e.target.value)}
-              className="bg-slate-900 border border-cyan-500/30 rounded px-3 py-1.5 text-xs text-cyan-300 h-9 font-medium"
+              className="antigravity-input bg-card/80 border border-teal-500/30 rounded-2xl px-3.5 py-2 text-xs font-semibold text-foreground h-10 min-w-[200px] shadow-sm backdrop-blur-md"
             >
               {facilities.map((f) => (
-                <option key={f._id} value={f._id}>
+                <option key={f._id} value={f._id} className="bg-slate-900 text-white">
                   {f.name} ({f.facilityCode})
                 </option>
               ))}
@@ -142,227 +145,284 @@ export default function AIEpidemicSurge() {
               size="sm"
               onClick={() => fetchPredictions(selectedPHCId)}
               disabled={loading}
-              className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-950/40 bg-slate-900/60 text-xs h-9"
+              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
-              <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
-              Recalculate
+              <RefreshCw className={`h-3.5 w-3.5 mr-2 ${loading ? "animate-spin" : ""}`} />
+              {t("phc.recalculate", "Recalculate")}
             </Button>
           </div>
         </div>
 
-        {/* Prediction KPI Cards */}
+        {/* Prediction KPI Bento Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-slate-900/70 border-cyan-500/20 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Current Daily Footfall</span>
-                <Users className="h-4 w-4 text-cyan-400" />
-              </div>
-              <p className="text-2xl font-bold text-white mt-1">
-                {footfallForecast?.currentDailyFootfall || 120} <span className="text-xs font-normal text-slate-400">patients/day</span>
-              </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Baseline average: {footfallForecast?.historicalMean || 115}
-              </p>
-            </CardContent>
-          </Card>
+          {/* Card 1: Daily Footfall */}
+          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+            <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.currentDailyFootfall", "Current Daily Footfall")}</span>
+              <Users className="h-4 w-4 text-teal-500" />
+            </div>
+            <p className="text-3xl font-black font-mono text-foreground mt-2">
+              {footfallForecast?.currentDailyFootfall || 120}{" "}
+              <span className="text-xs font-normal text-muted-foreground font-sans">
+                {t("phc.patientsDay", "patients/day")}
+              </span>
+            </p>
+            <p className="text-[11px] text-muted-foreground pt-1">
+              {t("phc.baselineAverage", "Baseline average")}: {footfallForecast?.historicalMean || 115}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-indigo-500/20 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">7-Day Forecast Average</span>
-                <TrendingUp className="h-4 w-4 text-indigo-400" />
-              </div>
-              <p className="text-2xl font-bold text-indigo-300 mt-1">
-                {footfallForecast?.sevenDayForecastAvg || 135} <span className="text-xs font-normal text-slate-400">patients/day</span>
-              </p>
-              <p className="text-[11px] text-indigo-400 flex items-center gap-1 mt-0.5">
-                <ArrowUpRight className="h-3 w-3" /> +{footfallForecast?.expectedIncreasePercentage || 8}% Projected Growth
-              </p>
-            </CardContent>
-          </Card>
+          {/* Card 2: 7-Day Forecast */}
+          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+            <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.forecastAverage", "7-Day Forecast Average")}</span>
+              <TrendingUp className="h-4 w-4 text-[#05D3B3]" />
+            </div>
+            <p className="text-3xl font-black font-mono text-teal-600 dark:text-teal-300 mt-2">
+              {footfallForecast?.sevenDayForecastAvg || 135}{" "}
+              <span className="text-xs font-normal text-muted-foreground font-sans">
+                {t("phc.patientsDay", "patients/day")}
+              </span>
+            </p>
+            <p className="text-[11px] text-teal-600 dark:text-teal-400 font-bold flex items-center gap-1 pt-1">
+              <ArrowUpRight className="h-3.5 w-3.5" />
+              +{footfallForecast?.expectedIncreasePercentage || 8}% {t("phc.projectedGrowth", "Projected Growth")}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-purple-500/20 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Surge Risk Level</span>
-                <Flame className="h-4 w-4 text-purple-400" />
-              </div>
-              <p
-                className={`text-2xl font-bold mt-1 ${
-                  footfallForecast?.risk === "High"
-                    ? "text-rose-400"
-                    : footfallForecast?.risk === "Medium"
-                    ? "text-amber-400"
-                    : "text-emerald-400"
-                }`}
-              >
-                {footfallForecast?.risk || "Low"}
-              </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Confidence: <strong className="text-cyan-300">{footfallForecast?.confidence || 88}%</strong>
-              </p>
-            </CardContent>
-          </Card>
+          {/* Card 3: Surge Risk Level */}
+          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+            <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.surgeRiskLevel", "Surge Risk Level")}</span>
+              <Flame className="h-4 w-4 text-amber-500" />
+            </div>
+            <p
+              className={`text-3xl font-black font-mono mt-2 ${
+                footfallForecast?.risk === "High"
+                  ? "text-rose-500"
+                  : footfallForecast?.risk === "Medium"
+                  ? "text-amber-500"
+                  : "text-emerald-500"
+              }`}
+            >
+              {footfallForecast?.risk === "High"
+                ? t("phc.high", "High")
+                : footfallForecast?.risk === "Medium"
+                ? t("phc.moderate", "Moderate")
+                : t("phc.low", "Low")}
+            </p>
+            <p className="text-[11px] text-muted-foreground pt-1">
+              {t("phc.confidence", "Confidence")}:{" "}
+              <strong className="text-foreground">{footfallForecast?.confidence || 88}%</strong>
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-amber-500/20 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">At-Risk Stockouts</span>
-                <Pill className="h-4 w-4 text-amber-400" />
-              </div>
-              <p className="text-2xl font-bold text-amber-300 mt-1">
-                {medicineForecasts.filter((m: any) => m.stockoutRisk === "Critical" || m.stockoutRisk === "High").length} items
-              </p>
-              <p className="text-[11px] text-amber-400/80 mt-0.5">
-                Depletion window &lt; 7 days
-              </p>
-            </CardContent>
-          </Card>
+          {/* Card 4: At-Risk Stockouts */}
+          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+            <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.atRiskStockouts", "At-Risk Stockouts")}</span>
+              <Pill className="h-4 w-4 text-amber-500" />
+            </div>
+            <p className="text-3xl font-black font-mono text-amber-500 mt-2">
+              {medicineForecasts.filter((m: any) => m.stockoutRisk === "Critical" || m.stockoutRisk === "High").length}{" "}
+              <span className="text-xs font-normal text-muted-foreground font-sans">
+                {t("phc.items", "items")}
+              </span>
+            </p>
+            <p className="text-[11px] text-amber-500/90 font-medium pt-1">
+              {t("phc.depletionWindow", "Depletion window < 7 days")}
+            </p>
+          </div>
         </div>
 
         {/* Epidemic Surge Early Warnings Radar */}
         {outbreakSignals.length > 0 && (
-          <Card className="bg-rose-950/20 border border-rose-500/40 shadow-xl">
-            <CardHeader className="p-4 pb-2 border-b border-rose-500/30">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Flame className="h-5 w-5 text-rose-400 animate-pulse" />
-                  <CardTitle className="text-sm font-bold text-white">
-                    Potential Surge / Early Warning Signals ({facility?.name})
-                  </CardTitle>
-                </div>
-                <Badge variant="destructive" className="text-[10px]">
-                  Statistical Anomaly (Z &gt; 1.8)
-                </Badge>
+          <div className="mermaid-glass p-6 rounded-3xl border border-rose-500/40 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-rose-500/25 pb-3">
+              <div className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-rose-500 animate-pulse" />
+                <h2 className="text-sm sm:text-base font-bold text-foreground">
+                  {t("phc.potentialSurge", "Potential Surge / Early Warning Signals")} ({facility?.name})
+                </h2>
               </div>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
+              <Badge variant="destructive" className="text-[10px] rounded-xl font-bold">
+                Statistical Anomaly (Z &gt; 1.8)
+              </Badge>
+            </div>
+
+            <div className="space-y-3">
               {outbreakSignals.map((sig: any, idx: number) => (
-                <div key={idx} className="p-3.5 rounded-lg bg-slate-950/80 border border-rose-500/30 space-y-2">
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-card/60 border border-rose-500/30 space-y-2 backdrop-blur-md"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-rose-300">{sig.signalName}</span>
-                    <span className="text-xs font-mono text-cyan-300">Confidence: {sig.confidence}%</span>
+                    <span className="text-sm font-bold text-rose-400">{sig.signalName}</span>
+                    <span className="text-xs font-mono text-teal-500 font-bold">
+                      {t("phc.confidence", "Confidence")}: {sig.confidence}%
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-300">
-                    Observed count: <strong>{sig.currentRate}/week</strong> vs Baseline: <strong>{sig.baselineAverage}/week</strong> (+{sig.percentageDeviation}% anomaly spike, Z-score: {sig.zScore}).
+                  <p className="text-xs text-muted-foreground">
+                    {t("phc.observedCount", "Observed count")}:{" "}
+                    <strong className="text-foreground">{sig.currentRate}/week</strong> {t("phc.vsBaseline", "vs Baseline")}:{" "}
+                    <strong className="text-foreground">{sig.baselineAverage}/week</strong> (+{sig.percentageDeviation}% anomaly spike, Z-score: {sig.zScore}).
                   </p>
-                  <p className="text-xs text-cyan-300 font-mono">
-                    ↳ Proactive Action: {sig.recommendedAction}
+                  <p className="text-xs text-teal-600 dark:text-teal-400 font-mono font-medium">
+                    ↳ {t("phc.proactiveAction", "Proactive Action")}: {sig.recommendedAction}
                   </p>
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Forecast Chart: Historical vs Predicted vs Confidence Range */}
-        <Card className="bg-slate-900/80 border-cyan-500/30 shadow-xl">
-          <CardHeader className="p-4 pb-2 border-b border-slate-800">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <CardTitle className="text-base font-bold text-cyan-300 flex items-center gap-2">
-                  <ChartIcon className="h-4 w-4" />
-                  7-Day Projected Patient Footfall Trajectory & Confidence Interval
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Displays Historical load, AI Moving Average projection, and ±15% statistical confidence bounds
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-4 text-xs font-mono">
-                <span className="flex items-center gap-1 text-slate-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400" /> Historical
-                </span>
-                <span className="flex items-center gap-1 text-cyan-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" /> Predicted
-                </span>
-                <span className="flex items-center gap-1 text-indigo-400">
-                  <span className="w-2.5 h-2.5 rounded bg-indigo-500/30 border border-indigo-400" /> Confidence Range
-                </span>
-              </div>
+        <div className="mermaid-glass p-6 rounded-3xl border border-teal-500/25 shadow-xl space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-500/15 pb-3">
+            <div>
+              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                <ChartIcon className="h-4 w-4 text-[#05D3B3]" />
+                {t(
+                  "phc.footfallTrajectory",
+                  "7-Day Projected Patient Footfall Trajectory & Confidence Interval"
+                )}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  "phc.footfallTrajectorySubtitle",
+                  "Displays Historical load, AI Moving Average projection, and ±15% statistical confidence bounds"
+                )}
+              </p>
             </div>
-          </CardHeader>
-          <CardContent className="p-4 h-[340px]">
+            <div className="flex items-center gap-4 text-xs font-mono font-bold">
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                {t("phc.historical", "Historical")}
+              </span>
+              <span className="flex items-center gap-1.5 text-[#05D3B3]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#05D3B3]" />
+                {t("phc.predicted", "Predicted")}
+              </span>
+              <span className="flex items-center gap-1.5 text-indigo-400">
+                <span className="w-2.5 h-2.5 rounded bg-indigo-500/30 border border-indigo-400" />
+                {t("phc.confidenceRange", "Confidence Range")}
+              </span>
+            </div>
+          </div>
+
+          <div className="h-[340px] w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="confidenceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#818cf8" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#818cf8" stopOpacity={0.02} />
+                    <stop offset="5%" stopColor="#05D3B3" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#05D3B3" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(45, 212, 191, 0.15)" />
                 <XAxis dataKey="day" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} domain={['dataMin - 20', 'dataMax + 30']} />
+                <YAxis stroke="#64748b" fontSize={11} domain={["dataMin - 20", "dataMax + 30"]} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#00f3ff', borderRadius: '8px', fontSize: '12px' }}
+                  contentStyle={{
+                    backgroundColor: "rgba(6, 18, 21, 0.95)",
+                    borderColor: "#05D3B3",
+                    borderRadius: "16px",
+                    fontSize: "12px",
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+                  }}
                 />
-                <Area type="monotone" dataKey="upperBound" stroke="#818cf8" strokeDasharray="3 3" fill="url(#confidenceGradient)" name="Upper Confidence Bound" />
-                <Area type="monotone" dataKey="lowerBound" stroke="#818cf8" strokeDasharray="3 3" fill="transparent" name="Lower Confidence Bound" />
-                <Line type="monotone" dataKey="actual" stroke="#94a3b8" strokeWidth={3} dot={{ r: 4, fill: "#94a3b8" }} name="Historical Actual" />
-                <Line type="monotone" dataKey="projected" stroke="#00f3ff" strokeWidth={3} dot={{ r: 4, fill: "#00f3ff" }} name="AI Projected" />
+                <Area
+                  type="monotone"
+                  dataKey="upperBound"
+                  stroke="#818cf8"
+                  strokeDasharray="3 3"
+                  fill="url(#confidenceGradient)"
+                  name="Upper Confidence Bound"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="lowerBound"
+                  stroke="#818cf8"
+                  strokeDasharray="3 3"
+                  fill="transparent"
+                  name="Lower Confidence Bound"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="actual"
+                  stroke="#94a3b8"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: "#94a3b8" }}
+                  name="Historical Actual"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="projected"
+                  stroke="#05D3B3"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: "#05D3B3" }}
+                  name="AI Projected"
+                />
               </AreaChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Medicine Demand Forecast Matrix */}
-        <Card className="bg-slate-900/80 border-cyan-500/30">
-          <CardHeader className="p-4 pb-2 border-b border-slate-800">
-            <CardTitle className="text-base font-bold text-white flex items-center gap-2">
-              <Pill className="h-4 w-4 text-cyan-400" />
+        <div className="mermaid-glass p-6 rounded-3xl border border-teal-500/25 shadow-xl space-y-4">
+          <div className="border-b border-teal-500/15 pb-3">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+              <Pill className="h-4 w-4 text-[#05D3B3]" />
               Medicine Demand Forecast & Estimated Depletion Windows
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-400">
+            </h2>
+            <p className="text-xs text-muted-foreground">
               Combines historical consumption rate, current footfall momentum, and outbreak surge multipliers
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 overflow-x-auto">
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-teal-500/15">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <thead className="bg-card/80 text-muted-foreground border-b border-teal-500/20 font-mono uppercase">
                 <tr>
-                  <th className="p-3">Medicine Name</th>
-                  <th className="p-3">Current Stock</th>
-                  <th className="p-3">Projected Daily Demand</th>
-                  <th className="p-3">7-Day Demand</th>
-                  <th className="p-3">30-Day Demand</th>
-                  <th className="p-3">Estimated Depletion Window</th>
-                  <th className="p-3">Stockout Risk</th>
+                  <th className="p-3.5">Medicine Name</th>
+                  <th className="p-3.5">Current Stock</th>
+                  <th className="p-3.5">Projected Daily Demand</th>
+                  <th className="p-3.5">7-Day Demand</th>
+                  <th className="p-3.5">30-Day Demand</th>
+                  <th className="p-3.5">Estimated Depletion Window</th>
+                  <th className="p-3.5">Stockout Risk</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+              <tbody className="divide-y divide-teal-500/10 bg-card/40 font-medium">
                 {medicineForecasts.map((med: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-cyan-950/20 transition">
-                    <td className="p-3 font-semibold text-slate-200">
+                  <tr key={idx} className="hover:bg-teal-500/10 transition">
+                    <td className="p-3.5 font-bold text-foreground">
                       {med.medicineName}
-                      <span className="block text-[10px] text-slate-500 font-mono">#{med.batchNumber}</span>
+                      <span className="block text-[10px] text-muted-foreground font-mono">#{med.batchNumber}</span>
                     </td>
-                    <td className="p-3 font-bold text-white">
+                    <td className="p-3.5 font-bold font-mono text-foreground">
                       {med.currentStock}
-                      <span className="block text-[10px] text-slate-400 font-normal">min {med.safeBufferThreshold}</span>
-                    </td>
-                    <td className="p-3 text-cyan-300 font-medium">
-                      {med.forecastedDailyDemand} /day
-                      <span className="block text-[10px] text-slate-500 font-mono">
-                        ({med.confidenceInterval?.dailyLow} - {med.confidenceInterval?.dailyHigh})
+                      <span className="block text-[10px] text-muted-foreground font-normal font-sans">
+                        min {med.safeBufferThreshold}
                       </span>
                     </td>
-                    <td className="p-3 text-indigo-300 font-medium">{med.demand7Days}</td>
-                    <td className="p-3 text-slate-300">{med.demand30Days}</td>
-                    <td className="p-3 font-semibold text-indigo-300">
-                      {med.estimatedDepletionWindow}
-                      <span className="block text-[10px] text-slate-500 font-mono">Confidence: {med.confidence}%</span>
+                    <td className="p-3.5 text-teal-600 dark:text-teal-300 font-mono font-bold">
+                      {med.forecastedDailyDemand} /day
                     </td>
-                    <td className="p-3">
+                    <td className="p-3.5 text-foreground font-mono">{med.demand7Days}</td>
+                    <td className="p-3.5 text-muted-foreground font-mono">{med.demand30Days}</td>
+                    <td className="p-3.5 font-bold text-foreground font-mono">
+                      {med.estimatedDepletionWindow}
+                    </td>
+                    <td className="p-3.5">
                       <Badge
                         variant="outline"
-                        className={
+                        className={`rounded-xl text-[10px] font-bold ${
                           med.stockoutRisk === "Critical"
-                            ? "border-rose-500 text-rose-400 bg-rose-950/30 text-[10px]"
+                            ? "border-rose-500 text-rose-500 bg-rose-500/10"
                             : med.stockoutRisk === "High"
-                            ? "border-amber-500 text-amber-400 bg-amber-950/30 text-[10px]"
-                            : "border-emerald-500 text-emerald-400 bg-emerald-950/30 text-[10px]"
-                        }
+                            ? "border-amber-500 text-amber-500 bg-amber-500/10"
+                            : "border-emerald-500 text-emerald-500 bg-emerald-500/10"
+                        }`}
                       >
                         {med.stockoutRisk}
                       </Badge>
@@ -371,8 +431,8 @@ export default function AIEpidemicSurge() {
                 ))}
               </tbody>
             </table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );

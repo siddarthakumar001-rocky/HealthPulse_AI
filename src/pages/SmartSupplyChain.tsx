@@ -13,6 +13,7 @@ import {
   RedistributionRec,
   ActiveTransfer,
 } from "@/services/phcService";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   AlertOctagon,
@@ -39,6 +40,7 @@ import {
 } from "lucide-react";
 
 export default function SmartSupplyChain() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [facilities, setFacilities] = useState<PHCFacility[]>([]);
@@ -150,11 +152,11 @@ export default function SmartSupplyChain() {
                 • {inventory.length} Stock Batches Monitored
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300 mt-1">
-              Smart Inventory & Inter-PHC Redistribution
+            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight mt-1">
+              {t("phc.supplyChainTitle", "Smart Inventory & Inter-PHC Redistribution")}
             </h1>
-            <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-              IoT-enabled medicine weights, cold-chain temperature telemetry, stockout forecasting, and automated rebalance
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+              {t("phc.supplyChainSubtitle", "IoT-enabled medicine weights, cold-chain temperature telemetry, stockout forecasting, and automated rebalance")}
             </p>
           </div>
 

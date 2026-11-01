@@ -73,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("token");
     localStorage.removeItem("admin_token");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("i18nextLng");
     setUser(null);
   };
 

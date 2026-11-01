@@ -62,8 +62,9 @@ export function AppSidebar() {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   const handleSignOut = async () => {
+    setShowSignOutModal(false);
     await signOut();
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   return (

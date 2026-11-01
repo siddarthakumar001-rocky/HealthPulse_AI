@@ -42,6 +42,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Calculate distance in km
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -139,6 +140,7 @@ function MapViewController({ center, zoom }: { center: [number, number]; zoom?: 
 
 export default function PHCCommandDashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [kpis, setKpis] = useState<NetworkKPIs | null>(null);
@@ -284,11 +286,11 @@ export default function PHCCommandDashboard() {
                 <Radio className="h-3 w-3 animate-pulse" /> Live Telemetry Feed
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300 mt-1">
-              Public Healthcare Network Command Hub
+            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight mt-1">
+              {t("phc.commandHubTitle", "Public Healthcare Network Command Hub")}
             </h1>
-            <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-              Continuous monitoring of Primary Health Centres (PHCs), CHCs, Cold Chains & Outbreak Signals near your location
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+              {t("phc.commandHubSubtitle", "Continuous monitoring of Primary Health Centres (PHCs), CHCs, Cold Chains & Outbreak Signals near your location")}
             </p>
           </div>
 
