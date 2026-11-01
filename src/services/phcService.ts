@@ -62,7 +62,12 @@ export interface InventoryItem {
     confidenceInterval: {
       dailyLow: number;
       dailyHigh: number;
+      sevenDayLow?: number;
+      sevenDayHigh?: number;
     };
+    estimatedDaysLeft?: number;
+    stockHealth?: string;
+    surgeFactorApplied?: number;
   };
 }
 
