@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, ArrowLeft, ArrowRight, User, Mail, Phone, ShieldCheck, Lock, Activity, Eye, EyeOff } from "lucide-react";
+import { Heart, ArrowRight, User, Mail, Phone, ShieldCheck, Lock, Activity, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { api } from "../services/api";
@@ -65,18 +65,9 @@ export default function Signup() {
       <AntiGravityBackground />
 
       {/* Top HUD Controls */}
-      <header className="relative z-10 w-full max-w-xl mx-auto flex items-center justify-between pt-2">
-        <Link
-          to="/"
-          className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 flex items-center justify-center text-foreground hover:bg-white shadow-sm transition active:scale-95"
-          title="Return to Home"
-        >
-          <ArrowLeft className="w-5 h-5 text-foreground/80" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-        </div>
+      <header className="relative z-30 w-full max-w-xl mx-auto flex items-center justify-end pt-2 gap-2">
+        <LanguageSwitcher />
+        <ThemeToggle />
       </header>
 
       {/* Center Form Card */}
@@ -110,10 +101,10 @@ export default function Signup() {
                 <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                   {t("signup.fullName", "Full Name")}
                 </Label>
-                <div className="relative flex items-center">
-                  <User className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                <div className="relative w-full">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                   <Input
-                    className="antigravity-input pl-10 h-11 text-sm font-medium"
+                    className="antigravity-input pl-10 h-11 text-sm font-medium w-full"
                     placeholder="Enter full name"
                     value={form.name}
                     onChange={(e) => update("name", e.target.value)}
@@ -126,11 +117,12 @@ export default function Signup() {
                 <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                   {t("login.email", "Email Address")}
                 </Label>
-                <div className="relative flex items-center">
-                  <Mail className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                <div className="relative w-full">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                   <Input
                     type="email"
-                    className="antigravity-input pl-10 h-11 text-sm font-medium"
+                    inputMode="email"
+                    className="antigravity-input pl-10 h-11 text-sm font-medium w-full"
                     placeholder="Enter email address"
                     value={form.email}
                     onChange={(e) => update("email", e.target.value)}
@@ -145,10 +137,12 @@ export default function Signup() {
                 <Label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                   {t("signup.phone", "Phone Number")}
                 </Label>
-                <div className="relative flex items-center">
-                  <Phone className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                <div className="relative w-full">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                   <Input
-                    className="antigravity-input pl-10 h-11 text-sm font-medium"
+                    type="tel"
+                    inputMode="tel"
+                    className="antigravity-input pl-10 h-11 text-sm font-medium w-full"
                     placeholder="Enter phone number"
                     value={form.phone}
                     onChange={(e) => update("phone", e.target.value)}
@@ -163,7 +157,8 @@ export default function Signup() {
                 </Label>
                 <Input
                   type="number"
-                  className="antigravity-input h-11 text-sm font-medium px-4"
+                  inputMode="numeric"
+                  className="antigravity-input h-11 text-sm font-medium px-4 w-full"
                   placeholder="Enter age"
                   value={form.age}
                   onChange={(e) => update("age", e.target.value)}
@@ -178,7 +173,7 @@ export default function Signup() {
                   {t("onboarding.gender", "Gender")}
                 </Label>
                 <Select onValueChange={(v) => update("gender", v)}>
-                  <SelectTrigger className="antigravity-input h-11 text-sm font-medium px-4">
+                  <SelectTrigger className="antigravity-input h-11 text-sm font-medium px-4 w-full">
                     <SelectValue placeholder={t("common.select", "Select Gender")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -194,7 +189,9 @@ export default function Signup() {
                   {t("signup.emergencyContact", "Emergency Contact")}
                 </Label>
                 <Input
-                  className="antigravity-input h-11 text-sm font-medium px-4"
+                  type="tel"
+                  inputMode="tel"
+                  className="antigravity-input h-11 text-sm font-medium px-4 w-full"
                   placeholder="Emergency phone number"
                   value={form.emergencyContact}
                   onChange={(e) => update("emergencyContact", e.target.value)}
@@ -220,8 +217,13 @@ export default function Signup() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  tabIndex={-1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowPassword(!showPassword);
+                  }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-auto p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

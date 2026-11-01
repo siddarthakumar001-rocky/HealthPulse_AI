@@ -73,14 +73,14 @@ export default function Login() {
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, ease: "out" }}
-          className="antigravity-card p-6 sm:p-8 space-y-6"
+          className="mermaid-glass p-6 sm:p-8 space-y-6 shadow-2xl border border-teal-400/35"
         >
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-inner">
-              <Heart className="h-7 w-7 text-primary animate-pulse" />
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/15 border border-teal-400/35 text-teal-600 dark:text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.25)] shadow-inner">
+              <Heart className="h-7 w-7 text-teal-600 dark:text-teal-400 animate-pulse" />
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase">
+            <div className="mermaid-chip text-[10px] font-bold tracking-wider uppercase border-teal-400/40 bg-teal-500/10 text-teal-700 dark:text-teal-300">
               <ShieldCheck className="w-3 h-3" /> IoMT Encrypted Access
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-display">
@@ -137,17 +137,17 @@ export default function Login() {
                     e.stopPropagation();
                     setShowPassword(!showPassword);
                   }}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-auto p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-teal-500 transition cursor-pointer"
                   title={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4 text-teal-500" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             <Button
               type="submit"
-              className="antigravity-btn w-full h-12 text-sm uppercase tracking-wider font-extrabold flex items-center justify-center gap-2 mt-2"
+              className="mermaid-btn w-full h-12 text-sm uppercase tracking-wider font-extrabold flex items-center justify-center gap-2 mt-2 shadow-[0_8px_25px_rgba(13,148,136,0.35)]"
               disabled={loading}
             >
               {loading ? (
