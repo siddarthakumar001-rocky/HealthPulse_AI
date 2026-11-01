@@ -8,8 +8,16 @@ export function BackButton() {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Hide on Landing page or Admin views
-  if (location.pathname === "/" || location.pathname === "/dashboard" || location.pathname.startsWith("/admin")) {
+  // Hide on Landing page, Auth pages, Onboarding or Admin views (since they have their own header back buttons)
+  if (
+    location.pathname === "/" ||
+    location.pathname === "/dashboard" ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/admin-login" ||
+    location.pathname === "/onboarding" ||
+    location.pathname.startsWith("/admin")
+  ) {
     return null;
   }
 
