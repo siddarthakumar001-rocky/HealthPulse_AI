@@ -26,7 +26,7 @@ function HolographicParticles() {
         <motion.circle
           key={p.id}
           cx={p.x} cy={p.y * 2.5} r={p.size * 0.3}
-          fill="rgba(227,83,54,0.45)"
+          fill="rgba(6,214,160,0.55)"
           animate={{ cy: [p.y * 2.5, p.y * 2.5 - 30, p.y * 2.5], opacity: [0.2, 0.7, 0.2] }}
           transition={{ duration: p.dur, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
         />
@@ -88,7 +88,7 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
   }, []);
 
   return (
-    <div className="relative w-full h-[400px] md:h-[600px] flex items-center justify-center overflow-hidden rounded-2xl bg-card border border-border"
+    <div className="relative w-full h-[400px] md:h-[600px] flex items-center justify-center overflow-hidden rounded-3xl mermaid-glass border border-teal-400/35 shadow-2xl"
       style={{
         boxShadow: "0 4px 30px rgba(0,0,0,0.15), inset 0 0 40px rgba(227,83,54,0.03)",
       }}
@@ -110,8 +110,8 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
       <motion.div
         className="absolute left-0 w-full h-[2px] pointer-events-none z-20"
         style={{
-          background: "linear-gradient(to right, transparent, rgba(227,83,54,0.8), rgba(255,126,103,0.8), rgba(227,83,54,0.8), transparent)",
-          boxShadow: "0 0 15px rgba(227,83,54,0.6)",
+          background: "linear-gradient(to right, transparent, rgba(6,214,160,0.85), rgba(0,240,181,0.95), rgba(6,214,160,0.85), transparent)",
+          boxShadow: "0 0 18px rgba(6,214,160,0.7)",
         }}
         animate={{ top: ["0%", "100%"] }}
         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
@@ -393,7 +393,7 @@ export default function HumanBodyView({ heartRate, fingerPresent, status, painAr
 
       {/* Corner HUD overlays */}
       <div className="absolute top-4 left-4 z-20">
-        <p className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: "#E35336", textShadow: "0 0 10px rgba(227,83,54,0.5)" }}>
+        <p className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: "#0D9488", textShadow: "0 0 10px rgba(45,212,191,0.6)" }}>
           SYS_STATUS: <span className={status === 'connected' ? 'text-emerald-500' : 'text-amber-500'}>{status.toUpperCase()}</span>
         </p>
         <p className="font-mono text-[8px] tracking-widest uppercase text-muted-foreground">

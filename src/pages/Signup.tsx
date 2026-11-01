@@ -65,7 +65,7 @@ export default function Signup() {
       <AntiGravityBackground />
 
       {/* Top HUD Controls */}
-      <header className="relative z-30 w-full max-w-xl mx-auto flex items-center justify-end pt-2 gap-2">
+      <header className="relative z-30 w-full max-w-xl mx-auto flex items-center justify-end pt-2 pl-16 gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
       </header>

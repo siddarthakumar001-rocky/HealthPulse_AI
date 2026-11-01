@@ -62,7 +62,7 @@ export default function Login() {
       <AntiGravityBackground />
 
       {/* Top Controls: Right Anchored Language & Theme */}
-      <header className="relative z-30 w-full max-w-md mx-auto flex items-center justify-end pt-2 gap-2">
+      <header className="relative z-30 w-full max-w-md mx-auto flex items-center justify-end pt-2 pl-16 gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
       </header>

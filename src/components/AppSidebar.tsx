@@ -6,13 +6,11 @@ import {
   User,
   Smartphone,
   LogOut,
-  Heart,
   Activity,
   Building,
   Boxes,
   BrainCircuit,
   Siren,
-  Sparkles,
   Stethoscope,
   FlaskConical,
 } from "lucide-react";
@@ -72,37 +70,23 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="icon"
-        className="border-r border-border [&>div]:bg-[#181519] [&>div]:dark:bg-[#181519]"
-        style={{
-          background: "#181519",
-          borderRight: "1px solid rgba(58, 47, 53, 0.6)",
-          boxShadow: "4px 0 24px rgba(0, 0, 0, 0.2)",
-          colorScheme: "dark",
-        }}
+        className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xl"
       >
-        <SidebarContent className="space-y-2">
+        <SidebarContent className="space-y-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
           {/* Logo Header */}
           <SidebarGroup>
             <SidebarGroupLabel className="px-4 py-4">
               <div className="flex items-center gap-2">
                 <motion.div
-                  animate={{ scale: [1, 1.15, 1] }}
+                  animate={{ scale: [1, 1.12, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg"
-                  style={{
-                    background: "rgba(227,83,54,0.15)",
-                    border: "1px solid rgba(227,83,54,0.3)",
-                    boxShadow: "0 0 8px rgba(227,83,54,0.25)",
-                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary shadow-sm"
                 >
                   <Activity className="h-4 w-4 text-primary" />
                 </motion.div>
                 {!collapsed && (
-                  <span
-                    className="font-display text-xs font-bold tracking-widest text-[#F5EBE6]"
-                    style={{ textShadow: "0 0 8px rgba(227,83,54,0.3)" }}
-                  >
-                    HEALTHPULSE <span className="text-primary">AI</span>
+                  <span className="font-display text-sm font-extrabold tracking-wider text-slate-900 dark:text-white uppercase">
+                    HEALTH<span className="text-primary">PULSE</span> AI
                   </span>
                 )}
               </div>
@@ -112,7 +96,7 @@ export function AppSidebar() {
           {/* Group 1: Public Health Network */}
           <SidebarGroup>
             {!collapsed && (
-              <SidebarGroupLabel className="px-4 text-[10px] font-mono uppercase tracking-widest text-[#B5A59E]">
+              <SidebarGroupLabel className="px-4 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                 {t("nav.publicHealthNetwork", "Public Health Network")}
               </SidebarGroupLabel>
             )}
@@ -128,21 +112,16 @@ export function AppSidebar() {
                           to={item.url}
                           end
                           className={`
-                            flex items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300
-                            font-mono text-xs font-bold uppercase tracking-wider
+                            flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200
+                            font-sans text-xs font-bold uppercase tracking-wide
                             ${isActive
-                              ? "text-primary"
-                              : "text-white/80 hover:text-primary hover:bg-white/5"
+                              ? "bg-primary/10 text-primary border border-primary/20 font-extrabold shadow-sm"
+                              : "text-slate-700 dark:text-slate-300 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
                             }
                           `}
-                          style={isActive ? {
-                            background: "rgba(227,83,54,0.15)",
-                            border: "1px solid rgba(227,83,54,0.35)",
-                            boxShadow: "0 0 12px rgba(227,83,54,0.25)"
-                          } : {}}
                           activeClassName=""
                         >
-                          <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-white/60"}`} />
+                          <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-slate-400"}`} />
                           {!collapsed && <span>{label}</span>}
                         </NavLink>
                       </SidebarMenuButton>
@@ -156,7 +135,7 @@ export function AppSidebar() {
           {/* Group 2: Personal Healthcare */}
           <SidebarGroup>
             {!collapsed && (
-              <SidebarGroupLabel className="px-4 text-[10px] font-mono uppercase tracking-widest text-[#B5A59E]">
+              <SidebarGroupLabel className="px-4 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                 {t("nav.personalHealthcare", "Personal Healthcare")}
               </SidebarGroupLabel>
             )}
@@ -173,21 +152,16 @@ export function AppSidebar() {
                           to={item.url}
                           end
                           className={`
-                            flex items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300
-                            font-mono text-xs font-bold uppercase tracking-wider
+                            flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200
+                            font-sans text-xs font-bold uppercase tracking-wide
                             ${isActive
-                              ? "text-primary"
-                              : "text-white/70 hover:text-primary hover:bg-white/5"
+                              ? "bg-primary/10 text-primary border border-primary/20 font-extrabold shadow-sm"
+                              : "text-slate-700 dark:text-slate-300 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
                             }
                           `}
-                          style={isActive ? {
-                            background: "rgba(227,83,54,0.15)",
-                            border: "1px solid rgba(227,83,54,0.35)",
-                            boxShadow: "0 0 12px rgba(227,83,54,0.25)"
-                          } : {}}
                           activeClassName=""
                         >
-                          <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                          <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-slate-400"}`} />
                           {!collapsed && <span>{label}</span>}
                         </NavLink>
                       </SidebarMenuButton>
@@ -199,20 +173,12 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="p-3">
+        <SidebarFooter className="p-3 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
           <motion.button
             onClick={() => setShowSignOutModal(true)}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.96 }}
-            className={`
-              w-full flex items-center gap-3 rounded-xl px-3 py-2.5
-              font-mono text-xs font-bold uppercase tracking-wider
-              text-white/60 hover:text-red-400 transition-all duration-300
-            `}
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-xs font-bold uppercase tracking-wide text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/30 transition-all duration-200"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             {!collapsed && <span>{t("nav.signOut", "Sign Out")}</span>}
@@ -229,26 +195,18 @@ export function AppSidebar() {
       >
         <div className="flex gap-3 mt-4">
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSignOut}
-            className="flex-1 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-widest text-black"
-            style={{
-              background: "linear-gradient(135deg, #00f3ff, #0066ff)",
-              boxShadow: "0 0 16px rgba(0,243,255,0.4)",
-            }}
+            className="flex-1 py-2.5 rounded-xl font-sans text-xs font-extrabold uppercase tracking-widest text-white bg-destructive hover:bg-destructive/90 shadow-md"
           >
             Confirm
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowSignOutModal(false)}
-            className="flex-1 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-widest text-white/80"
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.15)",
-            }}
+            className="flex-1 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
           >
             Cancel
           </motion.button>

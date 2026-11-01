@@ -347,14 +347,14 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <motion.div
                 className="h-3.5 w-3.5 rounded-full"
-                style={{ background: "#E35336", boxShadow: "0 0 14px rgba(227,83,54,0.7)" }}
+                style={{ background: "#05D3B3", boxShadow: "0 0 16px rgba(5,211,179,0.8)" }}
                 animate={{ scale: [1, 1.35, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 1.8, repeat: Infinity }}
               />
               <h1
                 className="font-display text-2xl md:text-4xl font-black tracking-[0.15em] text-foreground"
               >
-                HEALTH<span className="text-primary">PULSE</span> AI
+                HEALTH<span className="text-teal-500">PULSE</span> AI
               </h1>
             </div>
             <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-bold pl-6 text-muted-foreground">
@@ -364,12 +364,12 @@ export default function Dashboard() {
 
           <div className="flex flex-wrap items-center gap-2">
             {/* IEEE Paper Mode Switcher */}
-            <div className="flex items-center rounded-xl bg-card border border-border p-1 shadow-sm">
+            <div className="flex items-center rounded-2xl mermaid-glass p-1 shadow-sm border border-teal-400/30">
               <button
                 onClick={() => setMonitoringMode("live")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-wider uppercase transition ${
                   monitoringMode === "live"
-                    ? "bg-primary text-primary-foreground shadow-sm"
+                    ? "bg-teal-500 text-white shadow-sm font-bold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -380,7 +380,7 @@ export default function Dashboard() {
                 onClick={() => setMonitoringMode("research")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-wider uppercase transition ${
                   monitoringMode === "research"
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-emerald-600 text-white shadow-sm font-bold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -393,7 +393,7 @@ export default function Dashboard() {
             <MagneticWrapper>
               <button
                 onClick={() => setVitalsModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider bg-card border border-border text-foreground hover:bg-muted transition shadow-sm"
+                className="mermaid-chip px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer border-teal-400/35 bg-white/70 dark:bg-teal-950/40 text-teal-900 dark:text-teal-100 shadow-sm"
               >
                 <PlusCircle className="h-3.5 w-3.5 text-primary" />
                 {t("dashboard.updateRealVitals", "Update Real Vitals")}
@@ -404,7 +404,7 @@ export default function Dashboard() {
             <MagneticWrapper>
               <button
                 onClick={toggleConnectionMode}
-                className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-wider uppercase px-3 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted transition shadow-sm"
+                className="mermaid-chip px-3.5 py-2 font-mono text-[11px] font-bold tracking-wider uppercase hover:scale-105 active:scale-95 transition-all cursor-pointer border-teal-400/35 bg-white/70 dark:bg-teal-950/40 text-teal-900 dark:text-teal-100 shadow-sm"
               >
                 <Radio className="h-3.5 w-3.5 text-primary animate-pulse" />
                 {connectionMode === "ble" && bleStatus === "connected"
@@ -419,7 +419,7 @@ export default function Dashboard() {
             <MagneticWrapper>
               <button
                 onClick={handleBLEConnect}
-                className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-wider uppercase px-3 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted transition shadow-sm"
+                className="mermaid-chip px-3.5 py-2 font-mono text-[11px] font-bold tracking-wider uppercase hover:scale-105 active:scale-95 transition-all cursor-pointer border-teal-400/35 bg-white/70 dark:bg-teal-950/40 text-teal-900 dark:text-teal-100 shadow-sm"
               >
                 <Bluetooth className="h-3.5 w-3.5 text-primary" />
                 {connectionMode === "ble" && bleStatus === "connected"
@@ -433,13 +433,8 @@ export default function Dashboard() {
               <button
                 onClick={handleCheckHealth}
                 disabled={isAnalyzing}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-widest text-primary-foreground transition shadow-md hover:opacity-95"
-                style={{
-                  background: "linear-gradient(135deg, #E35336 0%, #FF7E67 100%)",
-                  boxShadow: "0 4px 18px rgba(227,83,54,0.45)",
-                  border: "none",
-                  cursor: isAnalyzing ? "wait" : "pointer",
-                }}
+                className="mermaid-btn flex items-center gap-2 px-5 py-2 font-mono text-[11px] font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
+                style={{ cursor: isAnalyzing ? "wait" : "pointer" }}
               >
                 {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Brain className="h-3.5 w-3.5" />}
                 {t("dashboard.checkMyHealth", "CHECK MY HEALTH")}

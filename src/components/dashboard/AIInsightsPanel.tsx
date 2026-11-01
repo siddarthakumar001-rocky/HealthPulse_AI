@@ -57,18 +57,18 @@ function CircularProgress({ value, size = 80, strokeWidth = 5, color, label }: {
 function AICard({ children, emergency = false }: { children: React.ReactNode; emergency?: boolean }) {
   return (
     <motion.div
-      className={`relative rounded-2xl p-5 overflow-hidden border ${
+      className={`relative rounded-3xl p-5 overflow-hidden border ${
         emergency
-          ? "bg-red-50/70 dark:bg-[rgba(255,59,92,0.05)] border-red-400 dark:border-red-500/30"
-          : "bg-card/90 border-border"
-      } backdrop-blur-xl shadow-md`}
+          ? "bg-rose-500/10 border-rose-500/40"
+          : "mermaid-glass border-teal-400/35 shadow-xl"
+      } backdrop-blur-xl`}
       style={{
         boxShadow: emergency
-          ? "0 4px 30px rgba(255,59,92,0.15)"
-          : "0 4px 20px rgba(227,83,54,0.06)",
+          ? "0 4px 30px rgba(239,68,68,0.2)"
+          : "0 10px 30px rgba(13,148,136,0.14), inset 1px 1px 2px rgba(255,255,255,0.9)",
       }}
-      whileHover={{ scale: 1.03, y: -2 }}
-      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      transition={{ type: "spring", stiffness: 350, damping: 22 }}
     >
       <div className="absolute inset-0 pointer-events-none opacity-20" style={{
         background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%)"
@@ -83,7 +83,7 @@ export default function AIInsightsPanel({
 }: AIInsightsPanelProps) {
   const { t } = useTranslation();
   const isHighRisk = (stressLevel === 'HIGH' || isEmergency) && condition !== 'NOMINAL' && condition !== '';
-  const mainColor = isHighRisk ? "#dc2626" : "#E35336";
+  const mainColor = isHighRisk ? "#dc2626" : "#0D9488";
   const aiConfidence = healthScore > 0 ? Math.min(98, healthScore + 15) : 87;
   const anomalyCount = isHighRisk ? Math.floor(Math.random() * 3) + 1 : 0;
 
@@ -141,16 +141,16 @@ export default function AIInsightsPanel({
       {/* ── HEALTH SCORE ──────────────────────────────────────── */}
       <AICard>
         <div className="flex items-center gap-2 mb-3 relative z-10">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" style={{ boxShadow: "0 0 6px #E35336" }} />
+          <span className="h-1.5 w-1.5 rounded-full bg-teal-500" style={{ boxShadow: "0 0 8px #0D9488" }} />
           <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-foreground">
             {t("dashboard.healthScore", "Daily Health Score")}
           </h3>
         </div>
         <div className="flex items-center gap-4 relative z-10">
-          <CircularProgress value={healthScore} size={70} color={isHighRisk ? "#dc2626" : "#E35336"} label={t("dashboard.overall", "OVERALL")} />
+          <CircularProgress value={healthScore} size={70} color={isHighRisk ? "#dc2626" : "#0D9488"} label={t("dashboard.overall", "OVERALL")} />
           <div className="flex flex-col gap-1">
             <span className="font-display text-3xl font-bold" style={{
-              color: isHighRisk ? "#dc2626" : "#E35336",
+              color: isHighRisk ? "#dc2626" : "#0D9488",
               textShadow: `0 0 15px ${isHighRisk ? "rgba(220,38,38,0.3)" : "rgba(227,83,54,0.3)"}`
             }}>{healthScore}</span>
             <span className="font-mono text-[8px] font-bold text-muted-foreground">
@@ -164,18 +164,18 @@ export default function AIInsightsPanel({
       <AICard emergency={anomalyCount > 0}>
         <div className="flex items-center justify-between mb-2 relative z-10">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4" style={{ color: anomalyCount > 0 ? "#dc2626" : "#E35336" }} />
+            <Shield className="h-4 w-4" style={{ color: anomalyCount > 0 ? "#dc2626" : "#0D9488" }} />
             <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-foreground">
               {t("dashboard.anomalyDetection", "Anomaly Detection")}
             </h3>
           </div>
           <span className="font-display text-sm font-bold" style={{
-            color: anomalyCount > 0 ? "#dc2626" : "#E35336",
-            textShadow: `0 0 8px ${anomalyCount > 0 ? "#dc2626" : "#E35336"}`
+            color: anomalyCount > 0 ? "#dc2626" : "#0D9488",
+            textShadow: `0 0 8px ${anomalyCount > 0 ? "#dc2626" : "#0D9488"}`
           }}>{anomalyCount}</span>
         </div>
         <span className="font-mono text-[8px] uppercase tracking-widest font-bold relative z-10" style={{
-          color: anomalyCount > 0 ? "#dc2626" : "#E35336"
+          color: anomalyCount > 0 ? "#dc2626" : "#0D9488"
         }}>
           {anomalyCount > 0 ? t("dashboard.anomaliesFlagged", "ANOMALIES FLAGGED") : t("dashboard.allClear", "ALL CLEAR")}
         </span>
@@ -191,8 +191,8 @@ export default function AIInsightsPanel({
         </div>
         <div className="grid grid-cols-2 gap-2 relative z-10">
           {[
-            { label: "ESP32", status: t("dashboard.online", "ONLINE"), color: "#E35336" },
-            { label: "WiFi", status: t("dashboard.connected", "CONNECTED"), color: "#E35336" },
+            { label: "ESP32", status: t("dashboard.online", "ONLINE"), color: "#0D9488" },
+            { label: "WiFi", status: t("dashboard.connected", "CONNECTED"), color: "#0D9488" },
             { label: "MAX30102", status: t("dashboard.active", "ACTIVE"), color: "#10b981" },
             { label: "DS18B20", status: t("dashboard.active", "ACTIVE"), color: "#10b981" },
           ].map(s => (
