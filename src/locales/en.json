@@ -208,7 +208,9 @@
     "next": "Next",
     "select": "Select",
     "step": "Step",
-    "of": "of"
+    "of": "of",
+    "authorizing": "Authorizing...",
+    "resolving": "Resolving..."
   },
   "onboarding": {
     "title": "Health Profile",
@@ -751,6 +753,18 @@
     "chamber3Desc": "Receives purified oxygenated blood from lungs. System dynamically calibrates 99% SpO2 levels and systemic vascular resistance across all peripheral sensors.",
     "chamber4Name": "Chamber IV: Left Ventricle & Aorta Systemic Delivery",
     "chamber4Role": "High-Pressure Systolic Surge & Sub-Second Dispatch",
-    "chamber4Desc": "Massive muscular contraction pumps life-saving oxygen to the entire body. If arrhythmia or hypoxia spikes, autonomous PHC geofencing mobilizes emergency dispatch."
+    "chamber4Desc": "Massive muscular contraction pumps life-saving oxygen to the entire body. If arrhythmia or hypoxia spikes, autonomous PHC geofencing mobilizes emergency dispatch.",
+    "feature1Name": "Real-Time IoMT Biometric Sensor Fusion",
+    "feature1Role": "250 Hz Continuous Multi-Parametric Vitals Acquisition & Pacemaker Sync",
+    "feature1Desc": "Seamlessly pairs with Bluetooth Low Energy (BLE) medical wearables, optical pulse oximeters, smart patches, and ECG monitors. Streams high-fidelity continuous heart rate, SpO2, HRV, and skin temperature at 250 Hz with 16-bit Sigma-Delta precision.",
+    "feature2Name": "CSDI Neural Diffusion & Denoising Engine",
+    "feature2Role": "Deep-Learning Telemetry Imputation & Motion Artifact Cleansing",
+    "feature2Desc": "Eliminates movement artifacts, sweat-induced noise, and missing telemetry packets using conditional score-based diffusion models. Reconstructs missing biometric frames with 98.55% clinical fidelity before diagnostic evaluation.",
+    "feature3Name": "Autonomous Predictive Clinical Digital Twin",
+    "feature3Role": "Dynamic Biological Simulation & 48-Hour Decompensation Early Warning",
+    "feature3Desc": "Synthesizes a living computational replica of the patient's cardiovascular, pulmonary, and metabolic state. Automatically parses uploaded blood tests, scans, and questionnaires via OCR to forecast acute decompensation 48 hours prior to onset.",
+    "feature4Name": "Smart Supply Chain & Autonomous Emergency Ring",
+    "feature4Role": "District Epidemic Outbreak AI & Sub-Second Emergency PHC Geofencing",
+    "feature4Desc": "When life-threatening arrhythmias, severe hypoxia, or sudden stockouts occur, HealthPulse AI triggers the district primary health centre (PHC) ring, alerts ambulances, and dispatches automated inter-facility medicine transfers via IoT smart scales."
   }
 }
