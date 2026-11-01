@@ -25,7 +25,7 @@ export default function HowToUseModal({
 
   const speak = useCallback(
     (text: string, idx: number) => {
-      if ("speechSynthesis" in window) {
+      if (typeof window !== "undefined" && "speechSynthesis" in window && window.speechSynthesis) {
         window.speechSynthesis.cancel();
         if (speakingIdx === idx) {
           setSpeakingIdx(null);
@@ -88,7 +88,9 @@ export default function HowToUseModal({
         </div>
         <Button
           onClick={() => {
-            window.speechSynthesis.cancel();
+            if (typeof window !== "undefined" && "speechSynthesis" in window && window.speechSynthesis) {
+              window.speechSynthesis.cancel();
+            }
             onOpenChange(false);
           }}
           className="w-full mt-4 rounded-xl h-12 text-base font-bold shadow-lg shadow-primary/20"
