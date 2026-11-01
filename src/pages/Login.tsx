@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, Activity, ArrowLeft, Zap } from "lucide-react";
+import { Heart, Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, Activity, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useTranslation } from "react-i18next";
@@ -58,14 +58,14 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#F0F4F8] dark:bg-[#090D16] text-[#0F172A] dark:text-slate-100 flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+    <div className="relative min-h-screen w-full bg-[#F8FAFC] dark:bg-[#090D16] text-[#0F172A] dark:text-slate-100 flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <AntiGravityBackground />
 
       {/* Top HUD Controls */}
       <header className="relative z-10 w-full max-w-md mx-auto flex items-center justify-between pt-2">
         <Link
           to="/"
-          className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-slate-800/70 border border-white/80 dark:border-white/10 flex items-center justify-center text-foreground hover:bg-white shadow-sm transition active:scale-95"
+          className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 flex items-center justify-center text-foreground hover:bg-white shadow-sm transition active:scale-95"
           title="Return to Home"
         >
           <ArrowLeft className="w-5 h-5 text-foreground/80" />
@@ -107,12 +107,12 @@ export default function Login() {
                 {t("login.email", "Email Address")}
               </Label>
               <div className="relative flex items-center">
-                <Mail className="absolute left-3.5 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                 <Input
                   id="email"
                   type="email"
                   className="antigravity-input pl-10 h-12 text-sm font-medium"
-                  placeholder="name@example.com"
+                  placeholder="Enter email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -125,12 +125,12 @@ export default function Login() {
                 {t("login.password", "Password")}
               </Label>
               <div className="relative flex items-center">
-                <Lock className="absolute left-3.5 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  className="antigravity-input pl-10 pr-10 h-12 text-sm font-medium"
-                  placeholder="••••••••"
+                  className="antigravity-input pl-10 pr-12 h-12 text-sm font-medium"
+                  placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -138,7 +138,8 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
+                  title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -162,21 +163,9 @@ export default function Login() {
                 </>
               )}
             </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setEmail("bhoomi@example.com");
-                setPassword("123456");
-              }}
-              className="w-full h-11 rounded-2xl border-dashed border-primary/40 text-primary hover:bg-primary/5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
-            >
-              <Activity className="w-3.5 h-3.5 text-primary" /> Fill Demo Patient Account
-            </Button>
           </form>
 
-          {/* Quick Demo Credentials */}
+          {/* Quick Demo Link */}
           <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 text-center space-y-2">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {t("login.noAccount", "Don't have an account?")}{" "}
@@ -184,11 +173,6 @@ export default function Login() {
                 {t("login.signUp", "Create Account")}
               </Link>
             </p>
-            <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-slate-400">
-              <Link to="/login?admin=true" className="hover:text-primary transition underline">
-                Fill Admin Credentials
-              </Link>
-            </div>
           </div>
         </motion.div>
       </main>

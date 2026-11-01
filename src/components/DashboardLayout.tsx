@@ -10,11 +10,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import CursorTrail from "@/components/dashboard/CursorTrail";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { useScrollFlow } from "@/hooks/useScrollFlow";
 import { useState } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const location = useLocation();
+  const { isScrolled } = useScrollFlow(10);
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
 
   const addRipple = (e: React.MouseEvent) => {
@@ -45,7 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1 flex flex-col min-w-0">
             {/* ── GLASS HEADER ──────────────────────────────────── */}
             <header
-              className="sticky top-0 z-40 flex h-16 items-center justify-between px-3 sm:px-6 transition-all duration-300 bg-background/90 border-b border-border/80 pt-[env(safe-area-inset-top)]"
+              className={`sticky top-0 z-40 flex items-center justify-between px-3 sm:px-6 transition-all duration-300 pt-[env(safe-area-inset-top)] ${isScrolled ? "h-14 bg-background/95 border-b border-primary/20 shadow-md backdrop-blur-2xl" : "h-16 bg-background/80 border-b border-border/80 shadow-none backdrop-blur-xl"}`}
               style={{
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",

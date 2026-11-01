@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Activity, Stethoscope, FileText, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
+import { useScrollFlow } from "@/hooks/useScrollFlow";
 
 interface NavItem {
   name: string;
@@ -19,9 +20,15 @@ const navItems: NavItem[] = [
 
 export default function MobileBottomNav() {
   const location = useLocation();
+  const { scrollDirection, scrollY } = useScrollFlow(15);
+
+  const isHidden = scrollDirection === "down" && scrollY > 75;
 
   return (
-    <nav
+    <motion.nav
+      initial={{ y: 0 }}
+      animate={{ y: isHidden ? 110 : 0 }}
+      transition={{ type: "spring", stiffness: 380, damping: 32 }}
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-2xl border-t border-border/80 pb-[calc(env(safe-area-inset-bottom)+0.4rem)] pt-1.5 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
       aria-label="Mobile Navigation"
     >
@@ -77,7 +84,6 @@ export default function MobileBottomNav() {
           );
         })}
       </div>
-    </nav>
+    </motion.nav>
   );
 }
-
