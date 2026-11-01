@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { phcService, PHCFacility, NetworkKPIs, PHCAlertItem } from "@/services/phcService";
 import DigitalTwinDrawer from "@/components/DigitalTwinDrawer";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-leaflet";
@@ -61,7 +59,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 
 // Leaflet custom marker generator
 const createCustomMarker = (status: string) => {
-  let color = "#10b981"; // green
+  let color = "#05D3B3"; // teal
   if (status === "Warning") color = "#f59e0b"; // yellow
   else if (status === "Critical") color = "#ef4444"; // red
   else if (status === "Outbreak") color = "#a855f7"; // purple
@@ -102,19 +100,19 @@ const userLiveIcon = L.divIcon({
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: rgba(0, 229, 255, 0.35);
+        background: rgba(0, 245, 212, 0.4);
         animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
       "></div>
       <div style="
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 18px;
-        height: 18px;
+        position: relative;
+        width: 14px;
+        height: 14px;
+        top: 5px;
+        left: 5px;
         border-radius: 50%;
-        background: #00E5FF;
-        border: 2px solid white;
-        box-shadow: 0 0 14px #00E5FF;
+        background: #00F5D4;
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 10px #00F5D4;
       "></div>
     </div>
   `,
@@ -122,48 +120,55 @@ const userLiveIcon = L.divIcon({
   iconAnchor: [12, 12],
 });
 
+// Auto-Center Map Helper
 function MapHelper({ facilities }: { facilities: PHCFacility[] }) {
   const map = useMap();
   useEffect(() => {
-    setTimeout(() => map.invalidateSize(), 150);
-  }, [map, facilities.length]);
+    if (facilities.length > 0) {
+      const bounds = L.latLngBounds(facilities.map((f) => [f.latitude, f.longitude]));
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+    }
+  }, [facilities, map]);
   return null;
 }
 
-function MapViewController({ center, zoom }: { center: [number, number]; zoom?: number }) {
+// Controller to smoothly pan to center coordinates
+function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, zoom || 12, { duration: 1.2 });
+    map.flyTo(center, zoom, { duration: 1.2 });
   }, [center, zoom, map]);
   return null;
 }
 
 export default function PHCCommandDashboard() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [facilities, setFacilities] = useState<PHCFacility[]>([]);
+  const [kpis, setKpis] = useState<NetworkKPIs | null>(null);
+  const [recentAlerts, setRecentAlerts] = useState<PHCAlertItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [kpis, setKpis] = useState<NetworkKPIs | null>(null);
-  const [facilities, setFacilities] = useState<PHCFacility[]>([]);
-  const [recentAlerts, setRecentAlerts] = useState<PHCAlertItem[]>([]);
+  const [simulating, setSimulating] = useState(false);
+
+  // Digital Twin Drawer
   const [selectedPHCId, setSelectedPHCId] = useState<string | null>(null);
   const [isTwinOpen, setIsTwinOpen] = useState(false);
-  const [simulating, setSimulating] = useState(false);
+
+  // Filters & State
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [districtFilter, setDistrictFilter] = useState<string>("NEAR_ME");
 
-  // Real-time user GPS
+  // Geolocation & Dynamic Map State
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([12.9716, 77.5946]); // Bengaluru default
+  const [mapZoom, setMapZoom] = useState<number>(11);
   const [locating, setLocating] = useState(false);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([12.9716, 77.5946]);
-  const [mapZoom, setMapZoom] = useState(12);
 
   const loadData = useCallback(
-    async (showToast = false, coords?: [number, number]) => {
+    async (showToast = false, loc = userLocation) => {
       try {
         if (showToast) setRefreshing(true);
-        const loc = coords || userLocation;
-
         const [overviewRes, facRes] = await Promise.all([
           phcService.getNetworkOverview(),
           loc
@@ -274,252 +279,254 @@ export default function PHCCommandDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 pb-12 max-w-[1600px] mx-auto">
-        {/* Top Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cyan-500/20 pb-4">
-          <div>
+      <div className="space-y-6 pb-16 max-w-7xl mx-auto">
+        
+        {/* ── HEADER STRIP (ANTIGRAVITY MEDICAL GLASS) ── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-teal-500/20 pb-5">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 tracking-wide uppercase">
-                Enterprise Command Center • Live GPS & Network Intelligence
+              <span className="mermaid-chip text-[11px] font-bold">
+                <Globe className="h-3.5 w-3.5 text-[#05D3B3]" />
+                {t("phc.enterpriseCommandCenter", "Enterprise Command Center • Live GPS & Network Intelligence")}
               </span>
-              <span className="flex items-center gap-1 text-xs text-emerald-400">
-                <Radio className="h-3 w-3 animate-pulse" /> Live Telemetry Feed
+              <span className="flex items-center gap-1 text-xs text-[#05D3B3] font-mono">
+                <Radio className="h-3 w-3 animate-pulse" /> {t("phc.liveTelemetryFeed", "Live Telemetry Feed")}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight mt-1">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
               {t("phc.commandHubTitle", "Public Healthcare Network Command Hub")}
             </h1>
-            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed">
               {t("phc.commandHubSubtitle", "Continuous monitoring of Primary Health Centres (PHCs), CHCs, Cold Chains & Outbreak Signals near your location")}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Button
               variant="outline"
               size="sm"
               onClick={captureUserLocation}
               disabled={locating}
-              className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-950/40 bg-slate-900/60 text-xs"
+              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
-              <LocateFixed className={`h-3.5 w-3.5 mr-1.5 ${locating ? "animate-spin text-cyan-400" : ""}`} />
-              {locating ? "Locating..." : "Locate Near Me"}
+              <LocateFixed className={`h-3.5 w-3.5 mr-1.5 ${locating ? "animate-spin text-[#05D3B3]" : ""}`} />
+              {locating ? t("phc.locating", "Locating...") : t("phc.locateNearMe", "Locate Near Me")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => loadData(true)}
               disabled={refreshing}
-              className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-950/40 bg-slate-900/60 text-xs"
+              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
               <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
-              Sync Network
+              {t("phc.syncNetwork", "Sync Network")}
             </Button>
             <Button
               size="sm"
-              onClick={() => navigate("/supply-chain")}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-semibold text-xs shadow-lg shadow-cyan-500/20"
+              onClick={() => navigate("/phc-supply-chain")}
+              className="mermaid-btn text-xs font-bold uppercase tracking-wider h-10 px-4 rounded-2xl shadow-sm"
             >
-              <Pill className="h-3.5 w-3.5 mr-1.5" /> Supply Chain Hub
+              <Pill className="h-3.5 w-3.5 mr-1.5" /> {t("phc.supplyChainHub", "Supply Chain Hub")}
             </Button>
           </div>
         </div>
 
-        {/* Top KPIs Banner */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <Card className="bg-slate-900/70 border-cyan-500/20 backdrop-blur-md">
-            <CardContent className="p-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">Nearby PHCs</span>
-                <Building className="h-4 w-4 text-cyan-400" />
-              </div>
-              <p className="text-xl font-bold text-white mt-1">
-                {filteredFacilities.length} Centres
-              </p>
-              <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
-                <CheckCircle2 className="h-2.5 w-2.5" /> 100% Operational
-              </p>
-            </CardContent>
-          </Card>
+        {/* ── TOP KPIS BENTO BANNER (MERMAID GLASS) ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.nearbyPHCs", "Nearby PHCs")}</span>
+              <Building className="h-4 w-4 text-[#05D3B3]" />
+            </div>
+            <p className="text-2xl font-black font-mono text-foreground mt-1">
+              {filteredFacilities.length} <span className="text-xs font-normal text-muted-foreground font-sans">{t("phc.centres", "Centres")}</span>
+            </p>
+            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1 pt-0.5 font-mono">
+              <CheckCircle2 className="h-3 w-3" /> {t("phc.operational100", "100% Operational")}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-cyan-500/20 backdrop-blur-md">
-            <CardContent className="p-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">Network Health</span>
-                <ShieldCheck className="h-4 w-4 text-indigo-400" />
-              </div>
-              <p className="text-xl font-bold text-indigo-300 mt-1">
-                {kpis?.networkHealthScore || 90}/100
-              </p>
-              <p className="text-[10px] text-indigo-400 mt-0.5">Optimal Safety Tier</p>
-            </CardContent>
-          </Card>
+          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.networkHealth", "Network Health")}</span>
+              <ShieldCheck className="h-4 w-4 text-teal-500" />
+            </div>
+            <p className="text-2xl font-black font-mono text-teal-600 dark:text-teal-300 mt-1">
+              {kpis?.networkHealthScore || 90}/100
+            </p>
+            <p className="text-[10px] text-teal-600 dark:text-teal-400 font-bold pt-0.5 font-mono">
+              {t("phc.optimalSafetyTier", "Optimal Safety Tier")}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-cyan-500/20 backdrop-blur-md">
-            <CardContent className="p-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">Critical Alerts</span>
-                <AlertOctagon className="h-4 w-4 text-rose-400" />
-              </div>
-              <p className="text-xl font-bold text-rose-400 mt-1">
-                {kpis?.criticalAlerts || 0}
-              </p>
-              <p className="text-[10px] text-rose-300/80 mt-0.5">Under Control</p>
-            </CardContent>
-          </Card>
+          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.criticalAlerts", "Critical Alerts")}</span>
+              <AlertOctagon className="h-4 w-4 text-rose-500" />
+            </div>
+            <p className="text-2xl font-black font-mono text-rose-500 mt-1">
+              {kpis?.criticalAlerts || 0}
+            </p>
+            <p className="text-[10px] text-rose-400 font-bold pt-0.5 font-mono">
+              {t("phc.underControl", "Under Control")}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-cyan-500/20 backdrop-blur-md">
-            <CardContent className="p-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">Stockout Risk</span>
-                <Pill className="h-4 w-4 text-amber-400" />
-              </div>
-              <p className="text-xl font-bold text-amber-400 mt-1">
-                {kpis?.atRiskStockouts || 1} medicines
-              </p>
-              <p className="text-[10px] text-amber-300/80 mt-0.5">Safe Buffer Ready</p>
-            </CardContent>
-          </Card>
+          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.stockoutRisk", "Stockout Risk")}</span>
+              <Pill className="h-4 w-4 text-amber-500" />
+            </div>
+            <p className="text-2xl font-black font-mono text-amber-500 mt-1">
+              {kpis?.atRiskStockouts || 1} <span className="text-xs font-normal text-muted-foreground font-sans">{t("phc.medicines", "medicines")}</span>
+            </p>
+            <p className="text-[10px] text-amber-500 font-bold pt-0.5 font-mono">
+              {t("phc.safeBufferReady", "Safe Buffer Ready")}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-cyan-500/20 backdrop-blur-md">
-            <CardContent className="p-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">Outbreak Signals</span>
-                <Activity className="h-4 w-4 text-purple-400" />
-              </div>
-              <p className="text-xl font-bold text-purple-300 mt-1">
-                {kpis?.outbreakSignals || 1} active
-              </p>
-              <p className="text-[10px] text-purple-400 mt-0.5">Surge Surveillance</p>
-            </CardContent>
-          </Card>
+          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.outbreakSignals", "Outbreak Signals")}</span>
+              <Activity className="h-4 w-4 text-purple-400" />
+            </div>
+            <p className="text-2xl font-black font-mono text-purple-400 mt-1">
+              {kpis?.outbreakSignals || 1} <span className="text-xs font-normal text-muted-foreground font-sans">{t("phc.activeSurveillance", "active")}</span>
+            </p>
+            <p className="text-[10px] text-purple-400 font-bold pt-0.5 font-mono">
+              {t("phc.activeSurveillance", "Surge Surveillance")}
+            </p>
+          </div>
 
-          <Card className="bg-slate-900/70 border-cyan-500/20 backdrop-blur-md">
-            <CardContent className="p-3.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">Cold Chain Risk</span>
-                <Snowflake className="h-4 w-4 text-cyan-400" />
-              </div>
-              <p className="text-xl font-bold text-cyan-300 mt-1">
-                {kpis?.coldChainAlerts || 0} alerts
-              </p>
-              <p className="text-[10px] text-cyan-400 mt-0.5">2°C - 8°C Stabilized</p>
-            </CardContent>
-          </Card>
+          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
+              <span>{t("phc.coldChainRisk", "Cold Chain Risk")}</span>
+              <Snowflake className="h-4 w-4 text-cyan-400" />
+            </div>
+            <p className="text-2xl font-black font-mono text-cyan-400 mt-1">
+              {kpis?.coldChainAlerts || 0} <span className="text-xs font-normal text-muted-foreground font-sans">{t("phc.alerts", "alerts")}</span>
+            </p>
+            <p className="text-[10px] text-cyan-400 font-bold pt-0.5 font-mono">
+              {t("phc.tempStabilized", "2°C - 8°C Stabilized")}
+            </p>
+          </div>
         </div>
 
-        {/* Real-time Scenario Stress Simulator */}
-        <Card className="bg-slate-900/80 border-cyan-500/20 shadow-lg">
-          <CardHeader className="p-4 pb-2 border-b border-slate-800">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Cpu className="h-4 w-4 text-cyan-400" />
-                <CardTitle className="text-sm font-bold text-white">
-                  Real-Time Scenario & Stress Simulator (Live Proximity Network)
-                </CardTitle>
+        {/* ── REAL-TIME SCENARIO STRESS SIMULATOR (ANTIGRAVITY GLASS) ── */}
+        <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-teal-500/15 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30 text-[#05D3B3]">
+                <Cpu className="h-4 w-4" />
               </div>
-              <span className="text-[11px] text-slate-400">
-                Trigger real-time epidemiological and supply chain disruptions to test AI response
-              </span>
+              <h2 className="text-sm sm:text-base font-black text-foreground">
+                {t("phc.stressSimulatorTitle", "Real-Time Scenario & Stress Simulator (Live Proximity Network)")}
+              </h2>
             </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={simulating}
-                onClick={() => handleSimulate("DENGUE_SURGE")}
-                className="bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60 text-xs"
-              >
-                <Flame className="h-3.5 w-3.5 mr-1 text-purple-400" /> Simulate Dengue Outbreak
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={simulating}
-                onClick={() => handleSimulate("MEDICINE_STOCKOUT")}
-                className="bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60 text-xs"
-              >
-                <Pill className="h-3.5 w-3.5 mr-1 text-amber-400" /> Simulate Medicine Stockout
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={simulating}
-                onClick={() => handleSimulate("COLD_CHAIN_FAILURE")}
-                className="bg-cyan-950/40 border-cyan-500/40 text-cyan-300 hover:bg-cyan-900/60 text-xs"
-              >
-                <Snowflake className="h-3.5 w-3.5 mr-1 text-cyan-400" /> Simulate Cold Chain Alert
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={simulating}
-                onClick={() => handleSimulate("PATIENT_SURGE")}
-                className="bg-indigo-950/40 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/60 text-xs"
-              >
-                <Users className="h-3.5 w-3.5 mr-1 text-indigo-400" /> Simulate Bed Overload
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={simulating}
-                onClick={() => handleSimulate("OFFLINE_MODE")}
-                className="bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 text-xs"
-              >
-                <WifiOff className="h-3.5 w-3.5 mr-1 text-slate-400" /> Simulate Offline PHC
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={simulating}
-                onClick={() => handleSimulate("RESET_NORMAL")}
-                className="bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs ml-auto"
-              >
-                <RotateCcw className="h-3.5 w-3.5 mr-1" /> Reset Baseline
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            <span className="text-[11px] text-muted-foreground font-mono">
+              {t("phc.stressSimulatorSubtitle", "Trigger real-time epidemiological and supply chain disruptions to test AI response")}
+            </span>
+          </div>
 
-        {/* Map & Facility Matrix Grid */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={simulating}
+              onClick={() => handleSimulate("DENGUE_SURGE")}
+              className="rounded-2xl border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 text-xs font-bold h-9 shadow-sm"
+            >
+              <Flame className="h-3.5 w-3.5 mr-1.5 text-purple-400" /> {t("phc.simDengue", "Simulate Dengue Outbreak")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={simulating}
+              onClick={() => handleSimulate("MEDICINE_STOCKOUT")}
+              className="rounded-2xl border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-bold h-9 shadow-sm"
+            >
+              <Pill className="h-3.5 w-3.5 mr-1.5 text-amber-400" /> {t("phc.simStockout", "Simulate Medicine Stockout")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={simulating}
+              onClick={() => handleSimulate("COLD_CHAIN_FAILURE")}
+              className="rounded-2xl border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 text-xs font-bold h-9 shadow-sm"
+            >
+              <Snowflake className="h-3.5 w-3.5 mr-1.5 text-cyan-400" /> {t("phc.simColdChain", "Simulate Cold Chain Alert")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={simulating}
+              onClick={() => handleSimulate("PATIENT_SURGE")}
+              className="rounded-2xl border-teal-500/30 bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 text-xs font-bold h-9 shadow-sm"
+            >
+              <Users className="h-3.5 w-3.5 mr-1.5 text-teal-400" /> {t("phc.simBedOverload", "Simulate Bed Overload")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={simulating}
+              onClick={() => handleSimulate("OFFLINE_FACILITY")}
+              className="rounded-2xl border-slate-500/30 bg-slate-500/10 text-slate-400 hover:bg-slate-500/20 text-xs font-bold h-9 shadow-sm"
+            >
+              <WifiOff className="h-3.5 w-3.5 mr-1.5 text-slate-400" /> {t("phc.simOfflinePHC", "Simulate Offline PHC")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={simulating}
+              onClick={() => handleSimulate("RESET_BASELINE")}
+              className="rounded-2xl text-muted-foreground hover:text-foreground text-xs font-bold h-9"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> {t("phc.resetBaseline", "Reset Baseline")}
+            </Button>
+          </div>
+        </div>
+
+        {/* ── MAP & FACILITY MATRIX GRID ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
           {/* Interactive Geo-Map (2 cols) */}
-          <div className="lg:col-span-2 space-y-3">
-            <Card className="bg-slate-900/80 border-cyan-500/30 overflow-hidden shadow-xl">
-              <CardHeader className="p-4 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800">
+          <div className="lg:col-span-2">
+            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl overflow-hidden flex flex-col">
+              
+              <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-teal-500/15">
                 <div>
-                  <CardTitle className="text-base font-bold text-cyan-300 flex items-center gap-2">
-                    <MapPin className="h-4 w-4" /> Live Geospatial Health Intelligence Network
-                  </CardTitle>
-                  <CardDescription className="text-xs text-slate-400">
-                    Showing {filteredFacilities.length} public health centres near your live GPS coordinates
-                  </CardDescription>
+                  <h3 className="text-base font-black text-foreground flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-[#05D3B3]" />
+                    {t("phc.geospatialNetwork", "Live Geospatial Health Intelligence Network")}
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {t("phc.showingCentresNearGps", "Showing public health centres near your live GPS coordinates")}
+                  </p>
                 </div>
 
                 {/* District & Status Filters */}
-                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                <div className="flex flex-wrap items-center gap-2">
                   <select
                     value={districtFilter}
                     onChange={(e) => setDistrictFilter(e.target.value)}
-                    className="bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-cyan-300 text-xs focus:outline-none"
+                    className="antigravity-input bg-card/80 border border-teal-500/30 rounded-2xl px-3 text-xs font-semibold h-9 text-foreground shadow-sm"
                   >
-                    <option value="NEAR_ME">📍 Near My Live GPS (&lt; 35 km)</option>
-                    <option value="Bengaluru Urban">Bengaluru Urban (BBMP)</option>
-                    <option value="Chikmagalur">Chikmagalur / Kadur Region</option>
-                    <option value="ALL">All Network Facilities</option>
+                    <option value="NEAR_ME" className="bg-slate-900 text-white">📍 {t("phc.nearMyLiveGps", "Near My Live GPS (< 35 km)")}</option>
+                    <option value="Bengaluru Urban" className="bg-slate-900 text-white">Bengaluru Urban (BBMP)</option>
+                    <option value="Chikmagalur" className="bg-slate-900 text-white">Chikmagalur / Kadur Region</option>
+                    <option value="ALL" className="bg-slate-900 text-white">{t("phc.allDistricts", "All Districts (Karnataka)")}</option>
                   </select>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 bg-card/80 p-1 rounded-2xl border border-teal-500/20">
                     {["ALL", "OPTIMAL", "WARNING", "OUTBREAK"].map((st) => (
                       <button
                         key={st}
                         onClick={() => setStatusFilter(st)}
-                        className={`px-2 py-1 rounded transition text-[10px] font-semibold ${
+                        className={`px-2.5 py-1 rounded-xl transition text-[10px] font-extrabold ${
                           statusFilter === st
-                            ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                            : "text-slate-400 hover:text-white"
+                            ? "bg-[#05D3B3] text-slate-950 shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         {st}
@@ -527,9 +534,9 @@ export default function PHCCommandDashboard() {
                     ))}
                   </div>
                 </div>
-              </CardHeader>
+              </div>
 
-              <CardContent className="p-0 h-[480px] relative">
+              <div className="h-[460px] relative w-full">
                 <MapContainer
                   center={mapCenter}
                   zoom={mapZoom}
@@ -550,7 +557,7 @@ export default function PHCCommandDashboard() {
                       <Marker position={userLocation} icon={userLiveIcon}>
                         <Popup className="dark-popup">
                           <div className="p-1 text-xs text-slate-100">
-                            <p className="font-bold text-cyan-400 flex items-center gap-1">
+                            <p className="font-bold text-[#00F5D4] flex items-center gap-1">
                               <LocateFixed className="h-3 w-3" /> Your Real-Time GPS Location
                             </p>
                             <p className="text-[11px] text-slate-300 mt-1">
@@ -627,7 +634,7 @@ export default function PHCCommandDashboard() {
                               setSelectedPHCId(facility._id);
                               setIsTwinOpen(true);
                             }}
-                            className="w-full mt-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs h-7"
+                            className="mermaid-btn w-full mt-2 text-xs font-bold h-7"
                           >
                             Open Digital Twin
                           </Button>
@@ -636,25 +643,24 @@ export default function PHCCommandDashboard() {
                     </Marker>
                   ))}
                 </MapContainer>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Connected Facilities List (1 col) */}
           <div className="space-y-3">
-            <Card className="bg-slate-900/80 border-cyan-500/30 shadow-xl h-[560px] flex flex-col">
-              <CardHeader className="p-4 pb-2 border-b border-slate-800">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
-                    <Building className="h-4 w-4 text-cyan-400" />
-                    Nearby Facilities ({filteredFacilities.length})
-                  </CardTitle>
-                  <Badge variant="outline" className="border-cyan-500/40 text-cyan-300 text-[10px]">
-                    Live GPS Proximity
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 space-y-2.5 overflow-y-auto flex-1">
+            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl h-[545px] flex flex-col p-5">
+              <div className="flex items-center justify-between border-b border-teal-500/15 pb-3 mb-3">
+                <h3 className="text-sm font-black text-foreground flex items-center gap-2">
+                  <Building className="h-4 w-4 text-[#05D3B3]" />
+                  {t("phc.nearbyFacilities", "Nearby Facilities")} ({filteredFacilities.length})
+                </h3>
+                <span className="mermaid-chip text-[9px] font-bold">
+                  Live GPS
+                </span>
+              </div>
+
+              <div className="space-y-2.5 overflow-y-auto flex-1 pr-1">
                 {filteredFacilities.map((f) => (
                   <div
                     key={f._id}
@@ -663,14 +669,14 @@ export default function PHCCommandDashboard() {
                       setIsTwinOpen(true);
                       setMapCenter([f.latitude, f.longitude]);
                     }}
-                    className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition flex flex-col gap-1.5 shadow-md"
+                    className="p-3.5 rounded-2xl bg-card/60 border border-teal-500/15 hover:border-teal-500/40 cursor-pointer transition flex flex-col gap-1.5 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-bold text-xs text-slate-100 hover:text-cyan-300 transition">
+                        <p className="font-bold text-xs text-foreground hover:text-[#05D3B3] transition">
                           {f.name}
                         </p>
-                        <p className="text-[10px] text-slate-400">
+                        <p className="text-[10px] text-muted-foreground font-mono">
                           {f.type} • {f.district}
                         </p>
                       </div>
@@ -678,27 +684,27 @@ export default function PHCCommandDashboard() {
                         variant="outline"
                         className={
                           f.status === "Optimal"
-                            ? "border-emerald-500 text-emerald-400 text-[10px]"
+                            ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-[10px] font-bold"
                             : f.status === "Warning"
-                            ? "border-amber-500 text-amber-400 text-[10px]"
-                            : "border-purple-500 text-purple-400 text-[10px]"
+                            ? "border-amber-500/40 text-amber-400 bg-amber-500/10 text-[10px] font-bold"
+                            : "border-purple-500/40 text-purple-400 bg-purple-500/10 text-[10px] font-bold"
                         }
                       >
                         {f.status}
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">
-                      <span>Beds: {f.availableBeds} free</span>
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono pt-1.5 border-t border-teal-500/10">
+                      <span>{t("phc.beds", "Beds")}: {f.availableBeds} free</span>
                       {f.distanceKm !== null && (
-                        <span className="text-cyan-400 font-semibold">{f.distanceKm} km away</span>
+                        <span className="text-[#05D3B3] font-bold">{f.distanceKm} km {t("phc.away", "away")}</span>
                       )}
-                      <span className="text-indigo-300 font-bold">Score: {f.networkHealthScore}</span>
+                      <span className="text-teal-600 dark:text-teal-300 font-bold">Score: {f.networkHealthScore}</span>
                     </div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
 
