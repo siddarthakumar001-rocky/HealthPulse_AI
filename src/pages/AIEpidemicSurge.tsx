@@ -79,20 +79,56 @@ export default function AIEpidemicSurge() {
   const medicineForecasts = predictionData?.medicineForecasts || [];
   const outbreakSignals = predictionData?.outbreakSignals || [];
 
+  const formatChartDay = (day: string) => {
+    if (!day) return "";
+    let res = day;
+    res = res.replace(/Today \(Actual\)/gi, t("phc.todayActual", "Today (Actual)"));
+    res = res.replace(/Hist/gi, t("phc.hist", "Hist"));
+    res = res.replace(/Day/gi, t("phc.dayLabel", "Day"));
+    return res;
+  };
+
+  const translateMedicineName = (name: string) => {
+    if (!name) return "";
+    let res = name;
+    if (res.includes("Normal Saline")) res = res.replace(/Normal Saline/i, t("phc.normalSaline", "Normal Saline"));
+    if (res.includes("Oral Rehydration Salts") || res.includes("ORS")) res = res.replace(/Oral Rehydration Salts \(ORS\)|Oral Rehydration Salts/i, t("phc.ors", "Oral Rehydration Salts (ORS)"));
+    if (res.includes("Oxytocin")) res = res.replace(/Oxytocin/i, t("phc.oxytocin", "Oxytocin"));
+    if (res.includes("Hepatitis B Vaccine")) res = res.replace(/Hepatitis B Vaccine/i, t("phc.hepbVaccine", "Hepatitis B Vaccine"));
+    if (res.includes("Ringer Lactate")) res = res.replace(/Ringer Lactate/i, t("phc.ringerLactate", "Ringer Lactate"));
+    if (res.includes("Paracetamol")) res = res.replace(/Paracetamol/i, t("phc.paracetamol", "Paracetamol"));
+    return res;
+  };
+
+  const translateDepletionWindow = (windowStr: string) => {
+    if (!windowStr) return "";
+    return windowStr
+      .replace(/\bdays\b/gi, t("phc.days", "days"))
+      .replace(/\bday\b/gi, t("phc.day", "day"));
+  };
+
+  const getRiskLabel = (risk: string) => {
+    if (risk === "Critical") return t("phc.critical", "Critical");
+    if (risk === "High") return t("phc.high", "High");
+    if (risk === "Medium" || risk === "Moderate") return t("phc.moderate", "Moderate");
+    if (risk === "Low") return t("phc.low", "Low");
+    return risk;
+  };
+
   // Chart data: Combine historical baseline + 7-day projected trajectory
   const chartData = [
-    { day: "Day -6 (Hist)", actual: 110, lowerBound: null, upperBound: null, projected: null },
-    { day: "Day -4 (Hist)", actual: 118, lowerBound: null, upperBound: null, projected: null },
-    { day: "Day -2 (Hist)", actual: 122, lowerBound: null, upperBound: null, projected: null },
+    { day: formatChartDay("Day -6 (Hist)"), actual: 110, lowerBound: null, upperBound: null, projected: null },
+    { day: formatChartDay("Day -4 (Hist)"), actual: 118, lowerBound: null, upperBound: null, projected: null },
+    { day: formatChartDay("Day -2 (Hist)"), actual: 122, lowerBound: null, upperBound: null, projected: null },
     {
-      day: "Today (Actual)",
+      day: formatChartDay("Today (Actual)"),
       actual: footfallForecast?.currentDailyFootfall || 120,
       lowerBound: footfallForecast?.currentDailyFootfall || 120,
       upperBound: footfallForecast?.currentDailyFootfall || 120,
       projected: footfallForecast?.currentDailyFootfall || 120,
     },
     ...(footfallForecast?.timeSeries?.map((tItem: any) => ({
-      day: tItem.day,
+      day: formatChartDay(tItem.day),
       actual: null,
       projected: tItem.projected,
       lowerBound: tItem.lowerBound,
@@ -367,7 +403,7 @@ export default function AIEpidemicSurge() {
                   stroke="#818cf8"
                   strokeDasharray="3 3"
                   fill="url(#confidenceGradient)"
-                  name="Upper Confidence Bound"
+                  name={t("phc.upperConfidenceBound", "Upper Confidence Bound")}
                 />
                 <Area
                   type="monotone"
@@ -375,7 +411,7 @@ export default function AIEpidemicSurge() {
                   stroke="#818cf8"
                   strokeDasharray="3 3"
                   fill="transparent"
-                  name="Lower Confidence Bound"
+                  name={t("phc.lowerConfidenceBound", "Lower Confidence Bound")}
                 />
                 <Line
                   type="monotone"
@@ -383,7 +419,7 @@ export default function AIEpidemicSurge() {
                   stroke="#94a3b8"
                   strokeWidth={3}
                   dot={{ r: 4, fill: "#94a3b8" }}
-                  name="Historical Actual"
+                  name={t("phc.historicalActual", "Historical Actual")}
                 />
                 <Line
                   type="monotone"
@@ -391,7 +427,7 @@ export default function AIEpidemicSurge() {
                   stroke="#05D3B3"
                   strokeWidth={3}
                   dot={{ r: 4, fill: "#05D3B3" }}
-                  name="AI Projected"
+                  name={t("phc.aiProjected", "AI Projected")}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -403,45 +439,45 @@ export default function AIEpidemicSurge() {
           <div className="border-b border-teal-500/15 pb-3">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2">
               <Pill className="h-4 w-4 text-[#05D3B3]" />
-              Medicine Demand Forecast & Estimated Depletion Windows
+              {t("phc.medicineDemandForecastTitle", "Medicine Demand Forecast & Estimated Depletion Windows")}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Combines historical consumption rate, current footfall momentum, and outbreak surge multipliers
+              {t("phc.medicineDemandForecastSubtitle", "Combines historical consumption rate, current footfall momentum, and outbreak surge multipliers")}
             </p>
           </div>
           <div className="overflow-x-auto rounded-2xl border border-teal-500/15">
             <table className="w-full text-xs text-left">
               <thead className="bg-card/80 text-muted-foreground border-b border-teal-500/20 font-mono uppercase">
                 <tr>
-                  <th className="p-3.5">Medicine Name</th>
-                  <th className="p-3.5">Current Stock</th>
-                  <th className="p-3.5">Projected Daily Demand</th>
-                  <th className="p-3.5">7-Day Demand</th>
-                  <th className="p-3.5">30-Day Demand</th>
-                  <th className="p-3.5">Estimated Depletion Window</th>
-                  <th className="p-3.5">Stockout Risk</th>
+                  <th className="p-3.5">{t("phc.colMedicineName", "Medicine Name")}</th>
+                  <th className="p-3.5">{t("phc.colCurrentStock", "Current Stock")}</th>
+                  <th className="p-3.5">{t("phc.colProjectedDailyDemand", "Projected Daily Demand")}</th>
+                  <th className="p-3.5">{t("phc.col7DayDemand", "7-Day Demand")}</th>
+                  <th className="p-3.5">{t("phc.col30DayDemand", "30-Day Demand")}</th>
+                  <th className="p-3.5">{t("phc.colEstimatedDepletion", "Estimated Depletion Window")}</th>
+                  <th className="p-3.5">{t("phc.colStockoutRisk", "Stockout Risk")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-teal-500/10 bg-card/40 font-medium">
                 {medicineForecasts.map((med: any, idx: number) => (
                   <tr key={idx} className="hover:bg-teal-500/10 transition">
                     <td className="p-3.5 font-bold text-foreground">
-                      {med.medicineName}
+                      {translateMedicineName(med.medicineName)}
                       <span className="block text-[10px] text-muted-foreground font-mono">#{med.batchNumber}</span>
                     </td>
                     <td className="p-3.5 font-bold font-mono text-foreground">
                       {med.currentStock}
                       <span className="block text-[10px] text-muted-foreground font-normal font-sans">
-                        min {med.safeBufferThreshold}
+                        {t("phc.minBuffer", "min")} {med.safeBufferThreshold}
                       </span>
                     </td>
                     <td className="p-3.5 text-teal-600 dark:text-teal-300 font-mono font-bold">
-                      {med.forecastedDailyDemand} /day
+                      {med.forecastedDailyDemand} /{t("phc.day", "day")}
                     </td>
                     <td className="p-3.5 text-foreground font-mono">{med.demand7Days}</td>
                     <td className="p-3.5 text-muted-foreground font-mono">{med.demand30Days}</td>
                     <td className="p-3.5 font-bold text-foreground font-mono">
-                      {med.estimatedDepletionWindow}
+                      {translateDepletionWindow(med.estimatedDepletionWindow)}
                     </td>
                     <td className="p-3.5">
                       <Badge
@@ -454,7 +490,7 @@ export default function AIEpidemicSurge() {
                             : "border-emerald-500 text-emerald-500 bg-emerald-500/10"
                         }`}
                       >
-                        {med.stockoutRisk}
+                        {getRiskLabel(med.stockoutRisk)}
                       </Badge>
                     </td>
                   </tr>
