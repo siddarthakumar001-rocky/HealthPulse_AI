@@ -9,7 +9,7 @@ export function BackButton() {
   const { user } = useAuth();
 
   // Hide on Landing page or Admin views
-  if (location.pathname === "/" || location.pathname.startsWith("/admin")) {
+  if (location.pathname === "/" || location.pathname === "/dashboard" || location.pathname.startsWith("/admin")) {
     return null;
   }
 
@@ -50,7 +50,7 @@ export function BackButton() {
       variant="outline" 
       size="icon" 
       onClick={handleBack} 
-      className="fixed bottom-6 right-6 z-[9999] rounded-full shadow-premium bg-background/80 backdrop-blur-md hover:scale-105 active:scale-95 transition-all w-12 h-12 border-primary/20 cursor-pointer pointer-events-auto"
+      className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-40 rounded-full shadow-premium bg-background/80 backdrop-blur-md hover:scale-105 active:scale-95 transition-all w-12 h-12 border-primary/20 cursor-pointer pointer-events-auto"
       title="Go back"
       aria-label="Go back"
     >

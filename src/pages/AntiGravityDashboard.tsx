@@ -1,3 +1,4 @@
+import MobileBottomNav from "@/components/MobileBottomNav";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -27,7 +28,7 @@ export default function AntiGravityDashboard() {
   const [simulatedDrop, setSimulatedDrop] = useState(false);
 
   return (
-    <div className="relative min-h-screen w-full bg-[#F0F4F8] text-[#1E293B] font-sans overflow-x-hidden p-4 sm:p-6 md:p-12 select-none">
+    <div className="relative min-h-screen w-full bg-[#F0F4F8] dark:bg-[#0B1120] text-[#1E293B] dark:text-slate-100 font-sans overflow-x-hidden p-3 sm:p-6 md:p-12 select-none pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+6rem)]">
       {/* ── ANTI-GRAVITY BACKGROUND CANVAS: FLOATING PASTEL ORBS ── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {/* Soft Blue Orb */}
@@ -277,73 +278,7 @@ export default function AntiGravityDashboard() {
           </div>
         </motion.div>
       </div>
+      <MobileBottomNav />
     </div>
-  );
-}
-
-/* ── REUSABLE DUAL-NEUMORPHIC GLASS CARD ── */
-interface CardProps {
-  title: string;
-  value: string;
-  change: string;
-  status: string;
-  icon: React.ReactNode;
-  badge: string;
-  isSelected?: boolean;
-  onClick: () => void;
-}
-
-function GlassNeumorphCard({
-  title,
-  value,
-  change,
-  status,
-  icon,
-  badge,
-  isSelected,
-  onClick,
-}: CardProps) {
-  return (
-    <motion.div
-      onClick={onClick}
-      className={`relative cursor-pointer rounded-3xl p-6 border transition-all duration-300 backdrop-blur-xl ${
-        isSelected
-          ? "border-[#2563EB]/40 bg-white/55"
-          : "border-white/80 bg-white/40 hover:bg-white/50"
-      }`}
-      style={{
-        boxShadow: isSelected
-          ? "inset 1px 1px 3px rgba(255,255,255,0.9), 0 0 20px rgba(37,99,235,0.15), 10px 14px 28px rgba(148,163,184,0.22)"
-          : "inset 2px 2px 4px rgba(255,255,255,0.9), 8px 12px 24px rgba(148,163,184,0.18)",
-      }}
-      whileHover={{ y: -5, scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-    >
-      {/* Card Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="w-10 h-10 rounded-2xl bg-white/80 border border-white flex items-center justify-center shadow-sm">
-          {icon}
-        </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#475569] border border-white/60">
-          {badge}
-        </span>
-      </div>
-
-      {/* Main Metric Value */}
-      <div className="space-y-1">
-        <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">{title}</p>
-        <h3 className="text-3xl font-black text-[#0F172A] tracking-tight">{value}</h3>
-      </div>
-
-      {/* Metric Delta & Status */}
-      <div className="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-xs">
-        <span className="flex items-center gap-1 font-bold text-[#10B981]">
-          <TrendingUp className="w-3.5 h-3.5" />
-          {change}
-        </span>
-        <span className="text-[#64748B] font-medium">{status}</span>
-      </div>
-    </motion.div>
   );
 }

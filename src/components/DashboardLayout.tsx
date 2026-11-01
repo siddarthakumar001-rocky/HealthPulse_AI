@@ -9,6 +9,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import CursorTrail from "@/components/dashboard/CursorTrail";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { useState } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -95,7 +96,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </header>
 
             {/* ── PAGE CONTENT ──────────────────────────────────── */}
-            <main className="flex-1 p-2 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden min-w-0">
+            <main className="flex-1 p-2 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden min-w-0 pb-28 md:pb-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}
@@ -116,6 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </div>
+      <MobileBottomNav />
     </SidebarProvider>
   );
 }

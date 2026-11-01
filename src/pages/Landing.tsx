@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "../components/ThemeToggle";
 import LiquidCursor from "@/components/LiquidCursor";
+import { AntiGravityBackground } from "@/components/AntiGravityBackground";
 
 // --- Custom Magnetic Button Wrapper ---
 const MagneticButton = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
@@ -49,9 +50,10 @@ export default function Landing() {
 
   useEffect(() => {
     // Simulate system boot
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     const timer = setTimeout(() => {
       setIsBooting(false);
-    }, 2500);
+    }, isMobile ? 300 : 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -107,9 +109,10 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 font-sans cursor-none">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 font-sans md:cursor-none pb-24 md:pb-0">
       <LiquidCursor />
-      
+      <AntiGravityBackground />
+
       {/* --- Animated Background Elements --- */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {/* Soft Background Gradient */}
@@ -479,6 +482,16 @@ export default function Landing() {
           </Button>
         </div>
       </footer>
+
+      {/* Mobile Sticky Bottom Floating Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-2xl border-t border-border/80 z-40 md:hidden flex items-center gap-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl">
+        <Button asChild variant="outline" className="flex-1 h-12 rounded-2xl font-bold border-border bg-card text-foreground">
+          <Link to="/login">Sign In</Link>
+        </Button>
+        <Button asChild className="flex-1 h-12 rounded-2xl font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/25">
+          <Link to="/signup">Get Started →</Link>
+        </Button>
+      </div>
     </div>
   );
 }
