@@ -12,13 +12,22 @@ import {
   Sparkles,
   Cpu,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  CheckCircle2,
+  Radio,
+  Share2,
+  Stethoscope,
+  Truck
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface ChamberData {
   id: number;
   key: string;
+  tabLabel: string;
+  featureTag: string;
   name: string;
   role: string;
   anatomicalName: string;
@@ -32,7 +41,10 @@ interface ChamberData {
   ecgSegment: "P" | "PR" | "QRS" | "T";
   description: string;
   clinicalImpact: string;
+  capabilities: string[];
   metrics: { label: string; value: string; unit: string }[];
+  route: string;
+  actionLabel: string;
 }
 
 export default function CardiacChambersScrollytelling() {
@@ -63,9 +75,11 @@ export default function CardiacChambersScrollytelling() {
     {
       id: 0,
       key: "chamber1",
-      name: t("phc.chamber1Name", "Chamber I: Right Atrium & SA Node"),
-      role: t("phc.chamber1Role", "Bioelectric Pulse Trigger & Pacemaker"),
-      anatomicalName: "Atrium Dextrum & Nodus Sinoatrialis",
+      tabLabel: "01 BLE SENSORS",
+      featureTag: "APPLICATION FEATURE 01 // HARDWARE TELEMETRY",
+      name: t("phc.feature1Name", "Real-Time IoMT Biometric Sensor Fusion"),
+      role: t("phc.feature1Role", "250 Hz Continuous Multi-Parametric Vitals Acquisition & Pacemaker Sync"),
+      anatomicalName: "Mapped to Chamber I: Right Atrium & Sinoatrial Node (Biological Pacemaker)",
       pressure: "2 – 6 mmHg",
       oxygen: "75% Deoxygenated",
       electricalPhase: "P-Wave • SA Node Depolarization",
@@ -75,22 +89,32 @@ export default function CardiacChambersScrollytelling() {
       bgGlow: "from-[#00F5D4]/20 via-[#0D9488]/10 to-transparent",
       ecgSegment: "P",
       description: t(
-        "phc.chamber1Desc",
-        "Sinoatrial node generates natural 60–100 BPM rhythm. HealthPulse AI taps optical photoplethysmography (PPG) at 250 Hz to monitor beat-to-beat HRV variability."
+        "phc.feature1Desc",
+        "Seamlessly pairs with Bluetooth Low Energy (BLE) medical wearables, optical pulse oximeters, smart patches, and ECG monitors. Streams high-fidelity continuous heart rate, SpO2, HRV, and skin temperature at 250 Hz with 16-bit Sigma-Delta precision."
       ),
       clinicalImpact: "Captures microvascular pulse transit time and sympathetic nervous tone at microsecond resolution.",
+      capabilities: [
+        "250 Hz Real-Time BLE Stream",
+        "Sub-Millisecond Jitter (<0.4 ms)",
+        "AES-256 Medical Encryption",
+        "Continuous HRV & Arrhythmia Detect"
+      ],
       metrics: [
         { label: "PACEMAKER RATE", value: "72", unit: "BPM" },
         { label: "SAMPLING ADC", value: "16-BIT", unit: "250 Hz" },
         { label: "HRV VARIABILITY", value: "78", unit: "ms" }
-      ]
+      ],
+      route: "/dashboard",
+      actionLabel: "Launch Vitals Cockpit"
     },
     {
       id: 1,
       key: "chamber2",
-      name: t("phc.chamber2Name", "Chamber II: Right Ventricle & Pulmonary Circuit"),
-      role: t("phc.chamber2Role", "Deoxygenated Blood to Lungs & Diffusion Imputation"),
-      anatomicalName: "Ventriculus Dexter & Truncus Pulmonalis",
+      tabLabel: "02 NEURAL CSDI",
+      featureTag: "APPLICATION FEATURE 02 // SIGNAL RECONSTRUCTION",
+      name: t("phc.feature2Name", "CSDI Neural Diffusion & Denoising Engine"),
+      role: t("phc.feature2Role", "Deep-Learning Telemetry Imputation & Motion Artifact Cleansing"),
+      anatomicalName: "Mapped to Chamber II: Right Ventricle & Pulmonary Circuit (Oxygenation Transit)",
       pressure: "15 – 25 mmHg",
       oxygen: "75% → 98% In Transit",
       electricalPhase: "PR-Segment • AV Delay & Ventricular Influx",
@@ -100,22 +124,32 @@ export default function CardiacChambersScrollytelling() {
       bgGlow: "from-sky-500/20 via-cyan-600/10 to-transparent",
       ecgSegment: "PR",
       description: t(
-        "phc.chamber2Desc",
-        "Pumps venous blood to pulmonary capillaries. CSDI Neural Diffusion algorithm detects motion artifacts and reconstructs missing telemetry with 98.55% fidelity."
+        "phc.feature2Desc",
+        "Eliminates movement artifacts, sweat-induced noise, and missing telemetry packets using conditional score-based diffusion models. Reconstructs missing biometric frames with 98.55% clinical fidelity before diagnostic evaluation."
       ),
       clinicalImpact: "Cleanses perspiration noise, sensor decoupling, and movement spikes before machine learning inference.",
+      capabilities: [
+        "98.55% Imputation Accuracy",
+        "< 8.2 ms Neural Inference",
+        "Automated Baseline Wander Removal",
+        "FHIR R4 / HL7 Data Compliance"
+      ],
       metrics: [
         { label: "PULMONARY FLOW", value: "5.2", unit: "L/min" },
         { label: "DIFFUSION PASSES", value: "10", unit: "Iter" },
         { label: "RECONSTRUCTION", value: "98.55", unit: "%" }
-      ]
+      ],
+      route: "/dashboard",
+      actionLabel: "Inspect Neural Denoising"
     },
     {
       id: 2,
       key: "chamber3",
-      name: t("phc.chamber3Name", "Chamber III: Left Atrium & Oxygenated Reservoir"),
-      role: t("phc.chamber3Role", "Oxygen-Rich Reservoir & Digital Twin Synthesis"),
-      anatomicalName: "Atrium Sinistrum & Venae Pulmonales",
+      tabLabel: "03 DIGITAL TWIN",
+      featureTag: "APPLICATION FEATURE 03 // PREDICTIVE DIGITAL TWIN",
+      name: t("phc.feature3Name", "Autonomous Predictive Clinical Digital Twin"),
+      role: t("phc.feature3Role", "Dynamic Biological Simulation & 48-Hour Decompensation Early Warning"),
+      anatomicalName: "Mapped to Chamber III: Left Atrium & Oxygenated Reservoir (Systemic Buffer)",
       pressure: "6 – 12 mmHg",
       oxygen: "98% Fully Oxygenated",
       electricalPhase: "PR-Interval • Interatrial Conduction",
@@ -125,22 +159,32 @@ export default function CardiacChambersScrollytelling() {
       bgGlow: "from-rose-500/20 via-pink-600/10 to-transparent",
       ecgSegment: "PR",
       description: t(
-        "phc.chamber3Desc",
-        "Receives freshly oxygenated blood from pulmonary veins. HealthPulse AI computes personalized Digital Twin parameters to simulate real-time cardiac workload."
+        "phc.feature3Desc",
+        "Synthesizes a living computational replica of the patient's cardiovascular, pulmonary, and metabolic state. Automatically parses uploaded blood tests, scans, and questionnaires via OCR to forecast acute decompensation 48 hours prior to onset."
       ),
       clinicalImpact: "Calculates stroke volume indices and warns 48 hours prior to acute decompensation events.",
+      capabilities: [
+        "48-Hour Early Warning Engine",
+        "Multimodal OCR Lab Report Parsing",
+        "Allostatic Stress Score (0-100)",
+        "Personalized Drug Interaction Model"
+      ],
       metrics: [
         { label: "OXYGEN SAT (SpO2)", value: "99", unit: "%" },
         { label: "ATRIAL PRESSURE", value: "8.4", unit: "mmHg" },
         { label: "DIGITAL TWIN FIT", value: "99.4", unit: "%" }
-      ]
+      ],
+      route: "/profile",
+      actionLabel: "View Digital Twin Passport"
     },
     {
       id: 3,
       key: "chamber4",
-      name: t("phc.chamber4Name", "Chamber IV: Left Ventricle & Systemic Aorta"),
-      role: t("phc.chamber4Role", "Systemic High-Pressure Engine & PHC Dispatch"),
-      anatomicalName: "Ventriculus Sinister & Aorta Ascendens",
+      tabLabel: "04 EMERGENCY & IOT",
+      featureTag: "APPLICATION FEATURE 04 // PUBLIC HEALTH & LOGISTICS",
+      name: t("phc.feature4Name", "Smart Supply Chain & Autonomous Emergency Ring"),
+      role: t("phc.feature4Role", "District Epidemic Outbreak AI & Sub-Second Emergency PHC Geofencing"),
+      anatomicalName: "Mapped to Chamber IV: Left Ventricle & Systemic Aorta (High-Pressure Delivery)",
       pressure: "100 – 140 mmHg",
       oxygen: "99% Peak Arterial Surge",
       electricalPhase: "QRS Complex • Giant Systolic Contraction",
@@ -150,15 +194,23 @@ export default function CardiacChambersScrollytelling() {
       bgGlow: "from-purple-500/25 via-indigo-600/10 to-transparent",
       ecgSegment: "QRS",
       description: t(
-        "phc.chamber4Desc",
-        "Massive muscular contraction pumps life-saving oxygen to the entire body. If arrhythmia or hypoxia spikes, autonomous PHC geofencing mobilizes emergency dispatch."
+        "phc.feature4Desc",
+        "When life-threatening arrhythmias, severe hypoxia, or sudden stockouts occur, HealthPulse AI triggers the district primary health centre (PHC) ring, alerts ambulances, and dispatches automated inter-facility medicine transfers via IoT smart scales."
       ),
       clinicalImpact: "Sub-second emergency telemetry ring automatically alerts nearest district ICU and PHC ambulances.",
+      capabilities: [
+        "< 800 ms PHC Ambulance Dispatch",
+        "IoT Smart Scale Automated Restock",
+        "District Epidemic Outbreak AI",
+        "LoRaWAN Cold-Chain Monitoring"
+      ],
       metrics: [
         { label: "SYSTOLIC PRESSURE", value: "120", unit: "mmHg" },
         { label: "CARDIAC OUTPUT", value: "6.8", unit: "L/min" },
         { label: "DISPATCH LATENCY", value: "<800", unit: "ms" }
-      ]
+      ],
+      route: "/emergency",
+      actionLabel: "Open Emergency Command Hub"
     }
   ];
 
@@ -197,11 +249,11 @@ export default function CardiacChambersScrollytelling() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2 shrink-0">
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-[10px] font-mono font-bold tracking-widest text-[#0D9488] dark:text-[#00F5D4] uppercase">
-              <Heart className="w-3 h-3 animate-pulse text-[#00F5D4]" />
-              <span>02 // CARDIAC CONDUCTION SCROLLYTELLING</span>
+              <Sparkles className="w-3 h-3 text-[#00F5D4]" />
+              <span>02 // HEALTHPULSE AI PLATFORM ARCHITECTURE</span>
             </div>
             <h2 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white mt-0.5">
-              {t("phc.heartChambersTitle", "Cardiovascular 4-Chamber Conduction Architecture")}
+              {t("phc.heartChambersTitle", "Four Foundational Pillars of Intelligent Healthcare")}
             </h2>
           </div>
 
@@ -209,7 +261,7 @@ export default function CardiacChambersScrollytelling() {
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100/90 dark:bg-black/60 border border-slate-200 dark:border-white/10 font-mono text-xs">
             <button
               onClick={handlePrev}
-              title="Previous Chamber"
+              title="Previous Feature"
               className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -227,14 +279,14 @@ export default function CardiacChambersScrollytelling() {
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  CH {i + 1}
+                  {c.tabLabel}
                 </button>
               );
             })}
 
             <button
               onClick={handleNext}
-              title="Next Chamber"
+              title="Next Feature"
               className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors"
             >
               <ChevronRight className="w-3.5 h-3.5" />
@@ -269,9 +321,9 @@ export default function CardiacChambersScrollytelling() {
               <div className="flex items-center justify-between text-[10px] font-mono mb-1.5 border-b border-slate-200/60 dark:border-white/10 pb-1.5">
                 <span className="flex items-center gap-1 font-bold text-[#0D9488] dark:text-[#00F5D4]">
                   <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
-                  BIO_CARDIAC_3D // 4-CHAMBER
+                  ANATOMICAL_MAPPING // 4-CHAMBERS
                 </span>
-                <span className="text-slate-500 dark:text-slate-400">CH-{currentChamber.id + 1} OF 4</span>
+                <span className="text-slate-500 dark:text-slate-400">PILLAR {currentChamber.id + 1} OF 4</span>
               </div>
 
               {/* ── ANATOMICAL SVG HEART WITH 4 INTERACTIVE GLOWING CHAMBERS ── */}
@@ -344,7 +396,7 @@ export default function CardiacChambersScrollytelling() {
                       transition={{ repeat: Infinity, duration: 0.9, ease: "easeOut" }}
                     />
                     <text x="75" y="165" fill={currentChamber.id === 0 ? "#00F5D4" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
-                      RA • 72 BPM
+                      RA • BLE SENSORS
                     </text>
                   </g>
 
@@ -358,8 +410,8 @@ export default function CardiacChambersScrollytelling() {
                       animate={currentChamber.id === 1 ? { scale: [1, 1.05, 1] } : { scale: 1 }}
                       transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut", delay: 0.2 }}
                     />
-                    <text x="110" y="270" fill={currentChamber.id === 1 ? "#38BDF8" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
-                      RV • 25 mmHg
+                    <text x="100" y="270" fill={currentChamber.id === 1 ? "#38BDF8" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
+                      RV • CSDI DIFFUSION
                     </text>
                   </g>
 
@@ -373,8 +425,8 @@ export default function CardiacChambersScrollytelling() {
                       animate={currentChamber.id === 2 ? { scale: [1, 1.04, 1] } : { scale: 1 }}
                       transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut", delay: 0.4 }}
                     />
-                    <text x="220" y="165" fill={currentChamber.id === 2 ? "#F43F5E" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
-                      LA • 99% SpO2
+                    <text x="215" y="165" fill={currentChamber.id === 2 ? "#F43F5E" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
+                      LA • DIGITAL TWIN
                     </text>
                   </g>
 
@@ -388,8 +440,8 @@ export default function CardiacChambersScrollytelling() {
                       animate={currentChamber.id === 3 ? { scale: [1, 1.06, 1] } : { scale: 1 }}
                       transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut", delay: 0.6 }}
                     />
-                    <text x="195" y="280" fill={currentChamber.id === 3 ? "#A855F7" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
-                      LV • 120 mmHg
+                    <text x="185" y="280" fill={currentChamber.id === 3 ? "#A855F7" : "currentColor"} className="text-[10px] font-mono font-bold fill-slate-700 dark:fill-slate-300 pointer-events-none">
+                      LV • PHC DISPATCH
                     </text>
                   </g>
 
@@ -437,10 +489,10 @@ export default function CardiacChambersScrollytelling() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.25 }}
-                className="p-4 sm:p-6 rounded-[2rem] bg-white/90 dark:bg-[#0D131A]/95 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-2xl space-y-3.5"
+                className="p-4 sm:p-6 rounded-[2rem] bg-white/90 dark:bg-[#0D131A]/95 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-2xl space-y-3"
               >
-                {/* Header Tag & Clinical Tier */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+                {/* Header Tag & Feature Tier */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2">
                   <div className="flex items-center gap-2">
                     <span
                       className="w-2.5 h-2.5 rounded-full animate-ping"
@@ -450,7 +502,7 @@ export default function CardiacChambersScrollytelling() {
                       className="font-mono text-xs font-bold tracking-widest uppercase"
                       style={{ color: currentChamber.accentColor }}
                     >
-                      {currentChamber.clinicalTier}
+                      {currentChamber.featureTag}
                     </span>
                   </div>
                   <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 italic">
@@ -458,7 +510,7 @@ export default function CardiacChambersScrollytelling() {
                   </span>
                 </div>
 
-                {/* Editorial Chamber Title */}
+                {/* Editorial Feature Title & Subtitle */}
                 <div>
                   <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {currentChamber.name}
@@ -468,17 +520,30 @@ export default function CardiacChambersScrollytelling() {
                   </p>
                 </div>
 
-                {/* Chamber Clinical Explanation */}
+                {/* Core Capabilities Chips */}
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {currentChamber.capabilities.map((cap, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-medium bg-slate-100 dark:bg-white/5 border border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-slate-300"
+                    >
+                      <CheckCircle2 className="w-3 h-3 text-[#0D9488] dark:text-[#00F5D4]" />
+                      {cap}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Feature In-Depth Description */}
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   {currentChamber.description}
                 </p>
 
-                {/* Real-Time Chamber Telemetry Metrics Grid */}
-                <div className="grid grid-cols-3 gap-2.5 pt-0.5">
+                {/* Real-Time Platform Telemetry Metrics Grid */}
+                <div className="grid grid-cols-3 gap-2 pt-0.5">
                   {currentChamber.metrics.map((m, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-black/50 border border-slate-200/80 dark:border-white/10"
+                      className="p-2 sm:p-2.5 rounded-xl bg-slate-50/90 dark:bg-black/50 border border-slate-200/80 dark:border-white/10"
                     >
                       <span className="block text-[9px] font-mono font-bold uppercase text-slate-500 dark:text-slate-400">
                         {m.label}
@@ -495,15 +560,23 @@ export default function CardiacChambersScrollytelling() {
                   ))}
                 </div>
 
-                {/* Physiological Action Footer */}
-                <div className="p-2.5 sm:p-3 rounded-xl bg-teal-500/10 border border-teal-500/25 flex items-center justify-between text-xs text-slate-800 dark:text-slate-200">
+                {/* Feature CTA & Physiological Impact Footer */}
+                <div className="p-2.5 sm:p-3 rounded-xl bg-teal-500/10 border border-teal-500/25 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-slate-800 dark:text-slate-200">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#0D9488] dark:text-[#00F5D4] shrink-0" />
                     <span className="font-medium text-[11px]">{currentChamber.clinicalImpact}</span>
                   </div>
-                  <span className="font-mono text-[10px] font-bold text-[#0D9488] dark:text-[#00F5D4] shrink-0 ml-2">
-                    {currentChamber.pressure}
-                  </span>
+                  
+                  <Button
+                    asChild
+                    size="sm"
+                    className="shrink-0 bg-slate-900 text-white dark:bg-[#00F5D4] dark:text-slate-950 font-bold hover:opacity-90 rounded-xl text-xs h-8 px-3.5 shadow-sm"
+                  >
+                    <Link to={currentChamber.route}>
+                      {currentChamber.actionLabel}
+                      <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
+                    </Link>
+                  </Button>
                 </div>
 
               </motion.div>
@@ -517,10 +590,10 @@ export default function CardiacChambersScrollytelling() {
         <div className="border-t border-slate-200/80 dark:border-white/10 pt-2 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
           <span className="flex items-center gap-2">
             <Activity className="w-3.5 h-3.5 text-[#00F5D4]" />
-            CARDIAC SYSTOLE / DIASTOLE TELEMETRY HARNESSED IN REAL TIME
+            HEALTHPULSE AI // 4 CORE APPLICATION PILLARS LIVE ARCHITECTURE
           </span>
           <span className="font-bold text-[#0D9488] dark:text-[#00F5D4]">
-            CYCLE STAGE: {currentChamber.id + 1} OF 4
+            FEATURE PILLAR: {currentChamber.id + 1} OF 4
           </span>
         </div>
 
