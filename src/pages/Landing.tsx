@@ -578,24 +578,23 @@ export default function Landing() {
 
       {/* ════════════════════════════════════════════════════════════
           3. PINNED HORIZONTAL LAYOUT (SCROLLYTELLING ARCHITECTURE)
-          Container pinned vertically with position: sticky;
-          Translates horizontally as user scrolls down.
-          Filled symmetrically with cards + live bottom telemetry dock!
+          Container pinned below the navbar (top-20 h-[calc(100vh-5rem)])
+          Translates horizontally as user scrolls down with zero top clipping!
       ════════════════════════════════════════════════════════════ */}
       <section
         ref={horizontalSectionRef}
-        className="relative h-[240vh] w-full"
+        className="relative h-[220vh] w-full"
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-24 pb-8 sm:pt-28 sm:pb-10 px-4 sm:px-8">
+        <div className="sticky top-20 h-[calc(100vh-5rem)] w-full overflow-hidden flex flex-col justify-between py-5 px-4 sm:px-8">
           
           {/* Pinned Section Header & Live Step Indicators */}
-          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-4">
+          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-white/10 pb-3">
             <div>
               <div className="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-[#00F5D4] uppercase mb-1 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
                 02 // SCROLLYTELLING CLINICAL ARCHITECTURE
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+              <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white">
                 Four Modular Clinical Tiers.
               </h2>
             </div>
@@ -605,7 +604,7 @@ export default function Landing() {
               {["01 FUSION", "02 CSDI", "03 DISPATCH", "04 VAULT"].map((step, idx) => (
                 <div
                   key={idx}
-                  className="px-3 py-1 rounded-lg border border-white/10 bg-white/[0.03] text-[#94A3B8] text-[10px] font-bold"
+                  className="px-2.5 py-0.5 rounded-lg border border-white/10 bg-white/[0.03] text-[#94A3B8] text-[10px] font-bold"
                 >
                   {step}
                 </div>
@@ -617,141 +616,141 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto w-full my-auto overflow-visible">
             <motion.div
               style={{ x: horizontalX, willChange: "transform" }}
-              className="flex gap-6 sm:gap-8 w-max"
+              className="flex gap-5 sm:gap-6 w-max"
             >
               
               {/* Card 1: Optical Sensor Fusion */}
-              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
-                    <Activity className="w-6 h-6" />
+              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
+                    <Activity className="w-5 h-5" />
                   </div>
                   <div className="font-mono text-[10px] tracking-widest text-[#00F5D4] uppercase">
                     MODULE // 01 • SENSOR FUSION
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
+                  <h3 className="text-lg sm:text-xl font-black text-white">
                     250 Hz Continuous Optical Telemetry
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                    Dual-channel photoplethysmography (PPG) fused with 16-bit Sigma-Delta ADC sampling extracts systemic vascular resistance and pulse transit time without clinical cuffs.
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
+                    Dual-channel photoplethysmography (PPG) fused with 16-bit Sigma-Delta ADC sampling extracts systemic vascular resistance and pulse transit time.
                   </p>
                 </div>
 
                 {/* Micro Visual inside Card */}
-                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
                     <span>PPG IR/RED ABSORPTION</span>
                     <span className="text-[#00F5D4]">SNR: 48 dB</span>
                   </div>
-                  <div className="h-8 w-full flex items-center">
+                  <div className="h-7 w-full flex items-center">
                     <svg className="w-full h-full" viewBox="0 0 200 30" preserveAspectRatio="none">
                       <path d="M 0 15 Q 25 0 50 15 T 100 15 T 150 15 T 200 15" fill="none" stroke="#00F5D4" strokeWidth="2" />
                     </svg>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
                   <span>MAX30102 • MLX90614</span>
                   <span className="text-[#00F5D4] font-bold">JITTER &lt; 0.4 MS</span>
                 </div>
               </div>
 
               {/* Card 2: CSDI Neural Diffusion Imputation */}
-              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
-                    <Cpu className="w-6 h-6" />
+              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
+                    <Cpu className="w-5 h-5" />
                   </div>
                   <div className="font-mono text-[10px] tracking-widest text-cyan-400 uppercase">
                     MODULE // 02 • NEURAL DIFFUSION
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
+                  <h3 className="text-lg sm:text-xl font-black text-white">
                     CSDI Signal Imputation & Denoising
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                    Motion artifacts and perspiration lead to false emergency alarms. Our Conditional Score-based Diffusion model reconstructs lost sensor telemetry packets with 98.55% fidelity.
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
+                    Motion artifacts and perspiration lead to false emergency alarms. Our Conditional Diffusion model reconstructs lost telemetry with 98.55% fidelity.
                   </p>
                 </div>
 
                 {/* Micro Visual inside Card */}
-                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
                     <span>RESTORED LOST PACKETS</span>
-                    <span className="text-cyan-400">DIFFUSION PASS 10</span>
+                    <span className="text-cyan-400">PASS 10</span>
                   </div>
-                  <div className="grid grid-cols-6 gap-1.5 h-6 items-center">
+                  <div className="grid grid-cols-6 gap-1 h-5 items-center">
                     {[1,1,1,0,1,1].map((ok, i) => (
-                      <div key={i} className={`h-full rounded ${ok ? "bg-cyan-500/40" : "bg-rose-500/80 animate-pulse"} border border-white/10 flex items-center justify-center text-[8px] font-mono`}>
+                      <div key={i} className={`h-full rounded ${ok ? "bg-cyan-500/40" : "bg-rose-500/80 animate-pulse"} border border-white/10 flex items-center justify-center text-[7px] font-mono`}>
                         {ok ? "✓" : "IMP"}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
                   <span>RECONSTRUCTION MAE</span>
                   <span className="text-cyan-400 font-bold">1.45% OPTIMAL</span>
                 </div>
               </div>
 
               {/* Card 3: Autonomous PHC Emergency Dispatch */}
-              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                    <AlertTriangle className="w-6 h-6" />
+              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                    <AlertTriangle className="w-5 h-5" />
                   </div>
                   <div className="font-mono text-[10px] tracking-widest text-rose-400 uppercase">
                     MODULE // 03 • EMERGENCY GEOFENCE
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
+                  <h3 className="text-lg sm:text-xl font-black text-white">
                     Sub-Second PHC Dispatch Network
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                    Automated geofencing immediately alerts the nearest Primary Health Centre (PHC) ambulance network when severe hypoxia or ventricular arrhythmia is detected.
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
+                    Automated geofencing immediately alerts the nearest Primary Health Centre (PHC) ambulance network when severe hypoxia or arrhythmia is detected.
                   </p>
                 </div>
 
                 {/* Micro Visual inside Card */}
-                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between text-[11px] font-mono">
-                  <div className="flex items-center gap-2 text-rose-400">
-                    <Hospital className="w-4 h-4" />
-                    <span>Indiranagar Urban PHC</span>
+                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between text-[10px] font-mono">
+                  <div className="flex items-center gap-1.5 text-rose-400">
+                    <Hospital className="w-3.5 h-3.5" />
+                    <span className="truncate max-w-[140px]">Indiranagar Urban PHC</span>
                   </div>
                   <span className="text-white font-bold">2.4 km • 6 min</span>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
                   <span>LATENCY TO DISPATCH</span>
                   <span className="text-rose-400 font-bold">&lt; 800 MS</span>
                 </div>
               </div>
 
               {/* Card 4: FHIR R4 Sovereign Biometric Vault */}
-              <div className="w-[85vw] sm:w-[480px] mermaid-glass p-6 sm:p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
-                    <ShieldCheck className="w-6 h-6" />
+              <div className="w-[82vw] sm:w-[420px] mermaid-glass p-5 sm:p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col justify-between shrink-0">
+                <div className="space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4]">
+                    <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div className="font-mono text-[10px] tracking-widest text-[#00F5D4] uppercase">
                     MODULE // 04 • SOVEREIGN SECURITY
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
+                  <h3 className="text-lg sm:text-xl font-black text-white">
                     FHIR R4 Sovereign Data Vault
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
                     Zero-knowledge biometric storage with AES-GCM-256 cryptographic hardware isolation ensures sensitive telemetry remains entirely under your sovereign control.
                   </p>
                 </div>
 
                 {/* Micro Visual inside Card */}
-                <div className="my-4 p-3 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between text-[11px] font-mono text-emerald-400">
-                  <span className="flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5" /> AES-256 ENCRYPTED
+                <div className="my-2.5 p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between text-[10px] font-mono text-emerald-400">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> AES-256 ENCRYPTED
                   </span>
                   <span>ZERO-KNOWLEDGE</span>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
                   <span>STANDARDS</span>
                   <span className="text-[#00F5D4] font-bold">FHIR • HL7 • HIPAA</span>
                 </div>
@@ -761,38 +760,38 @@ export default function Landing() {
           </div>
 
           {/* ── LIVE SCROLLYTELLING TELEMETRY DOCK (FILLS BOTTOM VIEWPORT) ── */}
-          <div className="max-w-7xl mx-auto w-full pt-4 border-t border-white/10">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto w-full pt-3 border-t border-white/10">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Sampling Rate</span>
-                  <span className="text-sm font-black font-mono text-white">250 Hz Real-Time</span>
+                  <span className="text-xs font-black font-mono text-white">250 Hz Real-Time</span>
                 </div>
-                <Activity className="w-4 h-4 text-[#00F5D4]" />
+                <Activity className="w-3.5 h-3.5 text-[#00F5D4]" />
               </div>
 
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Diffusion Inference</span>
-                  <span className="text-sm font-black font-mono text-cyan-400">&lt; 8.2 ms Edge</span>
+                  <span className="text-xs font-black font-mono text-cyan-400">&lt; 8.2 ms Edge</span>
                 </div>
-                <Cpu className="w-4 h-4 text-cyan-400" />
+                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
               </div>
 
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">PHC Dispatch</span>
-                  <span className="text-sm font-black font-mono text-rose-400">Sub-Second Ring</span>
+                  <span className="text-xs font-black font-mono text-rose-400">Sub-Second Ring</span>
                 </div>
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
               </div>
 
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[9px] font-mono text-[#94A3B8] uppercase block">Data Compliance</span>
-                  <span className="text-sm font-black font-mono text-[#00F5D4]">FHIR R4 / HL7</span>
+                  <span className="text-xs font-black font-mono text-[#00F5D4]">FHIR R4 / HL7</span>
                 </div>
-                <ShieldCheck className="w-4 h-4 text-[#00F5D4]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#00F5D4]" />
               </div>
             </div>
           </div>
