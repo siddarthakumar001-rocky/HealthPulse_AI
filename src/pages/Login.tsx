@@ -163,17 +163,16 @@ export default function Login() {
               )}
             </Button>
 
-            {/* Quick Demo Credentials Autofill */}
             <Button
               type="button"
               variant="outline"
               onClick={() => {
-                setEmail("nobi@example.com");
-                setPassword("password123");
+                setEmail("bhoomi@example.com");
+                setPassword("123456");
               }}
               className="w-full h-11 rounded-2xl border-dashed border-primary/40 text-primary hover:bg-primary/5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
-              <Zap className="w-3.5 h-3.5 text-primary" /> Fill Demo Patient Account
+              <Activity className="w-3.5 h-3.5 text-primary" /> Fill Demo Patient Account
             </Button>
           </form>
 
