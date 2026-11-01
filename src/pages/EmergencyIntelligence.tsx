@@ -91,6 +91,73 @@ export default function EmergencyIntelligence() {
   const coldChainCount = alerts.filter((a) => a.alertType === "COLD_CHAIN_BREACH" && a.status !== "Resolved").length;
   const stockoutCount = alerts.filter((a) => a.alertType === "STOCKOUT_RISK" && a.status !== "Resolved").length;
 
+  const translateAlertTitle = (title: string) => {
+    if (!title) return "";
+    if (title.includes("Critical Medicine Stockout") || title.includes("Medicine Stockout")) {
+      return title
+        .replace(/Critical Medicine Stockout:/i, t("phc.alertStockoutPrefix", "Critical Medicine Stockout") + ":")
+        .replace(/\bat\b/g, t("phc.atFacility", "at"));
+    }
+    if (title.includes("Potential Vector-Borne Surge") || title.includes("Potential Dengue Surge")) {
+      return title
+        .replace(/Potential Vector-Borne Surge Signal at|Potential Dengue Surge Detected at/i, t("phc.alertDenguePrefix", "Potential Vector-Borne Surge Signal at"))
+        .replace(/\bat\b/g, t("phc.atFacility", "at"));
+    }
+    if (title.includes("Critical Cold Chain Breach")) {
+      return title
+        .replace(/Critical Cold Chain Breach:/i, t("phc.alertColdChainPrefix", "Critical Cold Chain Breach") + ":")
+        .replace(/\bat\b/g, t("phc.atFacility", "at"));
+    }
+    if (title.includes("Patient Capacity Overload")) {
+      return title
+        .replace(/Patient Capacity Overload/i, t("phc.alertCapacityPrefix", "Patient Capacity Overload"))
+        .replace(/\bat\b/g, t("phc.atFacility", "at"));
+    }
+    return title;
+  };
+
+  const translateAlertDesc = (desc: string) => {
+    if (!desc) return "";
+    if (desc.includes("Amoxicillin 500mg down to 15 capsules")) {
+      return t("phc.alertAmoxDesc", "Amoxicillin 500mg down to 15 capsules (Daily demand: 25). Zero buffer safety remaining.");
+    }
+    if (desc.includes("Dengue & Fever symptom cases increased") || desc.includes("compared to historical 3-week baseline")) {
+      return t("phc.alertDengueCasesDesc", "Dengue & Fever symptom cases increased by +48% compared to historical 3-week baseline.");
+    }
+    if (desc.includes("Vector-Borne cases surged to 48/week") || desc.includes("Paracetamol and IV fluids depleting")) {
+      return t("phc.alertVectorSurgedDesc", "Vector-Borne cases surged to 48/week (+300% over baseline). Paracetamol and IV fluids depleting rapidly. Expected stockout within 3 days.");
+    }
+    if (desc.includes("Vaccine refrigerator temperature reached") || desc.includes("14.8°C")) {
+      return t("phc.alertFridgeTempDesc", "Vaccine refrigerator temperature reached 14.8°C (Safe limit: 2°C - 8°C). Rotavirus, Hepatitis B, and TT vaccine batches at risk.");
+    }
+    return desc;
+  };
+
+  const translateAlertAction = (action: string) => {
+    if (!action) return "";
+    if (action.includes("Execute AI Inter-Facility Redistribution") || action.includes("350 units available")) {
+      return t("phc.alertActionRedistribution", "Execute AI Inter-Facility Redistribution: 350 units available at nearby CHC within 14 km.");
+    }
+    if (action.includes("Deploy extra NS1 rapid diagnostic kits") || action.includes("BBMP vector-control team")) {
+      return t("phc.alertActionNS1", "Deploy extra NS1 rapid diagnostic kits and alert BBMP vector-control team.");
+    }
+    if (action.includes("Dispatch 500 units of Paracetamol") || action.includes("PHC-002")) {
+      return t("phc.alertActionDispatchParacetamol", "Dispatch 500 units of Paracetamol from nearest surplus facility (PHC-002) and alert district vector-control unit.");
+    }
+    if (action.includes("Move vaccine stocks to backup passive cold boxes") || action.includes("Biomedical engineer notified")) {
+      return t("phc.alertActionMoveVaccines", "Move vaccine stocks to backup passive cold boxes with frozen ice packs immediately. Biomedical engineer notified.");
+    }
+    return action;
+  };
+
+  const translateTrigger = (source: string) => {
+    if (!source) return "";
+    if (source.includes("IoT Smart Scale")) return t("phc.triggerIoTScale", "IoT Smart Scale & Inventory Engine");
+    if (source.includes("AI Epidemiological")) return t("phc.triggerAIEpidemic", "AI Epidemiological Anomaly Engine");
+    if (source.includes("Fridge") || source.includes("Probe")) return t("phc.triggerFridge", "IoT Smart Fridge Probe");
+    return source;
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-7xl mx-auto pb-16">
@@ -190,17 +257,23 @@ export default function EmergencyIntelligence() {
 
             {/* Severity Filter Pills */}
             <div className="flex items-center gap-1 bg-card/80 p-1 rounded-2xl border border-teal-500/20">
-              {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((sev) => (
+              {[
+                { key: "ALL", label: t("phc.filterAll", "ALL") },
+                { key: "CRITICAL", label: t("phc.filterCritical", "CRITICAL") },
+                { key: "HIGH", label: t("phc.filterHigh", "HIGH") },
+                { key: "MEDIUM", label: t("phc.filterMedium", "MEDIUM") },
+                { key: "LOW", label: t("phc.filterLow", "LOW") },
+              ].map((item) => (
                 <button
-                  key={sev}
-                  onClick={() => setFilterSeverity(sev)}
+                  key={item.key}
+                  onClick={() => setFilterSeverity(item.key)}
                   className={`px-3 py-1 rounded-xl transition text-[10px] font-extrabold ${
-                    filterSeverity === sev
+                    filterSeverity === item.key
                       ? "bg-rose-500 text-white shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {sev}
+                  {item.label}
                 </button>
               ))}
             </div>
@@ -210,7 +283,7 @@ export default function EmergencyIntelligence() {
             {filteredAlerts.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground text-xs font-mono">
                 <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
-                No active incidents matching the selected severity level.
+                {t("phc.noActiveIncidents", "No active incidents matching the selected severity level.")}
               </div>
             ) : (
               filteredAlerts.map((al) => (
@@ -228,9 +301,9 @@ export default function EmergencyIntelligence() {
                         {al.alertType === "EQUIPMENT_FAILURE" && <AlertTriangle className="h-4 w-4" />}
                       </div>
                       <div>
-                        <h4 className="font-black text-sm text-foreground">{al.title}</h4>
+                        <h4 className="font-black text-sm text-foreground">{translateAlertTitle(al.title)}</h4>
                         <p className="text-[11px] text-muted-foreground font-mono">
-                          {t("phc.facility", "Facility")}: <strong className="text-foreground">{al.phcId?.name || "PHC"}</strong> ({al.phcId?.district}) • {t("phc.trigger", "Trigger")}: {al.triggerSource}
+                          {t("phc.facility", "Facility")}: <strong className="text-foreground">{al.phcId?.name || "PHC"}</strong> ({al.phcId?.district}) • {t("phc.trigger", "Trigger")}: {translateTrigger(al.triggerSource)}
                         </p>
                       </div>
                     </div>
@@ -244,7 +317,13 @@ export default function EmergencyIntelligence() {
                             : "border-amber-500/40 text-amber-500 bg-amber-500/15 text-[10px] font-bold"
                         }
                       >
-                        {al.severity}
+                        {al.severity === "Critical"
+                          ? t("phc.critical", "Critical")
+                          : al.severity === "High"
+                          ? t("phc.high", "High")
+                          : al.severity === "Medium"
+                          ? t("phc.moderate", "Medium")
+                          : t("phc.low", "Low")}
                       </Badge>
 
                       <Badge
@@ -257,16 +336,20 @@ export default function EmergencyIntelligence() {
                             : "border-slate-500/40 text-muted-foreground text-[10px] font-bold"
                         }
                       >
-                        {al.status}
+                        {al.status === "Resolved"
+                          ? t("phc.statusResolved", "Resolved")
+                          : al.status === "Acknowledged"
+                          ? t("phc.statusAcknowledged", "Acknowledged")
+                          : t("phc.statusDetected", "Detected")}
                       </Badge>
                     </div>
                   </div>
 
-                  <p className="text-xs text-foreground/90 pl-12 leading-relaxed">{al.description}</p>
+                  <p className="text-xs text-foreground/90 pl-12 leading-relaxed">{translateAlertDesc(al.description)}</p>
 
                   {al.recommendedAction && (
                     <div className="ml-12 p-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-xs text-teal-600 dark:text-teal-300 font-mono">
-                      ↳ {t("phc.proactiveAction", "AI Recommended Action")}: {al.recommendedAction}
+                      ↳ {t("phc.proactiveAction", "AI Recommended Action")}: {translateAlertAction(al.recommendedAction)}
                     </div>
                   )}
 

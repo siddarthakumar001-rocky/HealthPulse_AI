@@ -347,8 +347,8 @@ export default function SmartSupplyChain() {
                           <td className="p-3.5 sm:px-5 font-bold text-foreground">
                             {item.medicineName}
                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
-                              <span>Batch: {item.batchNumber}</span>
-                              <span>• Cat: {item.category}</span>
+                              <span>{t("phc.batch", "Batch")}: {item.batchNumber}</span>
+                              <span>• {t("phc.cat", "Cat")}: {item.category}</span>
                             </div>
                           </td>
                           <td className="p-3.5 text-foreground">
@@ -360,11 +360,11 @@ export default function SmartSupplyChain() {
                               {item.quantity} {item.unit}
                             </span>
                             <span className="text-[10px] text-muted-foreground block font-mono">
-                              Safe Buffer: {item.safeBufferThreshold} {item.unit}
+                              {t("phc.safeBuffer", "Safe Buffer")}: {item.safeBufferThreshold} {item.unit}
                             </span>
                           </td>
                           <td className="p-3.5 text-foreground font-mono">
-                            {item.dailyBurnRate} {item.unit}/day
+                            {item.dailyBurnRate} {item.unit}/{t("phc.day", "day")}
                             {item.aiPrediction?.surgeFactorApplied && item.aiPrediction.surgeFactorApplied > 1 && (
                               <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[9px] font-mono">
                                 Surge: {item.aiPrediction.surgeFactorApplied}×
@@ -376,7 +376,7 @@ export default function SmartSupplyChain() {
                               {item.aiPrediction?.estimatedDepletionWindow || item.estimatedDepletionDate || "Safe (>30d)"}
                             </span>
                             <span className="text-[10px] text-muted-foreground block font-mono">
-                              Confidence: {item.aiPrediction?.confidence || item.confidenceScore || 90}%
+                              {t("phc.confidence", "Confidence")}: {item.aiPrediction?.confidence || item.confidenceScore || 90}%
                             </span>
                           </td>
                           <td className="p-3.5">
@@ -391,7 +391,7 @@ export default function SmartSupplyChain() {
                                 <Snowflake className="h-3 w-3" /> {item.storageTemperature}°C
                               </span>
                             ) : (
-                              <span className="text-muted-foreground text-[10px] font-mono">Ambient ({item.storageTemperature}°C)</span>
+                              <span className="text-muted-foreground text-[10px] font-mono">{t("phc.ambient", "Ambient")} ({item.storageTemperature}°C)</span>
                             )}
                           </td>
                           <td className="p-3.5 sm:px-5">
@@ -407,7 +407,13 @@ export default function SmartSupplyChain() {
                                       : "border-emerald-500/40 text-emerald-400 bg-emerald-500/15 text-[10px] font-bold"
                               }
                             >
-                              {item.stockHealth}
+                              {item.stockHealth === "Critical"
+                                ? t("phc.critical", "Critical")
+                                : item.stockHealth === "Low"
+                                  ? t("phc.low", "Low")
+                                  : item.stockHealth === "Excess"
+                                    ? t("phc.surplus", "Excess")
+                                    : t("phc.normal", "Normal")}
                             </Badge>
                           </td>
                         </tr>
@@ -440,7 +446,7 @@ export default function SmartSupplyChain() {
                           isBreach ? "text-rose-400 border-rose-500/40" : "text-cyan-400"
                         }`}
                       >
-                        {isBreach ? "🚨 TEMPERATURE BREACH" : "✓ COLD CHAIN SECURE"}
+                        {isBreach ? t("phc.tempBreach", "🚨 TEMPERATURE BREACH") : t("phc.coldChainSecure", "✓ COLD CHAIN SECURE")}
                       </span>
                       <span className="text-xs text-muted-foreground font-mono">{fac?.name}</span>
                     </div>
@@ -450,19 +456,19 @@ export default function SmartSupplyChain() {
                         {item.medicineName}
                       </h3>
                       <p className="text-[11px] text-muted-foreground font-mono">
-                        Batch: {item.batchNumber}
+                        {t("phc.batch", "Batch")}: {item.batchNumber}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between p-3.5 rounded-2xl bg-card/60 border border-teal-500/15">
                       <div>
-                        <span className="text-[9px] font-mono text-muted-foreground uppercase block font-bold">Live Sensor Telemetry</span>
+                        <span className="text-[9px] font-mono text-muted-foreground uppercase block font-bold">{t("phc.liveSensorTelemetry", "Live Sensor Telemetry")}</span>
                         <p className={`text-2xl font-black font-mono ${isBreach ? "text-rose-500" : "text-[#05D3B3]"}`}>
                           {item.storageTemperature}°C
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="text-[9px] font-mono text-muted-foreground uppercase block font-bold">Safe Window</span>
+                        <span className="text-[9px] font-mono text-muted-foreground uppercase block font-bold">{t("phc.safeWindow", "Safe Window")}</span>
                         <p className="text-xs font-mono font-bold text-foreground">
                           {item.minTemperature}°C – {item.maxTemperature}°C
                         </p>
@@ -470,8 +476,8 @@ export default function SmartSupplyChain() {
                     </div>
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-teal-500/10">
-                      <span>Quantity: <strong className="text-foreground">{item.quantity} {item.unit}</strong></span>
-                      <span className="font-mono text-teal-600 dark:text-teal-400">IoT Active</span>
+                      <span>{t("phc.quantity", "Quantity")}: <strong className="text-foreground">{item.quantity} {item.unit}</strong></span>
+                      <span className="font-mono text-teal-600 dark:text-teal-400">{t("phc.iotActive", "IoT Active")}</span>
                     </div>
                   </div>
                 );
@@ -488,10 +494,10 @@ export default function SmartSupplyChain() {
                 <Clock className="h-5 w-5 text-amber-500" />
                 <div>
                   <h3 className="text-sm font-black text-foreground">
-                    Medicines & Vaccines Nearing Expiry (Within 90 Days)
+                    {t("phc.nearingExpiryTitle", "Medicines & Vaccines Nearing Expiry (Within 90 Days)")}
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
-                    Surplus stock approaching expiration should be redistributed to high-volume centres to prevent wastage
+                    {t("phc.nearingExpirySubtitle", "Surplus stock approaching expiration should be redistributed to high-volume centres to prevent wastage")}
                   </p>
                 </div>
               </div>
@@ -499,13 +505,13 @@ export default function SmartSupplyChain() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-teal-500/15">
                     <tr>
-                      <th className="p-3.5 sm:px-5">Medicine</th>
-                      <th className="p-3.5">Facility</th>
-                      <th className="p-3.5">Batch Number</th>
-                      <th className="p-3.5">Quantity</th>
-                      <th className="p-3.5">Expiry Date</th>
-                      <th className="p-3.5">Days Remaining</th>
-                      <th className="p-3.5 sm:px-5 text-right">Recommended Action</th>
+                      <th className="p-3.5 sm:px-5">{t("phc.tableMedicineVaccine", "Medicine / Vaccine")}</th>
+                      <th className="p-3.5">{t("phc.tableFacility", "Facility")}</th>
+                      <th className="p-3.5">{t("phc.batchNumber", "Batch Number")}</th>
+                      <th className="p-3.5">{t("phc.quantity", "Quantity")}</th>
+                      <th className="p-3.5">{t("phc.expiryDate", "Expiry Date")}</th>
+                      <th className="p-3.5">{t("phc.daysRemaining", "Days Remaining")}</th>
+                      <th className="p-3.5 sm:px-5 text-right">{t("phc.recommendedAction", "Recommended Action")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-teal-500/10">
@@ -521,7 +527,7 @@ export default function SmartSupplyChain() {
                           <td className="p-3.5 font-mono text-muted-foreground">{item.batchNumber}</td>
                           <td className="p-3.5 font-bold text-[#05D3B3] font-mono">{item.quantity} {item.unit}</td>
                           <td className="p-3.5 text-foreground font-mono">{new Date(item.expiryDate).toLocaleDateString()}</td>
-                          <td className="p-3.5 font-black font-mono text-amber-500">{daysLeft} days</td>
+                          <td className="p-3.5 font-black font-mono text-amber-500">{daysLeft} {t("phc.days", "days")}</td>
                           <td className="p-3.5 sm:px-5 text-right">
                             <Button
                               size="sm"
@@ -529,7 +535,7 @@ export default function SmartSupplyChain() {
                               onClick={() => toast.info(`AI Transfer scheduled for batch #${item.batchNumber}`)}
                               className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-xl text-xs h-8 px-3 font-bold shadow-sm"
                             >
-                              Redistribute Batch
+                              {t("phc.redistributeBatch", "Redistribute Batch")}
                             </Button>
                           </td>
                         </tr>
@@ -549,25 +555,25 @@ export default function SmartSupplyChain() {
               <div className="p-5 border-b border-teal-500/15 flex items-center gap-2.5">
                 <Truck className="h-5 w-5 text-[#05D3B3]" />
                 <h3 className="text-sm font-black text-foreground">
-                  Inter-Facility Resource Transfers Tracking
+                  {t("phc.activeTransfersTitle", "Inter-Facility Resource Transfers Tracking")}
                 </h3>
               </div>
               <div className="overflow-x-auto">
                 {activeTransfers.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground text-xs font-mono">
-                    No active inter-facility stock transfers currently in progress.
+                    {t("phc.noActiveTransfers", "No active inter-facility stock transfers currently in progress.")}
                   </div>
                 ) : (
                   <table className="w-full text-xs text-left">
                     <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-teal-500/15">
                       <tr>
-                        <th className="p-3.5 sm:px-5">Resource</th>
-                        <th className="p-3.5">Source (Donor)</th>
-                        <th className="p-3.5">Target (Deficit)</th>
-                        <th className="p-3.5">Quantity</th>
-                        <th className="p-3.5">Distance</th>
-                        <th className="p-3.5">Status</th>
-                        <th className="p-3.5 sm:px-5 text-right">Action</th>
+                        <th className="p-3.5 sm:px-5">{t("phc.resource", "Resource")}</th>
+                        <th className="p-3.5">{t("phc.sourceDonor", "Source (Donor)")}</th>
+                        <th className="p-3.5">{t("phc.targetDeficit", "Target (Deficit)")}</th>
+                        <th className="p-3.5">{t("phc.quantity", "Quantity")}</th>
+                        <th className="p-3.5">{t("phc.distance", "Distance")}</th>
+                        <th className="p-3.5">{t("phc.status", "Status")}</th>
+                        <th className="p-3.5 sm:px-5 text-right">{t("phc.action", "Action")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-teal-500/10">
@@ -586,10 +592,18 @@ export default function SmartSupplyChain() {
                                   ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/15 text-[10px] font-bold"
                                   : tr.status === "In Transit"
                                     ? "border-blue-500/40 text-blue-400 bg-blue-500/15 text-[10px] font-bold"
-                                    : "border-amber-500/40 text-amber-400 bg-amber-500/15 text-[10px] font-bold"
+                                    : tr.status === "Approved"
+                                      ? "border-teal-500/40 text-teal-400 bg-teal-500/15 text-[10px] font-bold"
+                                      : "border-amber-500/40 text-amber-400 bg-amber-500/15 text-[10px] font-bold"
                               }
                             >
-                              {tr.status}
+                              {tr.status === "Completed"
+                                ? t("phc.statusCompleted", "Completed")
+                                : tr.status === "In Transit"
+                                  ? t("phc.statusInTransit", "In Transit")
+                                  : tr.status === "Approved"
+                                    ? t("phc.statusApproved", "Approved")
+                                    : t("phc.statusPendingApproval", "Pending Approval")}
                             </Badge>
                           </td>
                           <td className="p-3.5 sm:px-5 text-right space-x-2">
@@ -599,7 +613,7 @@ export default function SmartSupplyChain() {
                                 onClick={() => handleUpdateTransferStatus(tr._id, "APPROVE")}
                                 className="mermaid-btn text-xs font-bold h-8 px-3 rounded-xl shadow-sm"
                               >
-                                Approve
+                                {t("phc.btnApprove", "Approve")}
                               </Button>
                             )}
                             {tr.status === "Approved" && (
@@ -608,7 +622,7 @@ export default function SmartSupplyChain() {
                                 onClick={() => handleUpdateTransferStatus(tr._id, "DISPATCH")}
                                 className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-8 px-3 rounded-xl shadow-sm"
                               >
-                                Dispatch
+                                {t("phc.btnDispatch", "Dispatch")}
                               </Button>
                             )}
                             {tr.status === "In Transit" && (
@@ -617,7 +631,7 @@ export default function SmartSupplyChain() {
                                 onClick={() => handleUpdateTransferStatus(tr._id, "RECEIVE")}
                                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs h-8 px-3 rounded-xl shadow-sm"
                               >
-                                Confirm Received
+                                {t("phc.btnConfirmReceived", "Confirm Received")}
                               </Button>
                             )}
                           </td>

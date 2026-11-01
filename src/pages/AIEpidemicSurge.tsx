@@ -100,6 +100,32 @@ export default function AIEpidemicSurge() {
     })) || []),
   ];
 
+  const translateSignalName = (name: string) => {
+    if (!name) return "";
+    if (name.includes("Dengue") || name.includes("Vector-Borne")) return t("phc.dengueSurgeTitle", "Potential Dengue / Vector-Borne Surge");
+    if (name.includes("Influenza") || name.includes("Respiratory")) return t("phc.influenzaSurgeTitle", "Potential Influenza / Acute Respiratory Surge");
+    if (name.includes("Gastroenteritis") || name.includes("Diarrheal")) return t("phc.gastroSurgeTitle", "Potential Gastroenteritis / Diarrheal Surge");
+    if (name.includes("Fever")) return t("phc.feverClusterTitle", "Unusual Fever Cluster Early Warning");
+    return name;
+  };
+
+  const translateSignalAction = (action: string) => {
+    if (!action) return "";
+    if (action.includes("Paracetamol") && action.includes("Saline")) {
+      return t("phc.dengueAction", "Deploy emergency buffer of Paracetamol, IV Saline, alert district epidemiologist, and ramp up diagnostic screening.");
+    }
+    if (action.includes("Amoxicillin") && action.includes("Azithromycin")) {
+      return t("phc.influenzaAction", "Deploy emergency buffer of Amoxicillin, Azithromycin, alert district epidemiologist, and ramp up diagnostic screening.");
+    }
+    if (action.includes("ORS") && (action.includes("Zinc") || action.includes("Metronidazole"))) {
+      return t("phc.gastroAction", "Deploy emergency buffer of ORS, Zinc Sulphate, alert district epidemiologist, and ramp up diagnostic screening.");
+    }
+    if (action.includes("Paracetamol") && (action.includes("Antibiotics") || action.includes("Rapid Diagnostic"))) {
+      return t("phc.feverAction", "Deploy emergency buffer of Paracetamol, Antibiotics, alert district epidemiologist, and ramp up diagnostic screening.");
+    }
+    return action;
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 pb-12">
@@ -246,7 +272,7 @@ export default function AIEpidemicSurge() {
                 </h2>
               </div>
               <Badge variant="destructive" className="text-[10px] rounded-xl font-bold">
-                Statistical Anomaly (Z &gt; 1.8)
+                {t("phc.statisticalAnomaly", "Statistical Anomaly (Z > 1.8)")}
               </Badge>
             </div>
 
@@ -257,18 +283,22 @@ export default function AIEpidemicSurge() {
                   className="p-4 rounded-2xl bg-card/60 border border-rose-500/30 space-y-2 backdrop-blur-md"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-rose-400">{sig.signalName}</span>
+                    <span className="text-sm font-bold text-rose-400">
+                      {translateSignalName(sig.signalName)}
+                    </span>
                     <span className="text-xs font-mono text-teal-500 font-bold">
                       {t("phc.confidence", "Confidence")}: {sig.confidence}%
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {t("phc.observedCount", "Observed count")}:{" "}
-                    <strong className="text-foreground">{sig.currentRate}/week</strong> {t("phc.vsBaseline", "vs Baseline")}:{" "}
-                    <strong className="text-foreground">{sig.baselineAverage}/week</strong> (+{sig.percentageDeviation}% anomaly spike, Z-score: {sig.zScore}).
+                    <strong className="text-foreground">{sig.currentRate}/{t("phc.week", "week")}</strong>{" "}
+                    {t("phc.vsBaseline", "vs Baseline")}:{" "}
+                    <strong className="text-foreground">{sig.baselineAverage}/{t("phc.week", "week")}</strong>{" "}
+                    (+{sig.percentageDeviation}% {t("phc.anomalySpike", "anomaly spike")}, Z-score: {sig.zScore}).
                   </p>
                   <p className="text-xs text-teal-600 dark:text-teal-400 font-mono font-medium">
-                    ↳ {t("phc.proactiveAction", "Proactive Action")}: {sig.recommendedAction}
+                    ↳ {t("phc.proactiveAction", "Proactive Action")}: {translateSignalAction(sig.recommendedAction)}
                   </p>
                 </div>
               ))}
