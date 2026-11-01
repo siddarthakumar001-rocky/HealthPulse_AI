@@ -30,8 +30,7 @@ import {
   Layers,
   ChevronRight,
   TrendingUp,
-  FileDown,
-  Zap
+  FileDown
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/services/api";
@@ -281,7 +280,7 @@ export default function Profile() {
             <div className="mermaid-glass p-5 rounded-[2rem] border border-teal-500/20 shadow-lg flex flex-col justify-between">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[10px] font-mono font-bold uppercase">Blood Sugar</span>
-                <Zap className="w-4 h-4 text-amber-500" />
+                <Flame className="w-4 h-4 text-amber-500" />
               </div>
               <div className="my-2">
                 <div className="text-2xl font-black font-mono text-foreground">
