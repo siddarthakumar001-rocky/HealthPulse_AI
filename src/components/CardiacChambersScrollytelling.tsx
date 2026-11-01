@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   AlertTriangle,
   ChevronRight,
+  ChevronLeft,
   Sparkles,
   Cpu,
   Layers,
@@ -181,13 +182,16 @@ export default function CardiacChambersScrollytelling() {
     }
   };
 
+  const handlePrev = () => handleSelectChamber((activeIdx - 1 + 4) % 4);
+  const handleNext = () => handleSelectChamber((activeIdx + 1) % 4);
+
   return (
     <section
       ref={containerRef}
-      className="relative h-[260vh] w-full transition-colors duration-300"
+      className="relative h-[220vh] w-full transition-colors duration-300"
     >
       {/* ── STICKY VIEWPORT CONTAINER ── */}
-      <div className="sticky top-20 h-[calc(100vh-5rem)] w-full overflow-hidden flex flex-col justify-between py-2 sm:py-3 px-4 sm:px-8 max-w-7xl mx-auto">
+      <div className="sticky top-20 z-20 h-[calc(100vh-5rem)] w-full overflow-hidden flex flex-col justify-between py-2 sm:py-3 px-4 sm:px-8 max-w-7xl mx-auto">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2 shrink-0">
@@ -201,8 +205,16 @@ export default function CardiacChambersScrollytelling() {
             </h2>
           </div>
 
-          {/* Chamber Switcher Tabs */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100/90 dark:bg-black/60 border border-slate-200 dark:border-white/10 font-mono text-xs">
+          {/* Chamber Switcher Tabs & Quick Navigation */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100/90 dark:bg-black/60 border border-slate-200 dark:border-white/10 font-mono text-xs">
+            <button
+              onClick={handlePrev}
+              title="Previous Chamber"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+
             {chambers.map((c, i) => {
               const isActive = activeIdx === i;
               return (
@@ -219,6 +231,14 @@ export default function CardiacChambersScrollytelling() {
                 </button>
               );
             })}
+
+            <button
+              onClick={handleNext}
+              title="Next Chamber"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 

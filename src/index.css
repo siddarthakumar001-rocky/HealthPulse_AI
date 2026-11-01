@@ -124,7 +124,8 @@
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    @apply bg-background text-foreground antialiased overflow-x-hidden w-full max-w-full;
+    @apply bg-background text-foreground antialiased w-full max-w-full;
+    overflow-x: clip;
     background-image:
       radial-gradient(ellipse 65% 55% at 10% 15%, rgba(204, 251, 241, 0.65) 0%, transparent 65%),
       radial-gradient(ellipse 65% 55% at 90% 10%, rgba(220, 233, 244, 0.6) 0%, transparent 65%),
@@ -142,7 +143,11 @@
 
   html, #root, body, button, input, select, textarea {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    @apply overflow-x-hidden w-full max-w-full;
+    @apply w-full max-w-full;
+  }
+
+  html, body, #root {
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4, h5, h6, .font-display {
