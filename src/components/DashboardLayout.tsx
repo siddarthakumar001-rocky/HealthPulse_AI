@@ -1,7 +1,8 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/lib/auth";
-import { Bell, Moon, Sun, User, LogOut, Activity, ArrowLeft } from "lucide-react";
+import { Bell, Moon, Sun, User, LogOut, Activity, ArrowLeft, ArrowUpCircle } from "lucide-react";
+import SoftwareUpdateModal from "@/components/SoftwareUpdateModal";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -27,6 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { t } = useTranslation();
   const location = useLocation();
   const { isScrolled } = useScrollFlow(10);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
 
   const handleBack = () => {
@@ -156,6 +158,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="my-1 bg-border/60" />
                     <DropdownMenuItem
+                      onClick={() => setShowUpdateModal(true)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-xl cursor-pointer hover:bg-teal-500/15 transition-colors"
+                    >
+                      <ArrowUpCircle className="w-4 h-4 text-teal-500" />
+                      <span>Software Updates</span>
+                      <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold">v1.0.0</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       onClick={() => navigate('/profile')}
                       className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-xl cursor-pointer hover:bg-teal-500/15 transition-colors"
                     >
@@ -207,6 +217,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </div>
+      <SoftwareUpdateModal isOpen={showUpdateModal} onClose={() => setShowUpdateModal(false)} />
       <MobileBottomNav />
     </SidebarProvider>
   );

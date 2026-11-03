@@ -13,6 +13,7 @@ import {
   Siren,
   Stethoscope,
   FlaskConical,
+  ArrowUpCircle,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/sidebar";
 import { motion } from "framer-motion";
 import GlassModal from "@/components/GlassModal";
+import SoftwareUpdateModal from "@/components/SoftwareUpdateModal";
 import { useState } from "react";
 
 const personalNavItems = [
@@ -60,6 +62,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   const handleSignOut = async () => {
     setShowSignOutModal(false);
@@ -176,6 +179,20 @@ export function AppSidebar() {
 
         <SidebarFooter className="p-3 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
           <motion.button
+            onClick={() => setShowUpdateModal(true)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full mb-2 flex items-center gap-3 rounded-xl px-3 py-2 font-sans text-xs font-bold uppercase tracking-wide text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/30 border border-teal-200 dark:border-teal-900/30 transition-all duration-200"
+          >
+            <ArrowUpCircle className="h-4 w-4 shrink-0 text-teal-500" />
+            {!collapsed && (
+              <div className="flex items-center justify-between w-full">
+                <span>Updates</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-teal-500/15 font-bold">v1.0.0</span>
+              </div>
+            )}
+          </motion.button>
+          <motion.button
             onClick={() => setShowSignOutModal(true)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -219,6 +236,7 @@ export function AppSidebar() {
           </button>
         </div>
       </GlassModal>
+      <SoftwareUpdateModal isOpen={showUpdateModal} onClose={() => setShowUpdateModal(false)} />
     </>
   );
 }
