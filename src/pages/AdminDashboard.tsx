@@ -245,7 +245,7 @@ class FunnelTracker {
   trackPurchase(orderId, amount) { this.dispatch('funnel_step_4_purchase', { step: 4, order_id: orderId, amount }); }
 }
 
-export const tracker = new FunnelTracker();`;
+const tracker = new FunnelTracker();`;
 
 const HEALTHCARE_STEP_INFO: Record<number, { name: string; desc: string; color: string }> = {
   1: {
@@ -270,7 +270,7 @@ const HEALTHCARE_STEP_INFO: Record<number, { name: string; desc: string; color: 
   },
 };
 
-export default function AdminDashboard() {
+export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"analytics" | "funnel" | "users" | "feedbacks">("analytics");
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [funnelData, setFunnelData] = useState<FunnelResponse | null>(null);
@@ -1382,3 +1382,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+export default AdminDashboard;
