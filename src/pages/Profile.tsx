@@ -99,9 +99,13 @@ export default function Profile() {
   const userAge = Number(meta.age || data.age) || 0;
   // Normalized, language-independent biological sex: 'male' | 'female' | 'other'
   const biologicalSex = (meta.biological_sex || meta.gender || data.gender || "").toLowerCase().trim();
-  const defaultTrackMenstrual = biologicalSex === "female" || biologicalSex === "f";
+  const isMale = biologicalSex === "male" || biologicalSex === "m";
+  const isFemale = biologicalSex === "female" || biologicalSex === "f";
+  // Menstrual health tracking is strictly disabled and hidden for biological males
+  const defaultTrackMenstrual = !isMale && (isFemale || (!isMale && biologicalSex !== "male"));
   
   const [trackMenstrual, setTrackMenstrual] = useState(defaultTrackMenstrual);
+  const showMenstrual = !isMale && trackMenstrual;
   const [aiHormonalConsent, setAiHormonalConsent] = useState(() => {
     return localStorage.getItem("consent_ai_hormonal_data") === "true";
   });
@@ -596,21 +600,67 @@ export default function Profile() {
                         <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                       </div>
                       <h3 className="font-extrabold text-sm tracking-wide text-foreground">
-                        {trackMenstrual ? "Gynecological & Menstrual Health" : biologicalSex === "male" ? "Men's Health & Preventative Screening" : "Preventative Wellness Profile"}
+                        {isMale
+                          ? "Men's Health & Preventative Screening"
+                          : showMenstrual
+                          ? "Gynecological & Menstrual Health"
+                          : "Preventative Wellness Profile"}
                       </h3>
                     </div>
 
-                    {/* Opt-in toggle for menstrual health tracking */}
-                    <button
-                      type="button"
-                      onClick={() => setTrackMenstrual(!trackMenstrual)}
-                      className="text-[10px] font-mono font-bold text-teal-600 dark:text-teal-400 hover:underline"
-                    >
-                      {trackMenstrual ? "Switch to General" : "Track Menstrual Health"}
-                    </button>
+                    {/* Opt-in toggle: ONLY available for non-male profiles */}
+                    {!isMale && (
+                      <button
+                        type="button"
+                        onClick={() => setTrackMenstrual(!trackMenstrual)}
+                        className="text-[10px] font-mono font-bold text-teal-600 dark:text-teal-400 hover:underline"
+                      >
+                        {showMenstrual ? "Switch to General" : "Track Menstrual Health"}
+                      </button>
+                    )}
                   </div>
 
-                  {trackMenstrual ? (
+                  {isMale ? (
+                    /* ── MEN'S HEALTH & PREVENTATIVE SCREENING BLOCK ── */
+                    <div className="space-y-2.5 pt-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Biological Sex</span>
+                          <p className="font-bold text-foreground capitalize">Male (Documented)</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Age Category</span>
+                          <p className="font-bold text-foreground">{userAge > 0 ? `${userAge} years` : "Adult"}</p>
+                        </div>
+                      </div>
+
+                      {/* PSA Checkpoint: Only shown for relevant ages (>= 50), strictly worded as discuss with doctor */}
+                      {userAge >= 50 && (
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
+                          <span className="text-[10px] font-mono uppercase block font-bold">PSA Checkpoint (Age 50+)</span>
+                          <p className="text-[11px] leading-relaxed mt-0.5">
+                            Routine prostate health evaluation recommended for age 50 and above. Discuss screening options with your doctor.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Cardiovascular Fitness</span>
+                          <p className="font-bold text-foreground">{data.activity_level || "Active monitoring"}</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Smoking / Tobacco</span>
+                          <p className="font-bold text-foreground">{data.smoker ? "Yes" : "Non-smoker"}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-border">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Primary Care Recommendation</span>
+                        <p className="font-medium text-foreground">Annual metabolic panel and blood pressure evaluation.</p>
+                      </div>
+                    </div>
+                  ) : showMenstrual ? (
                     /* ── WOMEN'S / MENSTRUAL HEALTH BLOCK (OPT-IN) ── */
                     <div className="space-y-2.5 pt-2 text-xs">
                       <div className="grid grid-cols-2 gap-2">
@@ -652,46 +702,6 @@ export default function Profile() {
                         >
                           {aiHormonalConsent ? "Opted In" : "Excluded (Private)"}
                         </button>
-                      </div>
-                    </div>
-                  ) : biologicalSex === "male" ? (
-                    /* ── MEN'S HEALTH & PREVENTATIVE SCREENING BLOCK ── */
-                    <div className="space-y-2.5 pt-2 text-xs">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Biological Sex</span>
-                          <p className="font-bold text-foreground capitalize">Male (Documented)</p>
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Age Category</span>
-                          <p className="font-bold text-foreground">{userAge > 0 ? `${userAge} years` : "Adult"}</p>
-                        </div>
-                      </div>
-
-                      {/* PSA Checkpoint: Only shown for relevant ages (>= 50), strictly worded as discuss with doctor */}
-                      {userAge >= 50 && (
-                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
-                          <span className="text-[10px] font-mono uppercase block font-bold">PSA Checkpoint (Age 50+)</span>
-                          <p className="text-[11px] leading-relaxed mt-0.5">
-                            Routine prostate health evaluation recommended for age 50 and above. Discuss screening options with your doctor.
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
-                        <div>
-                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Cardiovascular Fitness</span>
-                          <p className="font-bold text-foreground">{data.activity_level || "Active monitoring"}</p>
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Smoking / Tobacco</span>
-                          <p className="font-bold text-foreground">{data.smoker ? "Yes" : "Non-smoker"}</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-border">
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Primary Care Recommendation</span>
-                        <p className="font-medium text-foreground">Annual metabolic panel and blood pressure evaluation.</p>
                       </div>
                     </div>
                   ) : (

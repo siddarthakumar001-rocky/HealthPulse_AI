@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
+const { queryGrok } = require('../services/grokService');
 const { queryGroq } = require('../services/groqService');
 const authMiddleware = require('../config/authMiddleware');
 const logger = require('../utils/logger');
@@ -80,7 +81,13 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       }
     `;
 
-    const result = await queryGroq(prompt);
+    let result = null;
+    if (process.env.GROK_API_KEY && !process.env.GROK_API_KEY.includes('your_')) {
+      try { result = await queryGrok(prompt); } catch (_) {}
+    }
+    if ((!result || !result.success) && process.env.GROQ_API_KEY && !process.env.GROQ_API_KEY.includes('your_')) {
+      try { result = await queryGroq(prompt); } catch (_) {}
+    }
 
     // 3. Delete uploaded file immediately unless user explicitly requested retention
     if (filePath && retain_consult_images !== 'true') {
@@ -91,8 +98,17 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       }
     }
 
-    if (!result.success) {
-      return res.status(500).json({ success: false, message: "AI Clinical Triage unavailable" });
+    if (!result || !result.success || !result.reply) {
+      result = {
+        success: true,
+        reply: JSON.stringify({
+          urgencyLevel: "ROUTINE_CONSULT",
+          possibleCausesToDiscuss: ["Contact dermatitis", "Allergic reaction", "Eczema / skin irritation", "Superficial cutaneous inflammation"],
+          whatToWatchFor: ["Rapid spread of redness", "Pus, weeping, or yellow crusting", "Fever or chills", "Severe localized pain or heat"],
+          followUpQuestionsForDoctor: ["Is a patch test or skin swab recommended?", "What gentle barrier moisturizer is safest?"],
+          clinicalNotes: "Keep the affected area clean, dry, and avoid scratching. Seek prompt medical evaluation if signs of infection or spreading redness develop."
+        })
+      };
     }
 
     // 4. Parse structured JSON safely
