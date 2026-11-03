@@ -43,7 +43,15 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // Calculate distance in km
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+const calculateDistance = (lat1?: number, lon1?: number, lat2?: number, lon2?: number) => {
+  if (
+    typeof lat1 !== 'number' || isNaN(lat1) ||
+    typeof lon1 !== 'number' || isNaN(lon1) ||
+    typeof lat2 !== 'number' || isNaN(lat2) ||
+    typeof lon2 !== 'number' || isNaN(lon2)
+  ) {
+    return null;
+  }
   const R = 6371; // km
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -58,12 +66,13 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 };
 
 // Leaflet custom marker generator
-const createCustomMarker = (status: string) => {
-  let color = "#0D9488"; // teal
-  if (status === "Warning") color = "#f59e0b"; // yellow
-  else if (status === "Critical") color = "#ef4444"; // red
-  else if (status === "Outbreak") color = "#a855f7"; // purple
-  else if (status === "Offline") color = "#64748b"; // gray
+const createCustomMarker = (status?: string) => {
+  let color = '#0D9488'; // teal
+  const sStatus = (status || '').toLowerCase();
+  if (sStatus === 'warning') color = '#f59e0b';
+  else if (sStatus === 'critical') color = '#ef4444';
+  else if (sStatus === 'outbreak') color = '#a855f7';
+  else if (sStatus === 'offline') color = '#64748b';
 
   return L.divIcon({
     className: "custom-phc-pin",
@@ -196,11 +205,14 @@ export default function PHCCommandDashboard() {
           setRecentAlerts(overviewRes.data.recentAlerts || []);
         }
 
-        if (facRes?.data) {
-          setFacilities(facRes.data);
-        } else if (overviewRes?.data?.facilities) {
-          setFacilities(overviewRes.data.facilities);
-        }
+        const facList = Array.isArray(facRes?.data)
+          ? facRes.data
+          : Array.isArray((facRes as any)?.facilities)
+          ? (facRes as any).facilities
+          : Array.isArray(overviewRes?.data?.facilities)
+          ? overviewRes.data.facilities
+          : [];
+        setFacilities(facList);
 
         if (showToast) toast.success("Real-time network telemetry synchronized");
       } catch (e: any) {
@@ -267,28 +279,35 @@ export default function PHCCommandDashboard() {
   };
 
   // Facilities with computed distance from user location
-  const enrichedFacilities = facilities.map((f) => {
+  const enrichedFacilities = (facilities || []).map((f) => {
     const dist =
-      typeof (f as any).distanceKm === "number"
+      typeof (f as any)?.distanceKm === 'number' && !isNaN((f as any)?.distanceKm)
         ? (f as any).distanceKm
-        : userLocation
+        : userLocation && typeof f?.latitude === 'number' && typeof f?.longitude === 'number'
         ? calculateDistance(userLocation[0], userLocation[1], f.latitude, f.longitude)
         : null;
     return { ...f, distanceKm: dist };
   });
 
   // Sort by proximity when GPS is active
-  enrichedFacilities.sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999));
+  enrichedFacilities.sort((a, b) => {
+    const distA = typeof a?.distanceKm === 'number' ? a.distanceKm : 999;
+    const distB = typeof b?.distanceKm === 'number' ? b.distanceKm : 999;
+    return distA - distB;
+  });
 
   const filteredFacilities = enrichedFacilities.filter((f) => {
-    const matchesStatus = statusFilter === "ALL" || f.status.toUpperCase() === statusFilter;
+    if (!f) return false;
+    const fStatus = (f.status || 'OPTIMAL').toUpperCase();
+    const matchesStatus = statusFilter === 'ALL' || fStatus === statusFilter;
+    const dist = (f.district || 'Karnataka').toLowerCase();
+    const dTarget = districtFilter.toLowerCase();
     const matchesDistrict =
-      districtFilter === "ALL"
+      districtFilter === 'ALL'
         ? true
-        : districtFilter === "NEAR_ME"
-        ? (f.distanceKm !== null ? f.distanceKm <= 35 : true)
-        : f.district.toLowerCase().includes(districtFilter.toLowerCase()) ||
-          districtFilter.toLowerCase().includes(f.district.toLowerCase());
+        : districtFilter === 'NEAR_ME'
+        ? (typeof f.distanceKm === 'number' ? f.distanceKm <= 35 : true)
+        : dist.includes(dTarget) || dTarget.includes(dist);
     return matchesStatus && matchesDistrict;
   });
 
@@ -339,7 +358,7 @@ export default function PHCCommandDashboard() {
             </Button>
             <Button
               size="sm"
-              onClick={() => navigate("/phc-supply-chain")}
+              onClick={() => navigate("/supply-chain")}
               className="h-10 px-4 rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700"
             >
               <Pill className="h-3.5 w-3.5 mr-1.5" /> {t("phc.supplyChainHub", "Supply Chain Hub")}
@@ -559,7 +578,7 @@ export default function PHCCommandDashboard() {
               </div>
 
               <div className="h-[460px] relative w-full">
-                <MapContainer
+                <MapContainer key="phc-command-stable-canvas"
                   center={mapCenter}
                   zoom={mapZoom}
                   style={{ height: "100%", width: "100%" }}
@@ -736,7 +755,7 @@ export default function PHCCommandDashboard() {
         {/* Digital Twin Drawer Modal */}
         <DigitalTwinDrawer
           phcId={selectedPHCId}
-          open={isTwinOpen}
+          isOpen={isTwinOpen}
           onClose={() => setIsTwinOpen(false)}
           onDataChanged={() => loadData(false)}
         />

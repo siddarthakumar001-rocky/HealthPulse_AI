@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, ProtectedRoute, AdminRoute } from "@/lib/auth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -102,7 +103,9 @@ export default function App() {
           <ThemeProvider>
             <AuthProvider>
               <BackButton />
-              <AnimatedAppRoutes />
+              <ErrorBoundary>
+                <AnimatedAppRoutes />
+              </ErrorBoundary>
             </AuthProvider>
           </ThemeProvider>
         </BrowserRouter>
