@@ -131,7 +131,11 @@
     "tryMoving": "Try searching for a different location.",
     "searchPlaceholder": "Search city or area...",
     "showList": "Show List",
-    "hideList": "Hide List"
+    "hideList": "Hide List",
+    "localRadius": "5 km (Local)",
+    "cityRadius": "10 km (City)",
+    "straightLine": "straight-line distance",
+    "outsideRadius": "Outside radius (Nearest available)"
   },
   "alerts": {
     "title": "Alerts",
@@ -511,7 +515,10 @@
     "precautionsTitle": "Precautions & Specialist Guidance",
     "lifestyleDietTitle": "Lifestyle & Dietary Alignment",
     "dietaryRecs": "Dietary Recommendations",
-    "physicalActivity": "Physical Activity & Eye Yoga"
+    "physicalActivity": "Physical Activity & Eye Yoga",
+    "tabAiDoctor": "AI Doctor Consultation",
+    "tabSpecialists": "Specialist Directory",
+    "tabRemedies": "Baseline & Remedies"
   },
   "phc": {
     "engineTitle": "AI Demand & Outbreak Early Warning Engine",

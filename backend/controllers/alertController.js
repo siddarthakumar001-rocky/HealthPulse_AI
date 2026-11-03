@@ -13,6 +13,30 @@ exports.getAlerts = async (req, res) => {
   }
 };
 
+exports.createAlert = async (req, res) => {
+  try {
+    const { message, severity = 'critical', idempotencyKey, location, vitals } = req.body;
+    if (idempotencyKey) {
+      const existing = await Alert.findOne({ user_id: req.user.id, idempotencyKey });
+      if (existing) {
+        return res.status(200).json({ success: true, alert: existing, deduplicated: true });
+      }
+    }
+    const alert = await Alert.create({
+      user_id: req.user.id,
+      message: message || 'EMERGENCY SOS BROADCAST TRIGGERED BY USER',
+      severity,
+      idempotencyKey,
+      location,
+      vitals,
+      provenance: 'SENSOR'
+    });
+    res.status(201).json({ success: true, alert });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.resolveAlert = async (req, res) => {
   try {
     const alert = await Alert.findOneAndUpdate(

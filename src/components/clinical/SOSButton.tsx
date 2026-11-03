@@ -1,49 +1,31 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Siren, AlertTriangle, PhoneCall } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Siren } from "lucide-react";
 import { cn } from "@/lib/utils";
+import SOSPanicModal from "./SOSPanicModal";
 
 export interface SOSButtonProps {
   className?: string;
   variant?: "floating" | "inline";
   onConfirmSOS?: () => void;
+  currentVitals?: {
+    heartRate?: number;
+    spO2?: number;
+    temperature?: number;
+  };
 }
 
 export function SOSButton({
   className,
   variant = "floating",
   onConfirmSOS,
+  currentVitals,
 }: SOSButtonProps) {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleTrigger = () => {
     setOpen(true);
-  };
-
-  const handleConfirm = () => {
-    setOpen(false);
-    if (onConfirmSOS) {
-      onConfirmSOS();
-    } else {
-      toast.error("Emergency SOS Broadcast Triggered!", {
-        description: "Transmitting live GPS coordinates and biometric vitals to the nearest Primary Health Centre (PHC) ambulance fleet.",
-        duration: 8000,
-      });
-      navigate("/alerts");
-    }
+    if (onConfirmSOS) onConfirmSOS();
   };
 
   return (
@@ -77,35 +59,14 @@ export function SOSButton({
         </Button>
       )}
 
-      {/* Standard Accessible Confirmation Modal */}
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent className="max-w-md rounded-2xl bg-surface dark:bg-surface border border-border p-6 shadow-2xl">
-          <AlertDialogHeader className="space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <AlertDialogTitle className="text-xl font-bold tracking-tight text-foreground">
-              Confirm Emergency SOS Broadcast?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
-              This action will transmit your live GPS coordinates, current cardiovascular vitals, and medical baseline to the district emergency dispatch ring and alert your designated primary emergency contacts.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-5 gap-2 sm:gap-3">
-            <AlertDialogCancel className="rounded-xl h-10 text-sm font-medium">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirm}
-              className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-10 text-sm font-bold shadow-md gap-1.5"
-            >
-              <PhoneCall className="w-4 h-4" />
-              <span>Confirm & Broadcast SOS</span>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Complete Emergency SOS Modal */}
+      <SOSPanicModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        currentVitals={currentVitals}
+      />
     </>
   );
 }
 
+export default SOSButton;

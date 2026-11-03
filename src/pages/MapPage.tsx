@@ -75,6 +75,7 @@ export default function MapPage() {
   const [hospitals, setHospitals] = useState<HospitalMarker[]>([]);
   const [discoveryState, setDiscoveryState] = useState<DiscoveryState>("INIT");
   const [currentRadius, setCurrentRadius] = useState(5);
+  const [selectedRadius, setSelectedRadius] = useState<5 | 10>(5);
   const [loading, setLoading] = useState(false);
 
   // 📍 1, 2, 3. CONTROL REFS
@@ -83,7 +84,7 @@ export default function MapPage() {
   const isFetchingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const RADIUS_STAGES = [5, 10, 20, 30];
+  const RADIUS_STAGES = [5, 10];
   const ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter"
@@ -170,7 +171,7 @@ export default function MapPage() {
     try {
       // 1. Try Primary: PHC & Facility Intelligence API
       try {
-        const phcRes = await phcService.getFacilities({ lat, lng: lon, radius: 35 });
+        const phcRes = await phcService.getFacilities({ lat, lng: lon, radius: 10 });
         if (phcRes?.data && Array.isArray(phcRes.data) && phcRes.data.length > 0) {
           const phcMarkers: HospitalMarker[] = phcRes.data
             .filter((f: any) => Number.isFinite(f.latitude) && Number.isFinite(f.longitude))
@@ -198,7 +199,7 @@ export default function MapPage() {
 
       // 2. Try Secondary: Overpass API with quick 3.5s timeout
       try {
-        const query = `[out:json][timeout:5];(nwr["amenity"~"hospital|clinic|doctors"](around:15000,${lat},${lon}););out center 15;`;
+        const query = `[out:json][timeout:5];(nwr["amenity"~"hospital|clinic|doctors"](around:10000,${lat},${lon}););out center 15;`;
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 3500);
         
@@ -275,6 +276,13 @@ export default function MapPage() {
     }
   };
 
+    const displayedHospitals = (() => {
+    const within = hospitals.filter(h => typeof h.distance === "number" && h.distance <= selectedRadius);
+    if (within.length > 0) return within.map(h => ({ ...h, isOutside: false }));
+    // If no facility is within selectedRadius, show nearest available labeled as outside radius
+    return hospitals.slice(0, 6).map(h => ({ ...h, isOutside: true }));
+  })();
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -290,6 +298,30 @@ export default function MapPage() {
             </p>
           </motion.div>
 
+          <div className="flex items-center gap-2">
+            <div className="flex items-center p-1 rounded-xl bg-card border border-border shadow-sm">
+              <Button
+                type="button"
+                variant={selectedRadius === 5 ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedRadius(5)}
+                className="h-8 px-3 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                <span>{t("map.localRadius", "5 km (Local)")}</span>
+              </Button>
+              <Button
+                type="button"
+                variant={selectedRadius === 10 ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedRadius(10)}
+                className="h-8 px-3 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                <span>{t("map.cityRadius", "10 km (City)")}</span>
+              </Button>
+            </div>
+          </div>
           <Button 
             onClick={handleRefresh}
             variant="outline"
@@ -386,7 +418,7 @@ export default function MapPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {hospitals.map((h, i) => (
+            {displayedHospitals.map((h, i) => (
               <motion.div
                 key={h.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -399,7 +431,13 @@ export default function MapPage() {
                     <Hospital className="h-7 w-7 text-teal-600 dark:text-teal-400" />
                   </div>
                   <div className="text-right">
-                    <p className="font-mono text-xs text-emerald-500 font-black">{h.distance?.toFixed(2)} KM</p>
+                    <p className="font-mono text-xs text-emerald-500 font-black">{h.distance?.toFixed(1)} km</p>
+                    <p className="font-mono text-[9px] text-muted-foreground uppercase">{t("map.straightLine", "straight-line distance")}</p>
+                    {(h as any).isOutside && (
+                      <Badge variant="outline" className="text-[9px] border-amber-500/40 text-amber-500 bg-amber-500/10 font-mono mt-1">
+                        {t("map.outsideRadius", "Outside radius (Nearest available)")}
+                      </Badge>
+                    )}
                     <p className="font-mono text-[8px] text-cyan-500/40 uppercase font-bold mt-1">Localized</p>
                   </div>
                 </div>

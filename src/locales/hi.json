@@ -131,7 +131,11 @@
     "tryMoving": "किसी भिन्न स्थान को खोजने का प्रयास करें।",
     "searchPlaceholder": "शहर या क्षेत्र खोजें...",
     "showList": "सूची दिखाएं",
-    "hideList": "सूची छुपाएं"
+    "hideList": "सूची छुपाएं",
+    "localRadius": "5 किमी (स्थानीय)",
+    "cityRadius": "10 किमी (शहर)",
+    "straightLine": "सीधी दूरी",
+    "outsideRadius": "दायरे से बाहर (निकटतम उपलब्ध)"
   },
   "alerts": {
     "title": "अलर्ट",
@@ -511,7 +515,10 @@
     "precautionsTitle": "सावधानियां और विशेषज्ञ मार्गदर्शन",
     "lifestyleDietTitle": "जीवनशैली और आहार संरेखण",
     "dietaryRecs": "आहार संबंधी सिफारिशें",
-    "physicalActivity": "शारीरिक गतिविधि और नेत्र योग"
+    "physicalActivity": "शारीरिक गतिविधि और नेत्र योग",
+    "tabAiDoctor": "एआई डॉक्टर परामर्श",
+    "tabSpecialists": "विशेषज्ञ निर्देशिका",
+    "tabRemedies": "आधार रेखा और उपचार"
   },
   "phc": {
     "engineTitle": "एआई मांग और प्रकोप प्रारंभिक चेतावनी इंजन",
