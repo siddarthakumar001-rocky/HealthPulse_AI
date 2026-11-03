@@ -96,6 +96,20 @@ export default function Profile() {
 
   const meta = user?.user_metadata || {};
   const data = onboarding || {};
+  const userAge = Number(meta.age || data.age) || 0;
+  // Normalized, language-independent biological sex: 'male' | 'female' | 'other'
+  const biologicalSex = (meta.biological_sex || meta.gender || data.gender || "").toLowerCase().trim();
+  const defaultTrackMenstrual = biologicalSex === "female" || biologicalSex === "f";
+  
+  const [trackMenstrual, setTrackMenstrual] = useState(defaultTrackMenstrual);
+  const [aiHormonalConsent, setAiHormonalConsent] = useState(() => {
+    return localStorage.getItem("consent_ai_hormonal_data") === "true";
+  });
+
+  const toggleAiHormonalConsent = (checked: boolean) => {
+    setAiHormonalConsent(checked);
+    localStorage.setItem("consent_ai_hormonal_data", checked ? "true" : "false");
+  };
 
   const handleDownload = async (reportId: string, filename = "Clinical_Report.pdf") => {
     try {
@@ -573,46 +587,133 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Card 6: Women's Health (or General Wellness) */}
-              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
+              {/* Card 6: Gender-Differentiated Preventative Health */}
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
-                    <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
-                      <Sparkles className="w-4 h-4 text-pink-500" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
+                      <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
+                        <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <h3 className="font-extrabold text-sm tracking-wide text-foreground">
+                        {trackMenstrual ? "Gynecological & Menstrual Health" : biologicalSex === "male" ? "Men's Health & Preventative Screening" : "Preventative Wellness Profile"}
+                      </h3>
                     </div>
-                    <h3 className="font-extrabold text-sm tracking-wide text-foreground">
-                      Gynecological & Wellness Health
-                    </h3>
+
+                    {/* Opt-in toggle for menstrual health tracking */}
+                    <button
+                      type="button"
+                      onClick={() => setTrackMenstrual(!trackMenstrual)}
+                      className="text-[10px] font-mono font-bold text-teal-600 dark:text-teal-400 hover:underline"
+                    >
+                      {trackMenstrual ? "Switch to General" : "Track Menstrual Health"}
+                    </button>
                   </div>
 
-                  <div className="space-y-2.5 pt-2 text-xs">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Menstrual Flow</span>
-                        <p className="font-bold text-foreground capitalize">{data.menstrual_flow || "Regular"}</p>
+                  {trackMenstrual ? (
+                    /* ── WOMEN'S / MENSTRUAL HEALTH BLOCK (OPT-IN) ── */
+                    <div className="space-y-2.5 pt-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Menstrual Flow</span>
+                          <p className="font-bold text-foreground capitalize">{data.menstrual_flow || "Regular"}</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Cycle Duration</span>
+                          <p className="font-bold text-foreground">{data.cycle_duration ? `${data.cycle_duration} days` : "28 days"}</p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Cycle Duration</span>
-                        <p className="font-bold text-foreground">{data.cycle_duration ? `${data.cycle_duration} days` : "28 days"}</p>
-                      </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
-                      <div>
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Pads / Day</span>
-                        <p className="font-bold text-foreground">{data.pads_per_day || "2-3"}</p>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Hygiene Support</span>
+                          <p className="font-bold text-foreground">{data.pads_per_day ? `${data.pads_per_day} pads/day` : "Standard"}</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Menopausal Stage</span>
+                          <p className="font-bold text-foreground">{data.menopausal ? "Yes" : "No"}</p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Menopausal</span>
-                        <p className="font-bold text-foreground">{data.menopausal ? "Yes" : "No"}</p>
-                      </div>
-                    </div>
 
-                    <div className="pt-2 border-t border-border">
-                      <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Associated Symptoms</span>
-                      <p className="font-medium text-foreground">{data.menstrual_other_symptoms || "None reported"}</p>
+                      <div className="pt-2 border-t border-border">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Associated Symptoms</span>
+                        <p className="font-medium text-foreground">{data.menstrual_other_symptoms || "None reported"}</p>
+                      </div>
+
+                      {/* Explicit Consent for AI Hormonal Processing */}
+                      <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground font-mono">Include hormonal data in AI Doctor prompts:</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleAiHormonalConsent(!aiHormonalConsent)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                            aiHormonalConsent ? "bg-teal-500/15 border-teal-500/30 text-teal-600 dark:text-teal-400" : "bg-muted border-border text-muted-foreground"
+                          }`}
+                        >
+                          {aiHormonalConsent ? "Opted In" : "Excluded (Private)"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : biologicalSex === "male" ? (
+                    /* ── MEN'S HEALTH & PREVENTATIVE SCREENING BLOCK ── */
+                    <div className="space-y-2.5 pt-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Biological Sex</span>
+                          <p className="font-bold text-foreground capitalize">Male (Documented)</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Age Category</span>
+                          <p className="font-bold text-foreground">{userAge > 0 ? `${userAge} years` : "Adult"}</p>
+                        </div>
+                      </div>
+
+                      {/* PSA Checkpoint: Only shown for relevant ages (>= 50), strictly worded as discuss with doctor */}
+                      {userAge >= 50 && (
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
+                          <span className="text-[10px] font-mono uppercase block font-bold">PSA Checkpoint (Age 50+)</span>
+                          <p className="text-[11px] leading-relaxed mt-0.5">
+                            Routine prostate health evaluation recommended for age 50 and above. Discuss screening options with your doctor.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Cardiovascular Fitness</span>
+                          <p className="font-bold text-foreground">{data.activity_level || "Active monitoring"}</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Smoking / Tobacco</span>
+                          <p className="font-bold text-foreground">{data.smoker ? "Yes" : "Non-smoker"}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-border">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Primary Care Recommendation</span>
+                        <p className="font-medium text-foreground">Annual metabolic panel and blood pressure evaluation.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ── GENERAL PREVENTATIVE HEALTH BLOCK ── */
+                    <div className="space-y-2.5 pt-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Activity Profile</span>
+                          <p className="font-bold text-foreground">{data.activity_level || "Monitored"}</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Tobacco Exposure</span>
+                          <p className="font-bold text-foreground">{data.smoker ? "Yes" : "No"}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-border">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Preventative Focus</span>
+                        <p className="font-medium text-foreground">Cardiorespiratory telemetry tracking and routine health optimization.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

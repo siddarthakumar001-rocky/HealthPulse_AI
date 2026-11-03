@@ -131,7 +131,11 @@
     "tryMoving": "వేరే ప్రదేశం శోధించి చూడండి.",
     "searchPlaceholder": "నగరం లేదా ప్రాంతం శోధించండి...",
     "showList": "జాబితా చూపించు",
-    "hideList": "జాబితా దాచు"
+    "hideList": "జాబితా దాచు",
+    "localRadius": "5 కి.మీ (స్థానిక)",
+    "cityRadius": "10 కి.మీ (నగరం)",
+    "straightLine": "సరళ రేఖ దూరం",
+    "outsideRadius": "పరిధి వెలుపల (సమీపంలో అందుబాటులో ఉంది)"
   },
   "alerts": {
     "title": "హెచ్చరికలు",
@@ -498,7 +502,10 @@
     "precautionsTitle": "జాగ్రత్తలు & నిపుణుల మార్గదర్శకత్వం",
     "lifestyleDietTitle": "జీవనశైలి & ఆహార సర్దుబాటు",
     "dietaryRecs": "ఆహార సిఫార్సులు",
-    "physicalActivity": "శారీరక శ్రమ & కంటి యోగా"
+    "physicalActivity": "శారీరక శ్రమ & కంటి యోగా",
+    "tabAiDoctor": "AI వైద్యుల సంప్రదింపు",
+    "tabSpecialists": "నిపుణుల డైరెక్టరీ",
+    "tabRemedies": "బేస్లైన్ & నివారణలు"
   },
   "phc": {
     "engineTitle": "AI డిమాండ్ & అంటువ్యాధి ముందస్తు హెచ్చరిక ఇంజిన్",

@@ -8,7 +8,7 @@
     "start": "node backend/server.js",
     "backend": "node backend/server.js",
     "backend:dev": "nodemon backend/server.js",
-    "build": "tsc && vite build",
+    "build": "node scripts/generate_build_info.cjs && tsc && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -19,9 +19,14 @@ import {
   Globe,
   Github,
   Calendar,
+  Terminal,
+  Shield,
+  AlertCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 import { updateService, AppReleaseInfo, CURRENT_APP_VERSION } from "@/services/updateService";
-import { motion, AnimatePresence } from "framer-motion";
+import buildInfo from "@/config/buildInfo.json";
 
 interface SoftwareUpdateModalProps {
   isOpen: boolean;
@@ -37,6 +42,7 @@ export function SoftwareUpdateModal({
   const [checking, setChecking] = useState(false);
   const [releaseInfo, setReleaseInfo] = useState<AppReleaseInfo | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
 
   const performCheck = async () => {
     try {
@@ -63,12 +69,19 @@ export function SoftwareUpdateModal({
     setTimeout(() => setDownloading(false), 3000);
   };
 
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCmd(key);
+    setTimeout(() => setCopiedCmd(null), 2000);
+  };
+
   const isNative = updateService.isNativePlatform();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden bg-card/95 border border-border backdrop-blur-2xl rounded-3xl shadow-2xl text-foreground">
-        {/* Glowing Top Banner */}
+      <DialogContent className="max-w-xl p-0 overflow-hidden bg-card/95 border border-border backdrop-blur-2xl rounded-3xl shadow-2xl text-foreground">
+        
+        {/* Header Strip */}
         <div className="relative p-6 bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border-b border-border/60">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -78,7 +91,7 @@ export function SoftwareUpdateModal({
               <div>
                 <div className="flex items-center gap-2">
                   <DialogTitle className="text-lg font-black font-display tracking-tight text-foreground">
-                    Software Updates
+                    Software Updates & APK Download
                   </DialogTitle>
                   {releaseInfo?.hasUpdate ? (
                     <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 text-[10px] font-bold uppercase tracking-wider animate-pulse">
@@ -91,7 +104,7 @@ export function SoftwareUpdateModal({
                   )}
                 </div>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-mono">
-                  {isNative ? "Android Native Mobile Build" : "Web & Cross-Platform Telemetry Client"}
+                  Package: {buildInfo.packageName} • Version Code: {buildInfo.versionCode}
                 </DialogDescription>
               </div>
             </div>
@@ -102,112 +115,153 @@ export function SoftwareUpdateModal({
               onClick={performCheck}
               disabled={checking}
               className="h-8 px-2.5 rounded-xl text-xs font-mono border border-border/60 hover:bg-muted"
-              title="Check latest releases"
             >
               <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${checking ? "animate-spin text-teal-500" : ""}`} />
               {checking ? "Checking..." : "Re-check"}
             </Button>
           </div>
 
-          {/* Version Comparison Card */}
-          <div className="grid grid-cols-2 gap-3 mt-5 p-3.5 rounded-2xl bg-background/80 border border-border/80 shadow-inner">
+          {/* Build Telemetry Banner */}
+          <div className="grid grid-cols-3 gap-2.5 mt-5 p-3 rounded-2xl bg-background/80 border border-border/80 shadow-inner font-mono text-center">
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground block">
-                Installed Version
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">
+                Installed
               </span>
-              <span className="text-base font-black font-mono text-foreground">
+              <span className="text-sm font-bold text-foreground">
                 v{CURRENT_APP_VERSION}
               </span>
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground block">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">
                 Latest Available
               </span>
-              <span className="text-base font-black font-mono text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
+              <span className="text-sm font-bold text-teal-600 dark:text-teal-400">
                 v{releaseInfo?.latestVersion || CURRENT_APP_VERSION}
-                {releaseInfo?.hasUpdate && (
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                )}
+              </span>
+            </div>
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">
+                File Size
+              </span>
+              <span className="text-sm font-bold text-foreground">
+                {buildInfo.fileSize}
               </span>
             </div>
           </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-          {checking ? (
-            <div className="py-8 flex flex-col items-center justify-center space-y-3 text-center">
-              <RefreshCw className="w-8 h-8 text-teal-500 animate-spin" />
-              <p className="text-xs text-muted-foreground font-mono">
-                Querying GitHub Releases & Telemetry Update Mirrors...
-              </p>
+        <div className="p-6 space-y-4 max-h-[65vh] overflow-y-auto text-xs">
+          
+          {/* Download Action */}
+          <div className="space-y-2">
+            <Button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="w-full h-11 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2"
+            >
+              <Download className={`w-4 h-4 ${downloading ? "animate-bounce" : ""}`} />
+              {downloading ? "Initiating Download..." : "Download Release APK (app-release.apk)"}
+            </Button>
+            
+            <p className="text-[10px] text-center text-muted-foreground font-mono">
+              Direct download from GitHub Releases. Compatible with Android 10+ devices.
+            </p>
+          </div>
+
+          {/* SHA-256 Checksum Inspection */}
+          <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                SHA-256 checksum (Build-Time Generated)
+              </span>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(buildInfo.sha256Checksum, "hash")}
+                className="text-[10px] font-mono text-teal-600 dark:text-teal-400 flex items-center gap-1 hover:underline"
+              >
+                {copiedCmd === "hash" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                {copiedCmd === "hash" ? "Copied" : "Copy Hash"}
+              </button>
             </div>
-          ) : releaseInfo?.hasUpdate ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-mono">
-                <span className="font-bold text-foreground truncate max-w-[260px]">
-                  {releaseInfo.releaseName}
-                </span>
-                <span className="flex items-center gap-1 text-[11px]">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(releaseInfo.publishedAt).toLocaleDateString()}
-                </span>
-              </div>
+            <div className="p-2 rounded-xl bg-slate-950 font-mono text-[10px] text-teal-300 break-all select-all border border-teal-500/20">
+              <code>{buildInfo.sha256Checksum}</code>
+            </div>
+          </div>
 
-              {/* Release Notes */}
-              <div className="space-y-2">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-mono">
-                  What's New in this Release:
-                </p>
-                <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/60 space-y-2">
-                  {releaseInfo.releaseNotes.map((note, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-xs text-foreground/90 leading-relaxed">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-teal-500 shrink-0 mt-0.5" />
-                      <span>{note}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Verification Commands per OS */}
+          <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-2.5 font-mono">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
+              <Terminal className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+              Integrity Verification Commands
+            </div>
 
-              {/* Download / Auto-Update Direct Action */}
-              <div className="space-y-2 pt-2">
-                <Button
-                  onClick={handleDownload}
-                  disabled={downloading}
-                  className="w-full h-11 rounded-2xl bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 text-white dark:text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2"
+            <div className="space-y-1.5 text-[10px]">
+              {/* Windows */}
+              <div className="flex items-center justify-between p-2 rounded-xl bg-background border border-border">
+                <span className="text-muted-foreground">Windows (PowerShell/CMD):</span>
+                <code className="text-foreground">{buildInfo.verificationCommands.windows}</code>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(buildInfo.verificationCommands.windows, "win")}
+                  className="hover:text-primary ml-2"
                 >
-                  <Download className={`w-4 h-4 ${downloading ? "animate-bounce" : ""}`} />
-                  {downloading ? "Initiating Download..." : "Download & Install New Version (APK)"}
-                </Button>
+                  {copiedCmd === "win" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                </button>
+              </div>
 
-                <p className="text-[10px] text-center text-muted-foreground font-mono">
-                  {isNative
-                    ? "APK will download to your device. Tap the notification to complete in-place installation."
-                    : "Direct download from GitHub Releases. Compatible with all Android devices."}
-                </p>
+              {/* macOS */}
+              <div className="flex items-center justify-between p-2 rounded-xl bg-background border border-border">
+                <span className="text-muted-foreground">macOS (Terminal):</span>
+                <code className="text-foreground">{buildInfo.verificationCommands.macos}</code>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(buildInfo.verificationCommands.macos, "mac")}
+                  className="hover:text-primary ml-2"
+                >
+                  {copiedCmd === "mac" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                </button>
+              </div>
+
+              {/* Linux */}
+              <div className="flex items-center justify-between p-2 rounded-xl bg-background border border-border">
+                <span className="text-muted-foreground">Linux (Bash):</span>
+                <code className="text-foreground">{buildInfo.verificationCommands.linux}</code>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(buildInfo.verificationCommands.linux, "linux")}
+                  className="hover:text-primary ml-2"
+                >
+                  {copiedCmd === "linux" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                </button>
               </div>
             </div>
-          ) : (
-            <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
-                <CheckCircle2 className="w-7 h-7" />
-              </div>
-              <h3 className="text-base font-bold text-foreground">
-                You're on the Latest Version
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                HealthPulse AI v{CURRENT_APP_VERSION} is currently running with all recent performance, security, and medical telemetry modules fully synchronized.
-              </p>
-            </div>
-          )}
+          </div>
 
-          {/* External Links Strip */}
-          <div className="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-muted-foreground">
+          {/* Sideload & In-Place Upgrade Requirements Notice */}
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-200 space-y-1.5">
+            <div className="flex items-center gap-1.5 font-bold text-[11px]">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              In-Place Upgrade & Sideloading Notes
+            </div>
+            <ul className="list-disc pl-4 space-y-1 text-[10px] leading-relaxed">
+              <li>
+                <strong>In-Place Upgrade:</strong> An in-place APK upgrade without data loss requires the identical package name (<code>com.healthpulse.app</code>), the same production signing key, and a higher version code than the installed APK.
+              </li>
+              <li>
+                <strong>Play Protect Notice:</strong> Google Play Protect warnings (<em>"Unrecognized app source"</em>) are expected for all directly sideloaded APKs distributed outside the Play Store. Tap <strong>"More details"</strong> and <strong>"Install anyway"</strong> to complete installation.
+              </li>
+            </ul>
+          </div>
+
+          {/* External Links */}
+          <div className="pt-2 border-t border-border flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-muted-foreground">
             <a
               href={releaseInfo?.githubReleaseUrl || "https://github.com/siddhant-deshmukh/healthpulse-ai/releases"}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <Github className="w-3.5 h-3.5" />
               <span>GitHub Releases</span>
@@ -215,16 +269,17 @@ export function SoftwareUpdateModal({
             </a>
 
             <a
-              href={releaseInfo?.websiteUrl || "https://healthpulse-ai.vercel.app"}
+              href="https://healthpulse-ai.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <Globe className="w-3.5 h-3.5" />
-              <span>Product Website</span>
+              <span>Project Website</span>
               <ExternalLink className="w-2.5 h-2.5" />
             </a>
           </div>
+
         </div>
 
         {/* Footer */}

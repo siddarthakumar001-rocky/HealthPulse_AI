@@ -131,7 +131,11 @@
     "tryMoving": "வேறு இடத்தைத் தேடுங்கள்.",
     "searchPlaceholder": "நகரம் அல்லது பகுதி தேடுங்கள்...",
     "showList": "பட்டியலைக் காட்டு",
-    "hideList": "பட்டியலை மறை"
+    "hideList": "பட்டியலை மறை",
+    "localRadius": "5 கி.மீ (உள்ளூர்)",
+    "cityRadius": "10 கி.மீ (நகரம்)",
+    "straightLine": "நேர்கோட்டு தூரம்",
+    "outsideRadius": "வரம்பிற்கு வெளியே (அருகிலுள்ள வசதி)"
   },
   "alerts": {
     "title": "எச்சரிக்கைகள்",
@@ -498,7 +502,10 @@
     "precautionsTitle": "முன்னெச்சரிக்கைகள் & நிபுணர் வழிகாட்டுதல்",
     "lifestyleDietTitle": "வாழ்க்கை முறை & உணவு சீரமைப்பு",
     "dietaryRecs": "உணவு பரிந்துரைகள்",
-    "physicalActivity": "உடற்பயிற்சி & கண் யோகா"
+    "physicalActivity": "உடற்பயிற்சி & கண் யோகா",
+    "tabAiDoctor": "AI மருத்துவர் ஆலோசனை",
+    "tabSpecialists": "நிபுணர் அடைவு",
+    "tabRemedies": "அடிப்படை & தீர்வுகள்"
   },
   "phc": {
     "engineTitle": "AI தேவை & தொற்றுநோய் ஆரம்ப எச்சரிக்கை என்ஜின்",

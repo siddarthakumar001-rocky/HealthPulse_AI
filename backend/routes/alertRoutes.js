@@ -4,6 +4,7 @@ const alertController = require('../controllers/alertController');
 const authMiddleware = require('../config/authMiddleware');
 
 router.get('/', authMiddleware, alertController.getAlerts);
+router.post('/', authMiddleware, alertController.createAlert);
 router.patch('/:id/resolve', authMiddleware, alertController.resolveAlert);
 
 module.exports = router;

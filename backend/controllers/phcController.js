@@ -103,28 +103,30 @@ function calcDistance(lat1, lon1, lat2, lon2) {
 // 2. Get All Facilities (Geo-list) with optional nearby coordinates filter
 exports.getFacilities = async (req, res) => {
   try {
-    const { lat, lng, lon, radius = 25 } = req.query;
+    const { lat, lng, lon, radius = 5 } = req.query;
+    // Strict server-side radius enforcement (1km to 10km max)
+    const enforcedRadius = Math.min(10, Math.max(1, parseFloat(radius) || 5));
     let facilities = await PHC.find().sort({ networkHealthScore: 1 });
 
     const userLat = parseFloat(lat);
     const userLon = parseFloat(lng || lon);
 
     if (!isNaN(userLat) && !isNaN(userLon)) {
-      // 1. Calculate distance from user location
+      // 1. Calculate straight-line distance from user location
       let enriched = facilities.map(f => ({
         ...f.toObject(),
         distanceKm: calcDistance(userLat, userLon, f.latitude, f.longitude)
       }));
 
-      // 2. Check if facilities exist near user
-      let nearby = enriched.filter(f => f.distanceKm <= parseFloat(radius));
+      // 2. Check if facilities exist near user within enforced radius
+      let nearby = enriched.filter(f => f.distanceKm <= enforcedRadius);
 
       // 3. If fewer than 3 facilities are within radius, discover/seed local facilities for this location
       if (nearby.length < 3) {
-        logger.info(`[GeoDiscovery] Discovering real-time health centres near [${userLat}, ${userLon}] (radius: ${radius}km)...`);
+        logger.info(`[GeoDiscovery] Discovering real-time health centres near [${userLat}, ${userLon}] (radius: ${enforcedRadius}km)...`);
         
         try {
-          const rMeters = Math.min(35000, parseFloat(radius) * 1000);
+          const rMeters = Math.min(10000, enforcedRadius * 1000);
           const query = `[out:json][timeout:15];(nwr["amenity"~"hospital|clinic|doctors"](around:${rMeters},${userLat},${userLon});nwr["healthcare"~"hospital|clinic|doctor|centre"](around:${rMeters},${userLat},${userLon}););out center 15;`;
           
           let overpassElements = [];

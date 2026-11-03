@@ -131,7 +131,11 @@
     "tryMoving": "ಬೇರೆ ಸ್ಥಳ ಹುಡುಕಿ ನೋಡಿ.",
     "searchPlaceholder": "ನಗರ ಅಥವಾ ಪ್ರದೇಶ ಹುಡುಕಿ...",
     "showList": "ಪಟ್ಟಿ ತೋರಿಸಿ",
-    "hideList": "ಪಟ್ಟಿ ಮರೆಮಾಡಿ"
+    "hideList": "ಪಟ್ಟಿ ಮರೆಮಾಡಿ",
+    "localRadius": "5 ಕಿ.ಮೀ (ಸ್ಥಳೀಯ)",
+    "cityRadius": "10 ಕಿ.ಮೀ (ನಗರ)",
+    "straightLine": "ನೇರ ರೇಖೆಯ ದೂರ",
+    "outsideRadius": "ವ್ಯಾಪ್ತಿಯ ಹೊರಗೆ (ಹತ್ತಿರದ ಲಭ್ಯವಿದೆ)"
   },
   "alerts": {
     "title": "ಎಚ್ಚರಿಕೆಗಳು",
@@ -498,7 +502,10 @@
     "precautionsTitle": "ಮುನ್ನೆಚ್ಚರಿಕೆಗಳು & ತಜ್ಞರ ಮಾರ್ಗದರ್ಶನ",
     "lifestyleDietTitle": "ಜೀವನಶೈಲಿ & ಆಹಾರ ಹೊಂದಾಣಿಕೆ",
     "dietaryRecs": "ಆಹಾರ ಶಿಫಾರಸುಗಳು",
-    "physicalActivity": "ದೈಹಿಕ ಚಟುವಟಿಕೆ & ಕಣ್ಣಿನ ಯೋಗ"
+    "physicalActivity": "ದೈಹಿಕ ಚಟುವಟಿಕೆ & ಕಣ್ಣಿನ ಯೋಗ",
+    "tabAiDoctor": "ಎಐ ವೈದ್ಯ ಸಮಾಲೋಚನೆ",
+    "tabSpecialists": "ತಜ್ಞರ ಡೈರೆಕ್ಟರಿ",
+    "tabRemedies": "ಮೂಲ ರೇಖೆ ಮತ್ತು ಪರಿಹಾರಗಳು"
   },
   "phc": {
     "engineTitle": "AI ಬೇಡಿಕೆ & ಸಾಂಕ್ರಾಮಿಕ ರೋಗಗಳ ಮುನ್ನೆಚ್ಚರಿಕೆ ಎಂಜಿನ್",

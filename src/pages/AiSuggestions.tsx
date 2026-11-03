@@ -32,6 +32,9 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { AIDoctorHUD } from "@/components/clinical/AIDoctorHUD";
+import { SpecialistConsultDirectory } from "@/components/clinical/SpecialistConsultDirectory";
+import { PhoneCall } from "lucide-react";
 import {
   translateSymptom,
   translateCondition,
@@ -53,6 +56,7 @@ export default function AiSuggestions() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<"ai_doctor" | "specialists" | "remedies">("ai_doctor");
 
   const fetchLatestAnalysis = async () => {
     try {
@@ -98,26 +102,7 @@ export default function AiSuggestions() {
     if (user) fetchLatestAnalysis();
   }, [user]);
 
-  if (loading || analyzing) {
-    return (
-      <DashboardLayout>
-        <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
-          <div className="relative">
-            <div className="h-24 w-24 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
-            <Brain className="absolute inset-0 m-auto h-10 w-10 text-indigo-600 dark:text-indigo-400 animate-pulse" />
-          </div>
-          <div className="text-center space-y-1.5">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              {t("aiSuggestions.engineTitle", "Running AI Diagnostic & Remedy Synthesis")}
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {t("aiSuggestions.medicineCabinetDesc", "Correlating symptoms, biomarkers, vital telemetry, and holistic Ayurvedic pharmacology...")}
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  // Non-blocking: loading handled within Baseline and Remedies tab
 
   // Safe confidence calculation
   const rawConfidence = analysis?.mlPrediction?.confidence ?? analysis?.confidence ?? 0.92;
@@ -138,7 +123,68 @@ export default function AiSuggestions() {
     <DashboardLayout>
       <div className="mx-auto max-w-6xl space-y-6 px-2 sm:px-4 pb-16">
         {/* Top Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
+        {/* Sliding Navigation Tabs */}
+        <div className="flex justify-center my-2">
+          <div className="relative inline-flex items-center p-1.5 rounded-full bg-card/90 border border-border shadow-md">
+            {[
+              { id: "ai_doctor", label: t("aiSuggestions.tabAiDoctor", "AI Doctor Consultation"), icon: Stethoscope },
+              { id: "specialists", label: t("aiSuggestions.tabSpecialists", "Specialist Directory"), icon: PhoneCall },
+              { id: "remedies", label: t("aiSuggestions.tabRemedies", "Baseline & Remedies"), icon: Activity },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`relative z-10 px-3.5 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide transition-colors duration-200 flex items-center gap-2 ${
+                    isActive
+                      ? "text-white dark:text-slate-950 font-black"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-ai-suggestion-tab"
+                      className="absolute inset-0 rounded-full bg-teal-600 dark:bg-teal-400 shadow-md"
+                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                    />
+                  )}
+                  <Icon className="relative z-10 h-4 w-4" />
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tab 1: AI Doctor Multimodal HUD */}
+        {activeTab === "ai_doctor" && <AIDoctorHUD />}
+
+        {/* Tab 2: Verified Specialist & Telemedicine Directory */}
+        {activeTab === "specialists" && <SpecialistConsultDirectory />}
+
+        {/* Tab 3: Clinical Baseline Assessment & Remedies */}
+        {activeTab === "remedies" && (
+          (loading || analyzing) ? (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-6">
+              <div className="relative">
+                <div className="h-24 w-24 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
+                <Brain className="absolute inset-0 m-auto h-10 w-10 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+              </div>
+              <div className="text-center space-y-1.5">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {t("aiSuggestions.engineTitle", "Running AI Diagnostic & Remedy Synthesis")}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {t("aiSuggestions.medicineCabinetDesc", "Correlating symptoms, biomarkers, vital telemetry, and holistic Ayurvedic pharmacology...")}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
           <div className="flex items-center gap-3">
             
             <div>
@@ -444,6 +490,9 @@ export default function AiSuggestions() {
             </Card>
           </div>
         </div>
+            </div>
+          )
+        )}
       </div>
     </DashboardLayout>
   );

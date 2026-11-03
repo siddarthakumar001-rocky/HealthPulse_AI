@@ -1,7 +1,10 @@
-import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Activity, Stethoscope, FileText, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
 import { useScrollFlow } from "@/hooks/useScrollFlow";
+import { useAuth } from "@/lib/auth";
+import SOSPanicModal from "@/components/clinical/SOSPanicModal";
 
 interface NavItem {
   name: string;
@@ -20,70 +23,88 @@ const navItems: NavItem[] = [
 
 export default function MobileBottomNav() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { scrollDirection, scrollY } = useScrollFlow(15);
+  const [sosOpen, setSosOpen] = useState(false);
 
   const isHidden = scrollDirection === "down" && scrollY > 75;
 
-  return (
-    <motion.nav
-      initial={{ y: 0 }}
-      animate={{ y: isHidden ? 110 : 0 }}
-      transition={{ type: "spring", stiffness: 380, damping: 32 }}
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/85 dark:bg-[#042F2E]/85 backdrop-blur-2xl border-t border-teal-400/30 pb-[calc(env(safe-area-inset-bottom)+0.4rem)] pt-1.5 shadow-[0_-6px_28px_rgba(13,148,136,0.15)]"
-      aria-label="Mobile Navigation"
-    >
-      <div className="flex items-center justify-around px-2 max-w-md mx-auto">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const Icon = item.icon;
+  const isStaffRole = Boolean(
+    user?.role && ["admin", "doctor", "paramedic", "health_official"].includes(user.role.toLowerCase())
+  );
 
-          if (item.isEmergency) {
+  const handleSOSClick = (e: React.MouseEvent) => {
+    if (!isStaffRole) {
+      e.preventDefault();
+      setSosOpen(true);
+    }
+  };
+
+  return (
+    <>
+      <motion.nav
+        initial={{ y: 0 }}
+        animate={{ y: isHidden ? 110 : 0 }}
+        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/85 dark:bg-[#042F2E]/85 backdrop-blur-2xl border-t border-teal-400/30 pb-[calc(env(safe-area-inset-bottom)+0.4rem)] pt-1.5 shadow-[0_-6px_28px_rgba(13,148,136,0.15)]"
+        aria-label="Mobile Navigation"
+      >
+        <div className="flex items-center justify-around px-2 max-w-md mx-auto">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.icon;
+
+            if (item.isEmergency) {
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={handleSOSClick}
+                  className="relative -top-5 flex flex-col items-center group focus:outline-none"
+                  aria-label="Trigger Emergency SOS"
+                >
+                  <motion.div
+                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 to-red-500 text-white flex items-center justify-center shadow-[0_6px_20px_rgba(239,68,68,0.45)] border-4 border-background"
+                  >
+                    <Icon className="w-6 h-6 animate-pulse" />
+                  </motion.div>
+                  <span className="text-[10px] font-black tracking-wider text-rose-600 uppercase mt-0.5">
+                    SOS
+                  </span>
+                </Link>
+              );
+            }
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className="relative -top-5 flex flex-col items-center group focus:outline-none"
+                className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 relative ${
+                  isActive
+                    ? "text-teal-600 dark:text-teal-300 font-bold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 to-red-500 text-white flex items-center justify-center shadow-[0_6px_20px_rgba(239,68,68,0.45)] border-4 border-background"
-                >
-                  <Icon className="w-6 h-6 animate-pulse" />
-                </motion.div>
-                <span className="text-[10px] font-black tracking-wider text-rose-600 uppercase mt-0.5">
-                  SOS
-                </span>
+                <div className="relative">
+                  <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? "scale-110 text-teal-600 dark:text-teal-300" : ""}`} />
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeIndicator"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-teal-500 rounded-full"
+                    />
+                  )}
+                </div>
+                <span className="text-[10px] font-medium tracking-tight mt-0.5">{item.name}</span>
               </Link>
             );
-          }
+          })}
+        </div>
+      </motion.nav>
 
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 relative ${
-                isActive
-                  ? "text-teal-600 dark:text-teal-300 font-bold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <div className="relative">
-                <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? "scale-110 text-teal-600 dark:text-teal-300" : ""}`} />
-                {isActive && (
-                  <motion.span
-                    layoutId="activeIndicator"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"
-                  />
-                )}
-              </div>
-              <span className={`text-[10px] mt-1 tracking-tight ${isActive ? "font-bold text-teal-600 dark:text-teal-300" : "font-medium"}`}>
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </motion.nav>
+      <SOSPanicModal isOpen={sosOpen} onClose={() => setSosOpen(false)} />
+    </>
   );
 }
