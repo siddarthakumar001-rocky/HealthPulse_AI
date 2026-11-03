@@ -167,6 +167,22 @@ app.get("/", (req, res) => {
 });
 
 // 11. Centralized Error Handler (Must be registered after all routes)
+// 10b. Direct APK Download Endpoint
+app.get("/api/download/apk", (req, res) => {
+  const candidates = [
+    path.join(__dirname, "../public/app-release.apk"),
+    path.join(__dirname, "../android/app/build/outputs/apk/release/app-release.apk")
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      res.setHeader("Content-Type", "application/vnd.android.package-archive");
+      res.setHeader("Content-Disposition", 'attachment; filename="healthpulse-v1.0.0.apk"');
+      return res.sendFile(p);
+    }
+  }
+  return res.redirect("https://github.com/siddarthakumar001-rocky/HealthPulse_AI/releases");
+});
+
 app.use(errorHandler);
 
 const connectDB = require("./config/db");

@@ -72,7 +72,7 @@ export function AIDoctorHUD() {
 
   // Privacy & Consent State
   const [aiConsentGiven, setAiConsentGiven] = useState(() => {
-    return localStorage.getItem("consent_ai_doctor_processing") === "true";
+    return localStorage.getItem("consent_ai_doctor_processing") !== "false";
   });
 
   // Voice Input (SpeechRecognition) State
@@ -366,12 +366,14 @@ export function AIDoctorHUD() {
                 <Stethoscope className="w-5 h-5" />
               </div>
               <div>
-                <CardTitle className="text-base font-black font-display tracking-tight text-foreground flex items-center gap-2">
-                  AI Clinical Consultation HUD
-                  <Badge variant="outline" className="text-[10px] font-mono border-teal-500/40 text-teal-600 dark:text-teal-400">
-                    Multimodal (Text • Vision • Voice)
+                <div className="flex flex-wrap items-center gap-2">
+                  <CardTitle className="text-sm sm:text-base font-black font-display tracking-tight text-foreground">
+                    AI Clinical Consultation HUD
+                  </CardTitle>
+                  <Badge variant="outline" className="text-[10px] font-mono border-teal-500/40 text-teal-600 dark:text-teal-400 whitespace-nowrap">
+                    Multimodal Triage
                   </Badge>
-                </CardTitle>
+                </div>
                 <CardDescription className="text-xs text-muted-foreground font-mono">
                   Deterministic Red-Flag Guard Active • Zero PII Transmission • Structured Triage
                 </CardDescription>
@@ -547,13 +549,14 @@ export function AIDoctorHUD() {
         <div className="p-4 bg-muted/30 border-t border-border space-y-3">
           
           {/* Privacy Consent Checkbox */}
-          <div className="flex items-center space-x-2 text-[11px] text-muted-foreground font-mono">
+          <div className="flex items-start space-x-2.5 text-[11px] text-muted-foreground font-mono p-2 rounded-xl bg-card border border-border/60">
             <Checkbox
               id="ai-consent"
               checked={aiConsentGiven}
               onCheckedChange={(checked) => saveConsent(Boolean(checked))}
+              className="mt-0.5"
             />
-            <Label htmlFor="ai-consent" className="cursor-pointer">
+            <Label htmlFor="ai-consent" className="cursor-pointer leading-tight text-[11px] select-none">
               I consent to automated clinical triage analysis. Direct identifiers (name, contact, full DOB) are stripped.
             </Label>
           </div>

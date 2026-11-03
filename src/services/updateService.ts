@@ -17,10 +17,10 @@ export interface AppReleaseInfo {
 export const CURRENT_APP_VERSION = "1.0.0";
 
 // GitHub repository details (can be configured via environment or fallback)
-const GITHUB_OWNER = "siddhant-deshmukh";
-const GITHUB_REPO = "healthpulse-ai";
+const GITHUB_OWNER = "siddarthakumar001-rocky";
+const GITHUB_REPO = "HealthPulse_AI";
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
-const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases`;
 const DEFAULT_WEBSITE_URL = "https://healthpulse-ai.vercel.app";
 
 /**

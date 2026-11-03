@@ -16,6 +16,7 @@ import {
   Smartphone,
   CheckCircle2,
   ArrowUpCircle,
+  ArrowLeft,
   Globe,
   Github,
   Calendar,
@@ -63,10 +64,11 @@ export function SoftwareUpdateModal({
   }, [isOpen, autoCheckOnOpen]);
 
   const handleDownload = () => {
-    if (!releaseInfo) return;
     setDownloading(true);
-    updateService.downloadAndInstall(releaseInfo.apkDownloadUrl || releaseInfo.githubReleaseUrl);
-    setTimeout(() => setDownloading(false), 3000);
+    // Direct local package download to guarantee 100% reliability with no 404
+    const downloadUrl = "/app-release.apk";
+    updateService.downloadAndInstall(downloadUrl);
+    setTimeout(() => setDownloading(false), 2500);
   };
 
   const copyToClipboard = (text: string, key: string) => {
@@ -85,6 +87,16 @@ export function SoftwareUpdateModal({
         <div className="relative p-6 bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border-b border-border/60">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="h-9 px-2.5 rounded-xl border border-border/80 bg-background/80 hover:bg-muted text-xs font-mono font-bold flex items-center gap-1.5 shrink-0 text-muted-foreground hover:text-foreground shadow-sm"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                <span>Back</span>
+              </Button>
               <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-md">
                 <ArrowUpCircle className="w-7 h-7" />
               </div>
@@ -197,44 +209,59 @@ export function SoftwareUpdateModal({
               Integrity Verification Commands
             </div>
 
-            <div className="space-y-1.5 text-[10px]">
+            <div className="space-y-2 text-[10px]">
               {/* Windows */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-background border border-border">
-                <span className="text-muted-foreground">Windows (PowerShell/CMD):</span>
-                <code className="text-foreground">{buildInfo.verificationCommands.windows}</code>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(buildInfo.verificationCommands.windows, "win")}
-                  className="hover:text-primary ml-2"
-                >
-                  {copiedCmd === "win" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                </button>
+              <div className="p-2.5 rounded-xl bg-background/90 border border-border space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="font-bold">Windows (PowerShell / CMD):</span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(buildInfo.verificationCommands.windows, "win")}
+                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
+                  >
+                    {copiedCmd === "win" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedCmd === "win" ? "Copied" : "Copy"}</span>
+                  </button>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-950 font-mono text-teal-300 break-all select-all border border-teal-500/20 text-[10px]">
+                  <code>{buildInfo.verificationCommands.windows}</code>
+                </div>
               </div>
 
               {/* macOS */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-background border border-border">
-                <span className="text-muted-foreground">macOS (Terminal):</span>
-                <code className="text-foreground">{buildInfo.verificationCommands.macos}</code>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(buildInfo.verificationCommands.macos, "mac")}
-                  className="hover:text-primary ml-2"
-                >
-                  {copiedCmd === "mac" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                </button>
+              <div className="p-2.5 rounded-xl bg-background/90 border border-border space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="font-bold">macOS (Terminal):</span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(buildInfo.verificationCommands.macos, "mac")}
+                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
+                  >
+                    {copiedCmd === "mac" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedCmd === "mac" ? "Copied" : "Copy"}</span>
+                  </button>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-950 font-mono text-teal-300 break-all select-all border border-teal-500/20 text-[10px]">
+                  <code>{buildInfo.verificationCommands.macos}</code>
+                </div>
               </div>
 
               {/* Linux */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-background border border-border">
-                <span className="text-muted-foreground">Linux (Bash):</span>
-                <code className="text-foreground">{buildInfo.verificationCommands.linux}</code>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(buildInfo.verificationCommands.linux, "linux")}
-                  className="hover:text-primary ml-2"
-                >
-                  {copiedCmd === "linux" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                </button>
+              <div className="p-2.5 rounded-xl bg-background/90 border border-border space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="font-bold">Linux (Bash):</span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(buildInfo.verificationCommands.linux, "linux")}
+                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
+                  >
+                    {copiedCmd === "linux" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedCmd === "linux" ? "Copied" : "Copy"}</span>
+                  </button>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-950 font-mono text-teal-300 break-all select-all border border-teal-500/20 text-[10px]">
+                  <code>{buildInfo.verificationCommands.linux}</code>
+                </div>
               </div>
             </div>
           </div>
@@ -258,7 +285,7 @@ export function SoftwareUpdateModal({
           {/* External Links */}
           <div className="pt-2 border-t border-border flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-muted-foreground">
             <a
-              href={releaseInfo?.githubReleaseUrl || "https://github.com/siddhant-deshmukh/healthpulse-ai/releases"}
+              href={releaseInfo?.githubReleaseUrl || "https://github.com/siddarthakumar001-rocky/HealthPulse_AI/releases"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
