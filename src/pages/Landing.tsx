@@ -1,3 +1,4 @@
+import { useLenisSmoothScroll } from "@/hooks/useLenisSmoothScroll";
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -5,6 +6,7 @@ import {
   useScroll,
   useTransform,
   useSpring,
+  useReducedMotion,
   AnimatePresence
 } from "framer-motion";
 import {
@@ -123,15 +125,63 @@ const PRESETS: Record<SimulationMode, PresetState> = {
   }
 };
 
+// Hero HUD Vitals Count-Up from 0 over 1.2s on first view
+function CountUpNumber({ target, decimals = 0 }: { target: number; decimals?: number }) {
+  const shouldReduceMotion = useReducedMotion();
+  const [val, setVal] = useState(shouldReduceMotion ? target : 0);
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      setVal(target);
+      return;
+    }
+
+    let startTime: number | null = null;
+    const duration = 1200; // 1.2s
+    let rafId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setVal(Number((ease * target).toFixed(decimals)));
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(step);
+      }
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [target, shouldReduceMotion]);
+
+  return <span className="tabular-nums">{decimals > 0 ? val.toFixed(decimals) : Math.round(val)}</span>;
+}
+
 export default function Landing() {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const navigate = useNavigate();
+  useLenisSmoothScroll();
+  const shouldReduceMotion = useReducedMotion();
+
   const [mode, setMode] = useState<SimulationMode>("resting");
   const [selectedOrgan, setSelectedOrgan] = useState<string>("heart");
   const [signalMode, setSignalMode] = useState<"denoised" | "corrupted">("denoised");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [dividerPos, setDividerPos] = useState(50);
+  const isDraggingDivider = useRef(false);
+  const dividerContainerRef = useRef<HTMLDivElement>(null);
+
   const current = PRESETS[mode];
+
+  // ── SCROLL PROGRESS BAR (Top 3px) ──
+  const { scrollYProgress: pageScrollProgress } = useScroll();
+  const progressScaleX = useSpring(pageScrollProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   // ── SCROLL SCRUB HOOKS ──
   const { scrollY } = useScroll();
@@ -159,19 +209,55 @@ export default function Landing() {
       : ["none", "0 20px 40px -15px rgba(0,0,0,0.8)"]
   );
 
-  // 2. Hero Cinematic Scroll-Scrub Reveal
+  // 2. Hero Cinematic Scroll-Scrub Reveal & Parallax
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"]
   });
 
-  const heroScale = useTransform(heroProgress, [0, 1], [1, 0.94]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0.4]);
-  const heroY = useTransform(heroProgress, [0, 1], [0, -30]);
+  // Parallax: background gradient at 0.3x (~80px across hero), silhouette at 0.15x (~40px)
+  const heroBgY = useTransform(heroProgress, [0, 1], [0, shouldReduceMotion ? 0 : 80]);
+  const heroSilhouetteY = useTransform(heroProgress, [0, 1], [0, shouldReduceMotion ? 0 : 40]);
+  // Scale from 1 to 0.96 and fade to 0.6 as hero leaves
+  const heroScale = useTransform(heroProgress, [0, 1], [1, shouldReduceMotion ? 1 : 0.96]);
+  const heroOpacity = useTransform(heroProgress, [0, 0.85], [1, 0.6]);
+  const heroY = useTransform(heroProgress, [0, 1], [0, shouldReduceMotion ? 0 : -30]);
+
+    const handleDividerPointerDown = (e: React.PointerEvent) => {
+    isDraggingDivider.current = true;
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    updateDividerPosition(e.clientX);
+  };
+
+  const handleDividerPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingDivider.current) return;
+    updateDividerPosition(e.clientX);
+  };
+
+  const handleDividerPointerUp = (e: React.PointerEvent) => {
+    isDraggingDivider.current = false;
+    (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+  };
+
+  const updateDividerPosition = (clientX: number) => {
+    if (!dividerContainerRef.current) return;
+    const rect = dividerContainerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+    const pct = Math.round((x / rect.width) * 100);
+    setDividerPos(pct);
+    if (pct > 65) setSignalMode("denoised");
+    else if (pct < 35) setSignalMode("corrupted");
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 dark:bg-[#070A0D] dark:text-[#F8FAFC] font-sans selection:bg-[#00F5D4]/25 overflow-x-clip transition-colors duration-300">
+      {/* ── TOP SCROLL PROGRESS BAR (3px, Spring-smoothed) ── */}
+      <motion.div
+        style={{ scaleX: progressScaleX }}
+        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 via-cyan-400 to-indigo-500 origin-left z-[100] pointer-events-none"
+      />
+
       <LiquidCursor />
 
       {/* ── AMBIENT ORGANIC BACKGROUND CANVAS ── */}
@@ -179,20 +265,15 @@ export default function Landing() {
 
       {/* Subtle Dark Luxury Obsidian Grain & Radial Light */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-[#00F5D4]/12 via-[#0D9488]/6 to-transparent blur-[140px] opacity-70" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-[#05D3B3]/8 blur-[160px] opacity-40" />
+        <motion.div style={{ y: heroBgY }} className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-[#00F5D4]/12 via-[#0D9488]/6 to-transparent blur-[140px] opacity-70 will-change-transform" />
+        <motion.div style={{ y: heroSilhouetteY }} className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-[#05D3B3]/8 blur-[160px] opacity-40 will-change-transform" />
       </div>
 
       {/* ════════════════════════════════════════════════════════════
           1. STICKY NAVIGATION BAR (TRANSPARENT -> FROSTED GLASS BLUR)
       ════════════════════════════════════════════════════════════ */}
-      <motion.nav
-        style={{
-          backgroundColor: navBackground,
-          borderColor: navBorder,
-          boxShadow: navShadow,
-        }}
-        className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 h-20 flex items-center justify-between border-b backdrop-blur-md transition-colors duration-300"
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-8 h-16 sm:h-20 flex items-center justify-between border-b bg-white/90 dark:bg-[#070A0D]/90 border-slate-200 dark:border-white/10 backdrop-blur-2xl shadow-sm transition-all duration-300 pt-[env(safe-area-inset-top)]"
       >
         {/* Brand Logo & Editorial Wordmark */}
         <Link to="/" className="flex items-center gap-3 group">
@@ -238,7 +319,7 @@ export default function Landing() {
             </Link>
           </Button>
         </div>
-      </motion.nav>
+      </nav>
 
       {/* ════════════════════════════════════════════════════════════
           2. HERO SECTION: CINEMATIC SCROLL-SCRUB REVEAL
@@ -483,7 +564,7 @@ export default function Landing() {
                       <Heart className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white">{current.bpm}</span>
+                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.bpm} /></span>
                       <span className="text-xs font-bold text-rose-500 font-mono">BPM</span>
                     </div>
                   </motion.div>
@@ -499,7 +580,7 @@ export default function Landing() {
                       <Wind className="w-3.5 h-3.5 text-[#00F5D4]" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white">{current.spo2}</span>
+                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.spo2} /></span>
                       <span className="text-xs font-bold text-[#00F5D4] font-mono">%</span>
                     </div>
                   </motion.div>
@@ -515,7 +596,7 @@ export default function Landing() {
                       <Thermometer className="w-3.5 h-3.5 text-amber-400" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white">{current.temp}</span>
+                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.temp} decimals={1} /></span>
                       <span className="text-xs font-bold text-amber-400 font-mono">°C</span>
                     </div>
                   </motion.div>
@@ -531,7 +612,7 @@ export default function Landing() {
                       <Zap className="w-3.5 h-3.5 text-[#00F5D4]" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white">{current.stress}</span>
+                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.stress} /></span>
                       <span className="text-xs font-mono text-[#94A3B8]">/100</span>
                     </div>
                   </motion.div>
@@ -577,7 +658,7 @@ export default function Landing() {
       {/* ════════════════════════════════════════════════════════════
           4. INTERACTIVE SIGNAL DENOISING & WAVEFORM LABORATORY
       ════════════════════════════════════════════════════════════ */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
+      <motion.section initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
         <div className="mermaid-glass p-8 sm:p-12 rounded-[2.5rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-2xl space-y-8">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200/80 dark:border-white/10 pb-6">
@@ -597,7 +678,7 @@ export default function Landing() {
             {/* Toggle Switch */}
             <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-100/90 dark:bg-black/60 border border-slate-200/90 dark:border-white/15">
               <button
-                onClick={() => setSignalMode("corrupted")}
+                onClick={() => { setSignalMode("corrupted"); setDividerPos(15); }}
                 className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
                   signalMode === "corrupted"
                     ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border border-rose-500/40 shadow-sm"
@@ -607,7 +688,7 @@ export default function Landing() {
                 Corrupted (Motion Noise)
               </button>
               <button
-                onClick={() => setSignalMode("denoised")}
+                onClick={() => { setSignalMode("denoised"); setDividerPos(85); }}
                 className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
                   signalMode === "denoised"
                     ? "bg-[#00F5D4]/20 text-[#0D9488] dark:text-[#00F5D4] border border-[#00F5D4]/40 shadow-sm"
@@ -631,19 +712,17 @@ export default function Landing() {
               </span>
             </div>
 
-            <div className="h-32 w-full bg-[#05080C] rounded-xl border border-white/10 overflow-hidden relative flex items-center">
-              <svg className="w-full h-full" viewBox="0 0 800 120" preserveAspectRatio="none">
-                {signalMode === "denoised" ? (
-                  <motion.path
-                    d="M 0 60 Q 50 10 100 60 T 200 60 T 300 60 T 400 60 T 500 60 T 600 60 T 700 60 T 800 60"
-                    fill="none"
-                    stroke="#00F5D4"
-                    strokeWidth="3"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-                  />
-                ) : (
+            {/* Draggable Before / After Divider Oscilloscope */}
+            <div
+              ref={dividerContainerRef}
+              onPointerDown={handleDividerPointerDown}
+              onPointerMove={handleDividerPointerMove}
+              onPointerUp={handleDividerPointerUp}
+              className="h-36 w-full bg-[#05080C] rounded-xl border border-white/15 overflow-hidden relative select-none cursor-ew-resize touch-none"
+            >
+              {/* Background Layer: Corrupted Raw Waveform (Underneath) */}
+              <div className="absolute inset-0 flex items-center">
+                <svg className="w-full h-full" viewBox="0 0 800 120" preserveAspectRatio="none">
                   <motion.path
                     d="M 0 60 L 40 40 L 70 90 L 100 20 L 140 100 L 180 30 L 220 80 L 260 10 L 300 110 L 350 50 L 400 90 L 450 30 L 500 100 L 550 40 L 600 85 L 650 20 L 700 95 L 750 35 L 800 60"
                     fill="none"
@@ -651,10 +730,48 @@ export default function Landing() {
                     strokeWidth="2.5"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { repeat: Infinity, duration: 1.5, ease: "linear" }}
                   />
-                )}
-              </svg>
+                </svg>
+              </div>
+
+              {/* Clipped Top Layer: CSDI Denoised Waveform (Clipped to Divider %) */}
+              <div
+                className="absolute inset-0 flex items-center overflow-hidden pointer-events-none"
+                style={{ clipPath: `inset(0 ${100 - dividerPos}% 0 0)` }}
+              >
+                <div className="w-full h-full relative flex items-center bg-[#05080C]/40">
+                  <svg className="w-full h-full" viewBox="0 0 800 120" preserveAspectRatio="none">
+                    <motion.path
+                      d="M 0 60 Q 50 10 100 60 T 200 60 T 300 60 T 400 60 T 500 60 T 600 60 T 700 60 T 800 60"
+                      fill="none"
+                      stroke="#00F5D4"
+                      strokeWidth="3"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { repeat: Infinity, duration: 3, ease: "linear" }}
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Draggable Divider Handle */}
+              <div
+                className="absolute top-0 bottom-0 w-0.5 bg-white/80 pointer-events-none z-20 flex items-center justify-center shadow-[0_0_12px_rgba(0,245,212,0.9)]"
+                style={{ left: `${dividerPos}%` }}
+              >
+                <div className="w-8 h-8 rounded-full bg-slate-900 border-2 border-[#00F5D4] text-[#00F5D4] flex items-center justify-center text-xs shadow-lg shadow-[#00F5D4]/40 pointer-events-auto cursor-ew-resize">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </div>
+              </div>
+
+              {/* Labels overlay */}
+              <div className="absolute top-2 left-3 text-[10px] font-mono font-bold text-[#00F5D4] pointer-events-none z-10 flex items-center gap-1.5 bg-black/60 px-2 py-0.5 rounded-md border border-[#00F5D4]/30">
+                <span>◀ CSDI RECONSTRUCTED ({dividerPos}%)</span>
+              </div>
+              <div className="absolute top-2 right-3 text-[10px] font-mono font-bold text-rose-400 pointer-events-none z-10 flex items-center gap-1.5 bg-black/60 px-2 py-0.5 rounded-md border border-rose-500/30">
+                <span>RAW CORRUPTED ({100 - dividerPos}%) ▶</span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-mono text-slate-400">
@@ -674,12 +791,12 @@ export default function Landing() {
           </div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ════════════════════════════════════════════════════════════
           5. FOUR-PILLAR CLINICAL ECOSYSTEM (BENTO GRID)
       ════════════════════════════════════════════════════════════ */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
+      <motion.section initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="w-full bg-slate-100/60 dark:bg-[#0B1220]/60 border-y border-slate-200/80 dark:border-white/10 py-20 px-4 sm:px-8">
         <div className="space-y-4 mb-10 text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 font-mono text-[10px] text-[#0D9488] dark:text-[#00F5D4] uppercase">
             <Layers className="w-3.5 h-3.5" />
@@ -696,7 +813,7 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Bento Card 1 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-[#00F5D4]/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-[#00F5D4]/40 hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-200 cursor-pointer">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-[#00F5D4]/10 border border-[#00F5D4]/30 flex items-center justify-center text-[#0D9488] dark:text-[#00F5D4]">
                 <Smartphone className="w-6 h-6" />
@@ -714,7 +831,7 @@ export default function Landing() {
           </div>
 
           {/* Bento Card 2 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-cyan-400/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-cyan-400/40 hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-200 cursor-pointer">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
                 <Brain className="w-6 h-6" />
@@ -732,7 +849,7 @@ export default function Landing() {
           </div>
 
           {/* Bento Card 3 */}
-          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-amber-400/40 transition-all duration-300">
+          <div className="mermaid-glass p-6 sm:p-8 rounded-[2rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-xl space-y-4 flex flex-col justify-between hover:border-amber-400/40 hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-200 cursor-pointer">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-500 dark:text-amber-400">
                 <Hospital className="w-6 h-6" />
@@ -768,12 +885,12 @@ export default function Landing() {
           </div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ════════════════════════════════════════════════════════════
           6. METRIC PERFORMANCE COUNTERS (EDITORIAL GRID)
       ════════════════════════════════════════════════════════════ */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
+      <motion.section initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="py-20 max-w-7xl mx-auto px-4 sm:px-8">
         <div className="mermaid-glass p-8 sm:p-14 rounded-[3rem] bg-white/85 dark:bg-[#0D131A]/85 border border-slate-200/90 dark:border-white/10 shadow-2xl grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div className="space-y-1">
             <div className="text-4xl sm:text-6xl font-black font-mono text-slate-900 dark:text-white tracking-tight">
@@ -811,12 +928,12 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ════════════════════════════════════════════════════════════
           7. CLINICAL ARCHITECTURE FAQ ACCORDION
       ════════════════════════════════════════════════════════════ */}
-      <section className="py-20 max-w-4xl mx-auto px-4 sm:px-8">
+      <motion.section initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="w-full bg-slate-100/60 dark:bg-[#0B1220]/60 border-y border-slate-200/80 dark:border-white/10 py-20 px-4 sm:px-8"><div className="max-w-4xl mx-auto">
         <div className="text-center space-y-3 mb-10">
           <div className="font-mono text-xs tracking-[0.25em] text-[#0D9488] dark:text-[#00F5D4] uppercase">
             05 // FREQUENTLY ASKED QUESTIONS
@@ -867,12 +984,13 @@ export default function Landing() {
             );
           })}
         </div>
-      </section>
+      </div>
+      </motion.section>
 
       {/* ════════════════════════════════════════════════════════════
           8. FINAL CTA PORTAL
       ════════════════════════════════════════════════════════════ */}
-      <section className="py-20 max-w-5xl mx-auto px-4 sm:px-8">
+      <motion.section initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="py-20 max-w-5xl mx-auto px-4 sm:px-8">
         <div className="relative mermaid-glass p-12 sm:p-20 rounded-[3rem] bg-white/85 dark:bg-[#0D131A]/85 text-center shadow-2xl border border-slate-200/90 dark:border-white/10 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,245,212,0.18)_0%,_transparent_75%)] pointer-events-none" />
 
@@ -912,7 +1030,7 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-slate-200/80 dark:border-white/10 bg-slate-100/90 dark:bg-[#070A0D]/90 backdrop-blur-2xl py-12 px-4 sm:px-8">

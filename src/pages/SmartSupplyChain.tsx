@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +49,7 @@ export default function SmartSupplyChain() {
   const [selectedFacility, setSelectedFacility] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [activeSupplyTab, setActiveSupplyTab] = useState("all-inventory");
 
   // Redistribution state
   const [aiRecs, setAiRecs] = useState<RedistributionRec[]>([]);
@@ -143,11 +145,11 @@ export default function SmartSupplyChain() {
       <div className="space-y-6 max-w-7xl mx-auto pb-16">
         
         {/* ── HEADER STRIP (ANTIGRAVITY MEDICAL GLASS) ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-teal-500/20 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="mermaid-chip text-[11px] font-bold">
-                <Boxes className="h-3.5 w-3.5 text-[#05D3B3]" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[10px] font-bold text-[11px] font-bold">
+                <Boxes className="h-3.5 w-3.5 text-[#0D9488]" />
                 {t("phc.iotSupplyChainNetwork", "IoT SUPPLY CHAIN NETWORK")}
               </span>
               <span className="text-xs text-muted-foreground font-mono">
@@ -167,7 +169,7 @@ export default function SmartSupplyChain() {
             size="sm"
             onClick={loadData}
             disabled={loading}
-            className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
+            className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-2 ${loading ? "animate-spin" : ""}`} />
             {t("phc.refreshTelemetry", "Refresh Telemetry")}
@@ -176,16 +178,16 @@ export default function SmartSupplyChain() {
 
         {/* ── AI REDISTRIBUTION MATCHMAKER CALLOUT (MERMAID GLASS) ── */}
         {aiRecs.length > 0 && (
-          <div className="mermaid-glass p-6 sm:p-7 rounded-[2rem] border border-teal-500/25 shadow-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-teal-500/15 pb-4">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-6 sm:p-7 rounded-2xl border border-border shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-teal-500/15 border border-teal-400/30 text-[#05D3B3]">
+                <div className="p-2.5 rounded-2xl bg-teal-500/15 border border-teal-400/30 text-[#0D9488]">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
                   <h2 className="text-base sm:text-lg font-black tracking-tight text-foreground flex items-center gap-2">
                     {t("phc.aiResourceRedistributionRecommendations", "AI Resource Redistribution Recommendations")}
-                    <span className="mermaid-chip text-[10px] py-0.5 px-2 font-bold">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[10px] font-bold text-[10px] py-0.5 px-2 font-bold">
                       {aiRecs.length} {t("phc.opportunitiesDetected", "Opportunities Detected")}
                     </span>
                   </h2>
@@ -200,7 +202,7 @@ export default function SmartSupplyChain() {
               {aiRecs.slice(0, 3).map((rec, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-2xl bg-card/60 border border-teal-500/20 shadow-md space-y-3 flex flex-col justify-between"
+                  className="p-4 rounded-2xl bg-card/60 border border-border shadow-md space-y-3 flex flex-col justify-between"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
@@ -208,20 +210,20 @@ export default function SmartSupplyChain() {
                         <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{t("phc.deficit", "Deficit")}: {rec.targetPHC?.name}</span>
                       </span>
-                      <span className="mermaid-chip text-[10px] py-0.5 px-2 text-emerald-400 font-bold shrink-0">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[10px] font-bold text-[10px] py-0.5 px-2 text-emerald-400 font-bold shrink-0">
                         AI Match {rec.aiScore}%
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 p-2 rounded-xl bg-card/80 border border-teal-500/15 text-xs font-mono">
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-card/80 border border-border text-xs font-mono">
                       <div className="flex-1 truncate">
                         <span className="block text-[9px] text-muted-foreground uppercase">{t("phc.donorFacility", "Donor Facility")}</span>
                         <span className="font-bold text-foreground truncate block">{rec.sourcePHC?.name}</span>
                       </div>
-                      <MoveRight className="h-4 w-4 text-[#05D3B3] shrink-0" />
+                      <MoveRight className="h-4 w-4 text-[#0D9488] shrink-0" />
                       <div className="flex-1 truncate text-right">
                         <span className="block text-[9px] text-muted-foreground uppercase">{t("phc.transferQty", "Transfer Qty")}</span>
-                        <span className="font-black text-[#05D3B3] truncate block">{rec.transferQuantity} {rec.unit}</span>
+                        <span className="font-black text-[#0D9488] truncate block">{rec.transferQuantity} {rec.unit}</span>
                       </div>
                     </div>
 
@@ -237,7 +239,7 @@ export default function SmartSupplyChain() {
                       setSelectedRec(rec);
                       setTransferModalOpen(true);
                     }}
-                    className="mermaid-btn w-full text-xs font-bold tracking-wider uppercase h-9 rounded-xl shadow-sm"
+                    className="rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700 w-full text-xs font-bold tracking-wider uppercase h-9 rounded-xl shadow-sm"
                   >
                     <Truck className="h-3.5 w-3.5 mr-1.5" /> {t("phc.reviewAuthorizeTransfer", "Review & Authorize Transfer")}
                   </Button>
@@ -248,38 +250,42 @@ export default function SmartSupplyChain() {
         )}
 
         {/* ── MAIN SUPPLY CHAIN TABS & FILTER TOOLBAR ── */}
-        <Tabs defaultValue="all-inventory" className="w-full space-y-4">
+        <Tabs value={activeSupplyTab} onValueChange={setActiveSupplyTab} className="w-full space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <TabsList className="bg-card/70 border border-teal-500/25 p-1 rounded-2xl h-12 shadow-sm backdrop-blur-xl">
-              <TabsTrigger
-                value="all-inventory"
-                className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-4 flex items-center gap-2 transition-all"
-              >
-                <Boxes className="h-3.5 w-3.5" />
-                <span>{t("phc.allInventoryTab", "All Inventory")} ({inventory.length})</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="cold-chain"
-                className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-4 flex items-center gap-2 transition-all"
-              >
-                <Snowflake className="h-3.5 w-3.5" />
-                <span>{t("phc.coldChainTab", "Cold Chain")} ({coldChainItems.length})</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="expiry-radar"
-                className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-4 flex items-center gap-2 transition-all"
-              >
-                <Clock className="h-3.5 w-3.5" />
-                <span>{t("phc.expiryRadarTab", "Expiry Radar")} ({nearExpiryItems.length})</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="transfers"
-                className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-4 flex items-center gap-2 transition-all"
-              >
-                <Truck className="h-3.5 w-3.5" />
-                <span>{t("phc.activeTransfersTab", "Active Transfers")} ({activeTransfers.length})</span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="relative inline-flex items-center p-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner overflow-x-auto gap-1 p-1.5">
+              {[
+                { id: "all-inventory", label: `${t("phc.allInventoryTab", "All Inventory")} (${inventory.length})`, icon: Boxes },
+                { id: "cold-chain", label: `${t("phc.coldChainTab", "Cold Chain")} (${coldChainItems.length})`, icon: Snowflake },
+                { id: "expiry-radar", label: `${t("phc.expiryRadarTab", "Expiry Radar")} (${nearExpiryItems.length})`, icon: Clock },
+                { id: "transfers", label: `${t("phc.activeTransfersTab", "Active Transfers")} (${activeTransfers.length})`, icon: Truck },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveSupplyTab(tab.id)}
+                    className={`relative z-10 py-2.5 px-3.5 rounded-full font-mono text-xs uppercase font-bold tracking-wider transition-colors duration-200 flex items-center gap-2 whitespace-nowrap ${
+                      activeSupplyTab === tab.id
+                        ? "text-white dark:text-slate-950 font-black"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {activeSupplyTab === tab.id && (
+                      <motion.div
+                        layoutId="supply-tab-sliding-pill"
+                        className="absolute inset-0 rounded-full bg-teal-600 dark:bg-teal-400 shadow-sm"
+                        transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1.5">
+                      <Icon className="h-3.5 w-3.5" />
+                      <span>{tab.label}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Filter Bar with AntiGravity inputs */}
             <div className="flex flex-wrap items-center gap-2.5">
@@ -289,14 +295,14 @@ export default function SmartSupplyChain() {
                   placeholder={t("phc.searchPlaceholder", "Search medicine or batch...")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="antigravity-input pl-9 pr-3 h-10 w-48 sm:w-60 text-xs rounded-2xl bg-card/80 border border-teal-500/30"
+                  className="antigravity-input pl-9 pr-3 h-10 w-48 sm:w-60 text-xs rounded-2xl bg-card/80 border border-border"
                 />
               </div>
 
               <select
                 value={selectedFacility}
                 onChange={(e) => setSelectedFacility(e.target.value)}
-                className="antigravity-input bg-card/80 border border-teal-500/30 rounded-2xl px-3 text-xs font-semibold h-10 text-foreground shadow-sm"
+                className="antigravity-input bg-card/80 border border-border rounded-2xl px-3 text-xs font-semibold h-10 text-foreground shadow-sm"
               >
                 <option value="ALL" className="bg-slate-900 text-white">{t("phc.allFacilities", "All Facilities")}</option>
                 {facilities.map((f) => (
@@ -309,7 +315,7 @@ export default function SmartSupplyChain() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="antigravity-input bg-card/80 border border-teal-500/30 rounded-2xl px-3 text-xs font-semibold h-10 text-foreground shadow-sm"
+                className="antigravity-input bg-card/80 border border-border rounded-2xl px-3 text-xs font-semibold h-10 text-foreground shadow-sm"
               >
                 <option value="ALL" className="bg-slate-900 text-white">{t("phc.allCategories", "All Categories")}</option>
                 {Array.from(new Set(inventory.map((i) => i.category))).map((cat) => (
@@ -325,10 +331,10 @@ export default function SmartSupplyChain() {
               TAB 1: ALL INVENTORY (MERMAID GLASS DATA TABLE)
           ════════════════════════════════════════════════════════════ */}
           <TabsContent value="all-inventory" className="mt-2">
-            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl overflow-hidden">
+            <div className="bg-card border border-border shadow-sm rounded-2xl rounded-2xl border border-border shadow-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-teal-500/15">
+                  <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-border">
                     <tr>
                       <th className="p-3.5 sm:px-5">{t("phc.tableMedicineVaccine", "Medicine / Vaccine")}</th>
                       <th className="p-3.5">{t("phc.tableFacility", "Facility")}</th>
@@ -436,13 +442,13 @@ export default function SmartSupplyChain() {
                 return (
                   <div
                     key={item._id}
-                    className={`mermaid-glass p-5 rounded-3xl border shadow-lg space-y-4 ${
-                      isBreach ? "border-rose-500/50 shadow-rose-500/10" : "border-teal-500/20"
+                    className={`bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl border shadow-lg space-y-4 ${
+                      isBreach ? "border-rose-500/50 shadow-rose-500/10" : "border-border"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
-                        className={`mermaid-chip text-[10px] font-bold ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[10px] font-bold text-[10px] font-bold ${
                           isBreach ? "text-rose-400 border-rose-500/40" : "text-cyan-400"
                         }`}
                       >
@@ -460,10 +466,10 @@ export default function SmartSupplyChain() {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-card/60 border border-teal-500/15">
+                    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-card/60 border border-border">
                       <div>
                         <span className="text-[9px] font-mono text-muted-foreground uppercase block font-bold">{t("phc.liveSensorTelemetry", "Live Sensor Telemetry")}</span>
-                        <p className={`text-2xl font-black font-mono ${isBreach ? "text-rose-500" : "text-[#05D3B3]"}`}>
+                        <p className={`text-2xl font-black font-mono ${isBreach ? "text-rose-500" : "text-[#0D9488]"}`}>
                           {item.storageTemperature}°C
                         </p>
                       </div>
@@ -489,8 +495,8 @@ export default function SmartSupplyChain() {
               TAB 3: EXPIRY RADAR (MERMAID GLASS DATA TABLE)
           ════════════════════════════════════════════════════════════ */}
           <TabsContent value="expiry-radar" className="mt-2">
-            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl overflow-hidden">
-              <div className="p-5 border-b border-teal-500/15 flex items-center gap-2.5">
+            <div className="bg-card border border-border shadow-sm rounded-2xl rounded-2xl border border-border shadow-xl overflow-hidden">
+              <div className="p-5 border-b border-border flex items-center gap-2.5">
                 <Clock className="h-5 w-5 text-amber-500" />
                 <div>
                   <h3 className="text-sm font-black text-foreground">
@@ -503,7 +509,7 @@ export default function SmartSupplyChain() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-teal-500/15">
+                  <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-border">
                     <tr>
                       <th className="p-3.5 sm:px-5">{t("phc.tableMedicineVaccine", "Medicine / Vaccine")}</th>
                       <th className="p-3.5">{t("phc.tableFacility", "Facility")}</th>
@@ -525,7 +531,7 @@ export default function SmartSupplyChain() {
                           <td className="p-3.5 sm:px-5 font-bold text-foreground">{item.medicineName}</td>
                           <td className="p-3.5 text-foreground">{fac?.name}</td>
                           <td className="p-3.5 font-mono text-muted-foreground">{item.batchNumber}</td>
-                          <td className="p-3.5 font-bold text-[#05D3B3] font-mono">{item.quantity} {item.unit}</td>
+                          <td className="p-3.5 font-bold text-[#0D9488] font-mono">{item.quantity} {item.unit}</td>
                           <td className="p-3.5 text-foreground font-mono">{new Date(item.expiryDate).toLocaleDateString()}</td>
                           <td className="p-3.5 font-black font-mono text-amber-500">{daysLeft} {t("phc.days", "days")}</td>
                           <td className="p-3.5 sm:px-5 text-right">
@@ -533,7 +539,7 @@ export default function SmartSupplyChain() {
                               size="sm"
                               variant="outline"
                               onClick={() => toast.info(`AI Transfer scheduled for batch #${item.batchNumber}`)}
-                              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-xl text-xs h-8 px-3 font-bold shadow-sm"
+                              className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-xl text-xs h-8 px-3 font-bold shadow-sm"
                             >
                               {t("phc.redistributeBatch", "Redistribute Batch")}
                             </Button>
@@ -551,9 +557,9 @@ export default function SmartSupplyChain() {
               TAB 4: ACTIVE TRANSFERS (MERMAID GLASS DATA TABLE)
           ════════════════════════════════════════════════════════════ */}
           <TabsContent value="transfers" className="mt-2">
-            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl overflow-hidden">
-              <div className="p-5 border-b border-teal-500/15 flex items-center gap-2.5">
-                <Truck className="h-5 w-5 text-[#05D3B3]" />
+            <div className="bg-card border border-border shadow-sm rounded-2xl rounded-2xl border border-border shadow-xl overflow-hidden">
+              <div className="p-5 border-b border-border flex items-center gap-2.5">
+                <Truck className="h-5 w-5 text-[#0D9488]" />
                 <h3 className="text-sm font-black text-foreground">
                   {t("phc.activeTransfersTitle", "Inter-Facility Resource Transfers Tracking")}
                 </h3>
@@ -565,7 +571,7 @@ export default function SmartSupplyChain() {
                   </div>
                 ) : (
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-teal-500/15">
+                    <thead className="bg-card/90 text-muted-foreground font-mono text-[10px] uppercase tracking-wider border-b border-border">
                       <tr>
                         <th className="p-3.5 sm:px-5">{t("phc.resource", "Resource")}</th>
                         <th className="p-3.5">{t("phc.sourceDonor", "Source (Donor)")}</th>
@@ -611,7 +617,7 @@ export default function SmartSupplyChain() {
                               <Button
                                 size="sm"
                                 onClick={() => handleUpdateTransferStatus(tr._id, "APPROVE")}
-                                className="mermaid-btn text-xs font-bold h-8 px-3 rounded-xl shadow-sm"
+                                className="rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700 text-xs font-bold h-8 px-3 rounded-xl shadow-sm"
                               >
                                 {t("phc.btnApprove", "Approve")}
                               </Button>
@@ -648,10 +654,10 @@ export default function SmartSupplyChain() {
 
       {/* ── TRANSFER REVIEW & AUTHORIZATION MODAL (ANTIGRAVITY GLASS) ── */}
       <Dialog open={transferModalOpen} onOpenChange={setTransferModalOpen}>
-        <DialogContent className="max-w-lg mermaid-glass border border-teal-500/30 text-foreground shadow-2xl rounded-3xl p-6">
-          <DialogHeader className="border-b border-teal-500/15 pb-3">
+        <DialogContent className="max-w-lg bg-card border border-border shadow-sm rounded-2xl border border-border text-foreground shadow-2xl rounded-2xl p-6">
+          <DialogHeader className="border-b border-border pb-3">
             <DialogTitle className="text-base font-black text-foreground flex items-center gap-2">
-              <Truck className="h-5 w-5 text-[#05D3B3]" />
+              <Truck className="h-5 w-5 text-[#0D9488]" />
               {t("phc.authorizeInterFacilityTransfer", "Authorize Inter-Facility Transfer")}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -661,14 +667,14 @@ export default function SmartSupplyChain() {
 
           {selectedRec && (
             <div className="space-y-4 py-2 text-xs">
-              <div className="p-4 rounded-2xl bg-card/60 border border-teal-500/15 space-y-2 font-mono">
+              <div className="p-4 rounded-2xl bg-card/60 border border-border space-y-2 font-mono">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t("phc.resource", "Resource")}:</span>
                   <span className="font-bold text-foreground text-sm font-sans">{selectedRec.resourceName}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t("phc.authorizedQty", "Authorized Quantity")}:</span>
-                  <span className="font-black text-[#05D3B3] text-sm">
+                  <span className="font-black text-[#0D9488] text-sm">
                     {selectedRec.transferQuantity} {selectedRec.unit}
                   </span>
                 </div>
@@ -692,12 +698,12 @@ export default function SmartSupplyChain() {
                 ↳ {t("phc.reasoning", "Reasoning")}: {selectedRec.reasoning}
               </p>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-teal-500/15">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setTransferModalOpen(false)}
-                  className="rounded-xl border-teal-500/30 text-muted-foreground text-xs"
+                  className="rounded-xl border-border text-muted-foreground text-xs"
                 >
                   {t("common.cancel", "Cancel")}
                 </Button>
@@ -705,7 +711,7 @@ export default function SmartSupplyChain() {
                   size="sm"
                   disabled={approving}
                   onClick={() => handleApproveRec(selectedRec)}
-                  className="mermaid-btn rounded-xl font-bold uppercase tracking-wider text-xs px-4"
+                  className="rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700 rounded-xl font-bold uppercase tracking-wider text-xs px-4"
                 >
                   {approving ? t("common.authorizing", "Authorizing...") : t("phc.authorizeDispatch", "Authorize & Dispatch")}
                 </Button>

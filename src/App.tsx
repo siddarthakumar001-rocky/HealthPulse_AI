@@ -1,3 +1,4 @@
+import { MotionConfig, AnimatePresence, motion } from "framer-motion";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -50,44 +51,62 @@ function AnalyticsTracker() {
   return null;
 }
 
+function AnimatedAppRoutes() {
+  const location = useLocation();
+
+  return (
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
+      className="w-full min-h-screen"
+    >
+      <Routes location={location}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+        <Route path="/device-connect" element={<ProtectedRoute><DeviceConnect /></ProtectedRoute>} />
+        <Route path="/report-upload" element={<Navigate to="/reports" replace />} />
+        <Route path="/reports" element={<ProtectedRoute><ReportUpload /></ProtectedRoute>} />
+        <Route path="/ai-suggestions" element={<ProtectedRoute><AiSuggestions /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
+        <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/phc-command" element={<ProtectedRoute><PHCCommandDashboard /></ProtectedRoute>} />
+        <Route path="/supply-chain" element={<ProtectedRoute><SmartSupplyChain /></ProtectedRoute>} />
+        <Route path="/ai-forecasting" element={<ProtectedRoute><AIEpidemicSurge /></ProtectedRoute>} />
+        <Route path="/emergency" element={<ProtectedRoute><EmergencyIntelligence /></ProtectedRoute>} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/antigravity" element={<ProtectedRoute><AntiGravityDashboard /></ProtectedRoute>} />
+        <Route path="/research-evaluation" element={<ProtectedRoute><ResearchEvaluation /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </motion.div>
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <MotionConfig reducedMotion="user">
+          <BrowserRouter>
           <AnalyticsTracker />
           <ThemeProvider>
             <AuthProvider>
               <BackButton />
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-                <Route path="/device-connect" element={<ProtectedRoute><DeviceConnect /></ProtectedRoute>} />
-                <Route path="/report-upload" element={<Navigate to="/reports" replace />} />
-                <Route path="/reports" element={<ProtectedRoute><ReportUpload /></ProtectedRoute>} />
-                <Route path="/ai-suggestions" element={<ProtectedRoute><AiSuggestions /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
-                <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/phc-command" element={<ProtectedRoute><PHCCommandDashboard /></ProtectedRoute>} />
-                <Route path="/supply-chain" element={<ProtectedRoute><SmartSupplyChain /></ProtectedRoute>} />
-                <Route path="/ai-forecasting" element={<ProtectedRoute><AIEpidemicSurge /></ProtectedRoute>} />
-                <Route path="/emergency" element={<ProtectedRoute><EmergencyIntelligence /></ProtectedRoute>} />
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/antigravity" element={<ProtectedRoute><AntiGravityDashboard /></ProtectedRoute>} />
-                <Route path="/research-evaluation" element={<ProtectedRoute><ResearchEvaluation /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AnimatedAppRoutes />
             </AuthProvider>
           </ThemeProvider>
         </BrowserRouter>
+        </MotionConfig>
       </TooltipProvider>
     </QueryClientProvider>
   );

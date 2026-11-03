@@ -80,18 +80,18 @@ export default function Alerts() {
         {/* Page header */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="font-display text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500">
+            <h1 className="font-display text-3xl font-black tracking-wide text-foreground uppercase">
               {t("alerts.title")}
             </h1>
-            <p className="font-mono text-xs text-cyan-700 dark:text-cyan-500/60 uppercase tracking-widest mt-1 font-bold">
+            <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider mt-1 text-xs font-mono font-medium">
               {t("alerts.subtitle")}
             </p>
           </div>
 
           {/* Glass filter */}
-          <div className="rounded-xl overflow-hidden bg-muted/30 border border-cyan-500/20 backdrop-blur-sm">
+          <div className="rounded-xl bg-card border border-border shadow-sm">
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-40 h-10 border-none bg-transparent font-mono text-xs text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">
+              <SelectTrigger className="w-40 h-10 border-none bg-transparent font-mono text-xs text-foreground uppercase tracking-wider font-mono text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="font-mono text-xs uppercase tracking-wider">
@@ -109,7 +109,7 @@ export default function Alerts() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-16 text-center rounded-2xl border border-dashed border-cyan-500/20 bg-muted/10"
+            className="p-16 text-center rounded-2xl border border-dashed border-border bg-card shadow-sm"
           >
             <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
               <Bell className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
@@ -129,7 +129,7 @@ export default function Alerts() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ delay: i * 0.06 }}
                     whileHover={{ scale: 1.01, x: 4 }}
-                    className={`relative liquid-glass rounded-2xl overflow-hidden border ${tok.borderCls} ${alert.resolved ? "opacity-50" : ""}`}
+                    className={`relative bg-card rounded-2xl overflow-hidden border shadow-sm ${tok.borderCls} ${alert.resolved ? "opacity-50" : ""}`}
                   >
                     {/* Left severity bar */}
                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-gradient-to-b ${tok.barCls}`} />
@@ -218,7 +218,7 @@ export default function Alerts() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Ayurvedic */}
-              <motion.div whileHover={{ scale: 1.02, y: -4 }} className="liquid-glass rounded-2xl overflow-hidden border border-cyan-500/20">
+              <motion.div whileHover={{ scale: 1.02, y: -4 }} className="bg-card rounded-2xl overflow-hidden border shadow-sm border-cyan-500/20">
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-cyan-500/15 bg-cyan-500/5">
                   <div className="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
                     <Heart className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
@@ -247,7 +247,7 @@ export default function Alerts() {
               </motion.div>
 
               {/* Lifestyle */}
-              <motion.div whileHover={{ scale: 1.02, y: -4 }} className="liquid-glass rounded-2xl overflow-hidden border border-green-500/20">
+              <motion.div whileHover={{ scale: 1.02, y: -4 }} className="bg-card rounded-2xl overflow-hidden border shadow-sm border-green-500/20">
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-green-500/15 bg-green-500/5">
                   <div className="h-9 w-9 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
                     <Brain className="h-4 w-4 text-green-600 dark:text-green-400" />

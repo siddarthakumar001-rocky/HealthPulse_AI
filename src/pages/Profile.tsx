@@ -42,6 +42,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Profile() {
+  const [activeProfileTab, setActiveProfileTab] = useState("onboarding-data");
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -119,11 +120,11 @@ export default function Profile() {
       <div className="space-y-8 max-w-7xl mx-auto pb-16">
         
         {/* ── PROFILE COCKPIT HEADER ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-teal-500/20 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="mermaid-chip text-[11px] font-bold">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#05D3B3]" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[11px] font-bold text-[11px] font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0D9488]" />
                 BIOMETRIC IDENTITY & HEALTH PASSPORT
               </span>
               <span className="text-xs text-muted-foreground font-mono">
@@ -142,7 +143,7 @@ export default function Profile() {
             <Button
               asChild
               variant="outline"
-              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
+              className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
               <Link to="/onboarding?mode=update">
                 <Edit3 className="w-3.5 h-3.5 mr-1.5" />
@@ -152,7 +153,7 @@ export default function Profile() {
 
             <Button
               asChild
-              className="mermaid-btn text-xs font-bold uppercase tracking-wider h-10 px-4 rounded-2xl shadow-sm"
+              className="h-10 px-4 rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700"
             >
               <Link to="/reports">
                 <Upload className="w-3.5 h-3.5 mr-1.5" />
@@ -166,14 +167,14 @@ export default function Profile() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
           {/* Identity Hologram Card (Span 7) */}
-          <div className="lg:col-span-7 mermaid-glass p-6 sm:p-8 rounded-[2rem] shadow-xl border border-teal-500/20 flex flex-col justify-between">
+          <div className="lg:col-span-7 bg-card border border-border shadow-sm rounded-2xl p-6 sm:p-8 rounded-2xl shadow-xl border border-border flex flex-col justify-between">
             <div className="flex items-center gap-5">
               {/* Holographic glowing Avatar */}
               <div className="relative shrink-0">
                 <div
                   className="absolute -inset-1.5 rounded-full opacity-70 animate-spin"
                   style={{
-                    background: "conic-gradient(from 0deg, #05D3B3, #0D9488, #38BDF8, #05D3B3)",
+                    background: "conic-gradient(from 0deg, #0D9488, #0D9488, #38BDF8, #0D9488)",
                     animationDuration: "6s",
                   }}
                 />
@@ -188,8 +189,8 @@ export default function Profile() {
                   <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
                     {meta.name || "Patient Operator"}
                   </h2>
-                  <span className="mermaid-chip text-[9px] font-bold uppercase tracking-wider py-0.5 px-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#05D3B3] animate-pulse" /> In-Sync
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[11px] font-bold text-[9px] font-bold uppercase tracking-wider py-0.5 px-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D9488] animate-pulse" /> In-Sync
                   </span>
                 </div>
                 <p className="text-xs font-mono text-muted-foreground">{user?.email}</p>
@@ -200,20 +201,20 @@ export default function Profile() {
             </div>
 
             {/* Quick Demographics 4-Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-teal-500/15">
-              <div className="p-3 rounded-2xl bg-card/60 border border-teal-500/15 space-y-0.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-border">
+              <div className="p-3 rounded-2xl bg-card/60 border border-border space-y-0.5">
                 <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Age</span>
                 <p className="text-base font-black font-mono text-foreground">{meta.age || data.age || "N/A"} Yrs</p>
               </div>
-              <div className="p-3 rounded-2xl bg-card/60 border border-teal-500/15 space-y-0.5">
+              <div className="p-3 rounded-2xl bg-card/60 border border-border space-y-0.5">
                 <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Gender</span>
                 <p className="text-base font-black text-foreground capitalize">{meta.gender || data.gender || "N/A"}</p>
               </div>
-              <div className="p-3 rounded-2xl bg-card/60 border border-teal-500/15 space-y-0.5">
+              <div className="p-3 rounded-2xl bg-card/60 border border-border space-y-0.5">
                 <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Contact</span>
                 <p className="text-sm font-bold font-mono text-foreground truncate">{meta.phone || "N/A"}</p>
               </div>
-              <div className="p-3 rounded-2xl bg-card/60 border border-teal-500/15 space-y-0.5">
+              <div className="p-3 rounded-2xl bg-card/60 border border-border space-y-0.5">
                 <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Emergency</span>
                 <p className="text-sm font-bold font-mono text-rose-500 truncate">{meta.emergency_contact || data.emergency_contact || "N/A"}</p>
               </div>
@@ -223,7 +224,7 @@ export default function Profile() {
           {/* Biometric KPI Quick Summary (Span 5) */}
           <div className="lg:col-span-5 grid grid-cols-2 gap-4">
             
-            <div className="mermaid-glass p-5 rounded-[2rem] border border-teal-500/20 shadow-lg flex flex-col justify-between">
+            <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[10px] font-mono font-bold uppercase">Chronic Conditions</span>
                 <Heart className="w-4 h-4 text-rose-500" />
@@ -241,7 +242,7 @@ export default function Profile() {
               </span>
             </div>
 
-            <div className="mermaid-glass p-5 rounded-[2rem] border border-teal-500/20 shadow-lg flex flex-col justify-between">
+            <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[10px] font-mono font-bold uppercase">Lab Reports</span>
                 <FileText className="w-4 h-4 text-teal-500" />
@@ -259,10 +260,10 @@ export default function Profile() {
               </span>
             </div>
 
-            <div className="mermaid-glass p-5 rounded-[2rem] border border-teal-500/20 shadow-lg flex flex-col justify-between">
+            <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[10px] font-mono font-bold uppercase">Blood Pressure</span>
-                <Activity className="w-4 h-4 text-[#05D3B3]" />
+                <Activity className="w-4 h-4 text-[#0D9488]" />
               </div>
               <div className="my-2">
                 <div className="text-2xl font-black font-mono text-foreground">
@@ -277,7 +278,7 @@ export default function Profile() {
               </span>
             </div>
 
-            <div className="mermaid-glass p-5 rounded-[2rem] border border-teal-500/20 shadow-lg flex flex-col justify-between">
+            <div className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[10px] font-mono font-bold uppercase">Blood Sugar</span>
                 <Flame className="w-4 h-4 text-amber-500" />
@@ -300,24 +301,24 @@ export default function Profile() {
 
         {/* ── MAIN PROFILE TABS (ONBOARDING SELECTIONS + LAB REPORTS VAULT) ── */}
         <Tabs defaultValue="onboarding-data" className="w-full space-y-6">
-          <TabsList className="bg-card/70 border border-teal-500/25 p-1 rounded-2xl h-12 shadow-sm backdrop-blur-xl">
+          <TabsList className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-full h-12 shadow-inner">
             <TabsTrigger
               value="onboarding-data"
-              className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-5 flex items-center gap-2 transition-all"
+              className="rounded-full data-[state=active]:bg-teal-600 dark:data-[state=active]:bg-teal-400 data-[state=active]:text-white dark:data-[state=active]:text-slate-950 font-extrabold text-xs px-5 flex items-center gap-2 transition-all"
             >
               <FileHeart className="w-4 h-4" />
               <span>Onboarding Health Assessment</span>
             </TabsTrigger>
             <TabsTrigger
               value="lab-reports"
-              className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-5 flex items-center gap-2 transition-all"
+              className="rounded-full data-[state=active]:bg-teal-600 dark:data-[state=active]:bg-teal-400 data-[state=active]:text-white dark:data-[state=active]:text-slate-950 font-extrabold text-xs px-5 flex items-center gap-2 transition-all"
             >
               <FileText className="w-4 h-4" />
               <span>Uploaded Lab Reports ({reports.length})</span>
             </TabsTrigger>
             <TabsTrigger
               value="device-telemetry"
-              className="rounded-xl data-[state=active]:bg-[#05D3B3] data-[state=active]:text-slate-950 font-extrabold text-xs px-5 flex items-center gap-2 transition-all"
+              className="rounded-full data-[state=active]:bg-teal-600 dark:data-[state=active]:bg-teal-400 data-[state=active]:text-white dark:data-[state=active]:text-slate-950 font-extrabold text-xs px-5 flex items-center gap-2 transition-all"
             >
               <Smartphone className="w-4 h-4" />
               <span>Connected IoMT Sensor</span>
@@ -333,7 +334,7 @@ export default function Profile() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               {/* Card 1: Chronic Conditions & Medical Baseline */}
-              <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
                     <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
@@ -360,7 +361,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-teal-500/15">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                       <div>
                         <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Stroke History</span>
                         <p className="font-bold text-foreground">{data.stroke_history ? "Yes (Flagged)" : "No"}</p>
@@ -371,7 +372,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Current Medication</span>
                       <p className="font-medium text-foreground">{data.on_medication ? `Yes — ${data.medication_details || "Prescription ongoing"}` : "Not currently on daily medication"}</p>
                     </div>
@@ -380,7 +381,7 @@ export default function Profile() {
               </div>
 
               {/* Card 2: Symptoms & Pain Mapping */}
-              <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
                     <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
@@ -407,7 +408,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-teal-500/15">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                       <div>
                         <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Pain Severity</span>
                         <p className="font-bold text-foreground capitalize">{data.pain_severity || "None / Mild"}</p>
@@ -418,7 +419,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Body Pain Locations</span>
                       <p className="font-medium text-foreground capitalize">
                         {data.body_pain_location && data.body_pain_location.length > 0
@@ -437,7 +438,7 @@ export default function Profile() {
               </div>
 
               {/* Card 3: Lifestyle, Sleep & Metabolism */}
-              <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
                     <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
@@ -464,7 +465,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-teal-500/15">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                       <div>
                         <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Diet Regimen</span>
                         <p className="font-bold text-foreground capitalize">{data.diet_type || "Vegetarian"}</p>
@@ -475,7 +476,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Habits & Substance History</span>
                       <p className="font-medium text-foreground">
                         Smoking: {data.smoking ? "Yes" : "None"} • Alcohol: {data.alcohol ? "Yes" : "None"} • Addictions: {data.other_addictions || "None"}
@@ -486,7 +487,7 @@ export default function Profile() {
               </div>
 
               {/* Card 4: ENT, Ocular & Structural Findings */}
-              <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
                     <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
@@ -507,7 +508,7 @@ export default function Profile() {
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">ENT Complications</span>
                       <p className="font-medium text-foreground capitalize">
                         {data.ent_issues && data.ent_issues.length > 0
@@ -516,7 +517,7 @@ export default function Profile() {
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Wounds & Fractures</span>
                       <p className="font-medium text-foreground">
                         Wounds/Scars: {data.wound_details || (data.wound_scar_marks ? "Present" : "None")} • Fractures: {data.fracture_details || (data.fractures ? "Reported" : "None")}
@@ -527,7 +528,7 @@ export default function Profile() {
               </div>
 
               {/* Card 5: Diagnostic Investigations History */}
-              <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
                     <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
@@ -554,7 +555,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Clinical Imaging Done</span>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {data.imaging_done && data.imaging_done.length > 0 ? (
@@ -573,7 +574,7 @@ export default function Profile() {
               </div>
 
               {/* Card 6: Women's Health (or General Wellness) */}
-              <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2.5 text-teal-600 dark:text-teal-400">
                     <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30">
@@ -596,7 +597,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-teal-500/15">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                       <div>
                         <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Pads / Day</span>
                         <p className="font-bold text-foreground">{data.pads_per_day || "2-3"}</p>
@@ -607,7 +608,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-teal-500/15">
+                    <div className="pt-2 border-t border-border">
                       <span className="text-[10px] font-mono text-muted-foreground uppercase block font-bold">Associated Symptoms</span>
                       <p className="font-medium text-foreground">{data.menstrual_other_symptoms || "None reported"}</p>
                     </div>
@@ -636,10 +637,10 @@ export default function Profile() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="mermaid-glass p-6 sm:p-8 rounded-[2rem] border border-teal-500/25 shadow-xl space-y-5"
+                      className="bg-card border border-border shadow-sm rounded-2xl p-6 sm:p-8 rounded-2xl border border-border shadow-xl space-y-5"
                     >
                       {/* Report Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-teal-500/15 pb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
                         <div className="flex items-start gap-3.5">
                           <div className="p-3 rounded-2xl bg-teal-500/15 border border-teal-400/30 text-teal-600 dark:text-teal-400 shrink-0">
                             <FileText className="w-6 h-6" />
@@ -685,7 +686,7 @@ export default function Profile() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleDownload(rpt._id, `Report_${idx + 1}.pdf`)}
-                              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-xl text-xs font-bold h-9"
+                              className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-xl text-xs font-bold h-9"
                             >
                               <Download className="w-3.5 h-3.5 mr-1.5" />
                               Download File
@@ -720,7 +721,7 @@ export default function Profile() {
                                 className={`p-3 rounded-2xl border text-xs space-y-0.5 ${
                                   p.status === "high" || p.status === "low"
                                     ? "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200"
-                                    : "bg-card/60 border-teal-500/15 text-foreground"
+                                    : "bg-card/60 border-border text-foreground"
                                 }`}
                               >
                                 <span className="text-[10px] font-mono text-muted-foreground uppercase truncate block font-bold">
@@ -744,7 +745,7 @@ export default function Profile() {
 
                       {/* AI Clinical Insights / Predictions */}
                       {analysis.predictions && analysis.predictions.length > 0 && (
-                        <div className="pt-2 border-t border-teal-500/15 flex flex-wrap items-center gap-2">
+                        <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2">
                           <span className="text-[11px] font-mono font-bold text-muted-foreground uppercase">
                             AI Diagnostic Inference:
                           </span>
@@ -764,8 +765,8 @@ export default function Profile() {
                 })}
               </div>
             ) : (
-              <div className="mermaid-glass p-12 rounded-[2.5rem] border border-teal-500/20 text-center space-y-4 shadow-xl">
-                <div className="w-16 h-16 rounded-3xl bg-teal-500/15 border border-teal-400/30 mx-auto flex items-center justify-center text-[#05D3B3]">
+              <div className="bg-card border border-border shadow-sm rounded-2xl p-12 rounded-[2.5rem] border border-border text-center space-y-4 shadow-xl">
+                <div className="w-16 h-16 rounded-3xl bg-teal-500/15 border border-teal-400/30 mx-auto flex items-center justify-center text-[#0D9488]">
                   <FileText className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground">No Diagnostic Lab Reports Uploaded Yet</h3>
@@ -785,9 +786,9 @@ export default function Profile() {
               TAB 3: CONNECTED IOMT SENSOR HARDWARE
           ════════════════════════════════════════════════════════════ */}
           <TabsContent value="device-telemetry" className="space-y-6 mt-0">
-            <div className="mermaid-glass p-8 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-6">
-              <div className="flex items-center gap-3 border-b border-teal-500/15 pb-4">
-                <div className="p-3 rounded-2xl bg-teal-500/15 border border-teal-400/30 text-[#05D3B3]">
+            <div className="bg-card border border-border shadow-sm rounded-2xl p-8 rounded-2xl border border-border shadow-xl space-y-6">
+              <div className="flex items-center gap-3 border-b border-border pb-4">
+                <div className="p-3 rounded-2xl bg-teal-500/15 border border-teal-400/30 text-[#0D9488]">
                   <Smartphone className="w-6 h-6" />
                 </div>
                 <div>
@@ -801,13 +802,13 @@ export default function Profile() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-card/60 border border-teal-500/15 space-y-1">
+                <div className="p-4 rounded-2xl bg-card/60 border border-border space-y-1">
                   <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Hardware Device ID</span>
                   <p className="text-base font-black font-mono text-foreground">{device?.device_id || "ESP32-BLE-SENSOR-01"}</p>
                   <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono">MAC: C4:4F:33:18:22:9A</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-card/60 border border-teal-500/15 space-y-1">
+                <div className="p-4 rounded-2xl bg-card/60 border border-border space-y-1">
                   <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Connection Status</span>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
@@ -816,7 +817,7 @@ export default function Profile() {
                   <span className="text-[10px] text-muted-foreground font-mono">Sampling: 250 Hz Continuous</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-card/60 border border-teal-500/15 space-y-1">
+                <div className="p-4 rounded-2xl bg-card/60 border border-border space-y-1">
                   <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold">Last Synchronized</span>
                   <p className="text-sm font-bold text-foreground font-mono mt-1">
                     {device?.last_sync ? new Date(device.last_sync).toLocaleString() : "Real-time Streaming"}
@@ -830,7 +831,7 @@ export default function Profile() {
         </Tabs>
 
         {/* ── QUICK LOGOUT BUTTON ── */}
-        <div className="pt-4 border-t border-teal-500/15">
+        <div className="pt-4 border-t border-border">
           <Button
             type="button"
             variant="outline"

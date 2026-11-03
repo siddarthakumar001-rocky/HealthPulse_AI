@@ -178,10 +178,10 @@ export default function EmergencyIntelligence() {
       <div className="space-y-6 max-w-7xl mx-auto pb-16">
         
         {/* ── HEADER STRIP (ANTIGRAVITY EMERGENCY GLASS) ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-rose-500/20 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="mermaid-chip text-[11px] font-bold text-rose-500 border-rose-500/30">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-border text-rose-700 dark:text-rose-400 font-mono text-[10px] font-bold text-[11px] font-bold text-rose-500 border-border">
                 <Siren className="h-3.5 w-3.5 animate-pulse text-rose-500" />
                 {t("phc.emergencyTriageHub", "High-Risk Triage Hub")}
               </span>
@@ -202,7 +202,7 @@ export default function EmergencyIntelligence() {
             size="sm"
             onClick={loadAlerts}
             disabled={loading}
-            className="border-rose-500/30 text-rose-500 hover:bg-rose-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
+            className="border-border text-rose-500 hover:bg-rose-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-2 ${loading ? "animate-spin" : ""}`} />
             {t("phc.refreshIncidents", "Refresh Incidents")}
@@ -211,7 +211,7 @@ export default function EmergencyIntelligence() {
 
         {/* ── TOP INCIDENT BENTO TILES (MERMAID GLASS) ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="mermaid-glass p-5 rounded-3xl border border-rose-500/30 shadow-lg space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl border border-border shadow-lg space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.criticalIncidents", "Critical Incidents")}</span>
               <AlertOctagon className="h-4 w-4 text-rose-500" />
@@ -222,7 +222,7 @@ export default function EmergencyIntelligence() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-5 rounded-3xl border border-purple-500/30 shadow-lg space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl border border-border shadow-lg space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.potentialOutbreaks", "Potential Outbreaks")}</span>
               <Flame className="h-4 w-4 text-purple-400" />
@@ -233,18 +233,18 @@ export default function EmergencyIntelligence() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-5 rounded-3xl border border-cyan-500/30 shadow-lg space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl border border-border shadow-lg space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.coldChainBreaches", "Cold Chain Breaches")}</span>
-              <Snowflake className="h-4 w-4 text-cyan-400" />
+              <Snowflake className="h-4 w-4 text-teal-600 dark:text-teal-400" />
             </div>
-            <p className="text-3xl font-black font-mono text-cyan-400 mt-2">{coldChainCount}</p>
-            <p className="text-[11px] text-cyan-400 font-bold pt-1 font-mono">
+            <p className="text-3xl font-black font-mono text-teal-600 dark:text-teal-400 mt-2">{coldChainCount}</p>
+            <p className="text-[11px] text-teal-600 dark:text-teal-400 font-bold pt-1 font-mono">
               {t("phc.vaccineTempRisks", "Vaccine temperature risks")}
             </p>
           </div>
 
-          <div className="mermaid-glass p-5 rounded-3xl border border-amber-500/30 shadow-lg space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl border border-border shadow-lg space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.imminentStockouts", "Imminent Stockouts")}</span>
               <Pill className="h-4 w-4 text-amber-500" />
@@ -257,7 +257,7 @@ export default function EmergencyIntelligence() {
         </div>
 
         {/* ── INCIDENTS FILTER & WORKFLOW LIST (MERMAID GLASS) ── */}
-        <div className="mermaid-glass p-6 sm:p-7 rounded-[2rem] border border-rose-500/20 shadow-xl space-y-4">
+        <div className="bg-card border border-border shadow-sm rounded-2xl p-6 sm:p-7 rounded-2xl border border-border shadow-xl space-y-4">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-teal-500/15 pb-4">
             <div className="space-y-0.5">
@@ -308,7 +308,7 @@ export default function EmergencyIntelligence() {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                      <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-border">
                         {al.alertType === "OUTBREAK_SURGE" && <Flame className="h-4 w-4" />}
                         {al.alertType === "COLD_CHAIN_BREACH" && <Snowflake className="h-4 w-4" />}
                         {al.alertType === "STOCKOUT_RISK" && <Pill className="h-4 w-4" />}
@@ -390,7 +390,7 @@ export default function EmergencyIntelligence() {
                             setSelectedAlert(al);
                             setResolveModalOpen(true);
                           }}
-                          className="mermaid-btn text-xs font-bold h-8 px-3 rounded-xl shadow-sm"
+                          className="rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700 text-xs font-bold h-8 px-3 rounded-xl shadow-sm"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {t("phc.markAsResolved", "Mark as Resolved")}
                         </Button>
@@ -406,7 +406,7 @@ export default function EmergencyIntelligence() {
 
       {/* ── INCIDENT RESOLUTION MODAL (ANTIGRAVITY GLASS) ── */}
       <Dialog open={resolveModalOpen} onOpenChange={setResolveModalOpen}>
-        <DialogContent className="max-w-md mermaid-glass border border-teal-500/30 text-foreground shadow-2xl rounded-3xl p-6">
+        <DialogContent className="max-w-md bg-card border border-border shadow-sm rounded-2xl border border-border text-foreground shadow-2xl rounded-2xl p-6">
           <DialogHeader className="border-b border-teal-500/15 pb-3">
             <DialogTitle className="text-base font-black text-foreground flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-emerald-500" />
@@ -432,7 +432,7 @@ export default function EmergencyIntelligence() {
                   variant="outline"
                   size="sm"
                   onClick={() => setResolveModalOpen(false)}
-                  className="rounded-xl border-teal-500/30 text-muted-foreground text-xs"
+                  className="rounded-xl border-border text-muted-foreground text-xs"
                 >
                   {t("common.cancel", "Cancel")}
                 </Button>
@@ -440,7 +440,7 @@ export default function EmergencyIntelligence() {
                   size="sm"
                   disabled={resolving}
                   onClick={handleResolve}
-                  className="mermaid-btn rounded-xl font-bold uppercase tracking-wider text-xs px-4"
+                  className="rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700 rounded-xl font-bold uppercase tracking-wider text-xs px-4"
                 >
                   {resolving ? t("common.resolving", "Resolving...") : t("phc.markResolvedNotify", "Mark Resolved & Notify Network")}
                 </Button>

@@ -295,10 +295,10 @@ export default function MapPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="font-display text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 uppercase">
+            <h1 className="font-display text-3xl font-black tracking-tight text-foreground uppercase">
               {t("map.title")}
             </h1>
-            <p className="font-mono text-[9px] text-cyan-600 dark:text-cyan-500/60 uppercase tracking-[0.4em] mt-1 font-black flex items-center gap-2">
+            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.4em] mt-1 font-black flex items-center gap-2">
               <Signal className={`h-3 w-3 ${loading ? "animate-pulse text-cyan-500" : "text-emerald-500"}`} />
               {getStatusText()}
             </p>
@@ -308,7 +308,7 @@ export default function MapPage() {
             onClick={handleRefresh}
             variant="outline"
             disabled={loading}
-            className="liquid-glass border-cyan-500/20 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 font-mono text-[10px] tracking-widest uppercase h-10 px-6 rounded-xl"
+            className="rounded-xl border border-border text-foreground hover:bg-muted font-mono text-xs font-medium uppercase tracking-wider h-10 px-4 shadow-sm"
           >
             <RefreshCw className={`mr-2 h-3 w-3 ${loading ? "animate-spin" : ""}`} />
             Refresh Nearby Hospitals
@@ -319,7 +319,7 @@ export default function MapPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-[2rem] overflow-hidden border border-cyan-500/20 dark:border-cyan-500/10 shadow-2xl relative"
+          className="rounded-2xl overflow-hidden border border-border shadow-sm relative bg-card"
         >
           <div className="h-[300px] md:h-[550px] w-full relative" style={{ zIndex: 0 }}>
             <AnimatePresence>
@@ -335,7 +335,7 @@ export default function MapPage() {
                       <Hospital className="absolute inset-0 m-auto h-10 w-10 text-cyan-500 animate-pulse" />
                     </div>
                     <div className="space-y-3">
-                      <p className="font-mono text-[11px] text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.5em] font-black">
+                      <p className="font-mono text-[11px] text-teal-600 dark:text-teal-400 uppercase tracking-[0.5em] font-black">
                         {getStatusText()}
                       </p>
                       <div className="flex gap-2 justify-center">
@@ -387,8 +387,8 @@ export default function MapPage() {
         {/* Results */}
         <div className="space-y-4 pb-12">
           <div className="flex items-center justify-between">
-            <h2 className="font-mono text-[10px] text-cyan-700 dark:text-cyan-500/50 uppercase tracking-[0.5em] font-black flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-cyan-500" />
+            <h2 className="font-mono text-xs text-foreground uppercase tracking-wider font-bold flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-teal-500" />
               Real-time Discovery Feed ({hospitals.length})
             </h2>
             {discoveryState === "FALLBACK" && (
@@ -406,11 +406,11 @@ export default function MapPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="liquid-glass flex flex-col p-6 rounded-[2rem] border border-cyan-500/10 hover:border-cyan-500/30 transition-all group relative overflow-hidden"
+                className="bg-card flex flex-col p-5 rounded-2xl border border-border hover:border-primary/40 shadow-sm transition-all group relative overflow-hidden"
               >
                 <div className="flex items-start justify-between mb-5">
-                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center bg-cyan-500/5 border border-cyan-500/20 group-hover:scale-110 transition-transform">
-                    <Hospital className="h-7 w-7 text-cyan-600 dark:text-cyan-400" />
+                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center bg-teal-500/10 border border-teal-500/20 transition-transform group-hover:scale-105">
+                    <Hospital className="h-7 w-7 text-teal-600 dark:text-teal-400" />
                   </div>
                   <div className="text-right">
                     <p className="font-mono text-xs text-emerald-500 font-black">{h.distance?.toFixed(2)} KM</p>
@@ -419,13 +419,13 @@ export default function MapPage() {
                 </div>
                 
                 <div className="mb-8">
-                  <p className="font-mono text-sm font-black text-foreground uppercase truncate group-hover:text-cyan-500 transition-colors">{h.name}</p>
-                  <p className="font-mono text-[9px] text-cyan-600 dark:text-cyan-400/60 font-bold uppercase mt-1 tracking-wider">{h.type}</p>
+                  <p className="font-mono text-sm font-black text-foreground uppercase truncate group-hover:text-primary transition-colors">{h.name}</p>
+                  <p className="font-mono text-[9px] text-teal-600 dark:text-teal-400/60 font-bold uppercase mt-1 tracking-wider">{h.type}</p>
                 </div>
 
                 <a href={`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="w-full py-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 flex items-center justify-center gap-2 font-mono text-[10px] font-black text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 transition-all uppercase group-hover:border-cyan-500/40">
+                  className="w-full py-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 flex items-center justify-center gap-2 font-mono text-[10px] font-black text-teal-600 dark:text-teal-400 hover:bg-cyan-500/20 transition-all uppercase group-hover:border-cyan-500/40">
                   <Navigation className="h-3 w-3" />
                   Initiate Navigation
                 </a>
@@ -436,7 +436,7 @@ export default function MapPage() {
           {!loading && hospitals.length === 0 && discoveryState === "FALLBACK" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center rounded-[3rem] border-2 border-dashed border-cyan-500/10 bg-cyan-500/5">
               <AlertCircle className="h-16 w-16 text-cyan-500/20 mx-auto mb-6" />
-              <p className="font-mono text-base text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.4em] font-black">
+              <p className="font-mono text-base text-teal-600 dark:text-teal-400 uppercase tracking-[0.4em] font-black">
                 Zero Centers Detected
               </p>
               <p className="font-mono text-xs text-cyan-500/40 uppercase mt-3 px-10">No healthcare infrastructure localized within a 30KM operational radius.</p>

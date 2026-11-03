@@ -67,7 +67,7 @@ export default function GlassModal({
             initial={{ scale: 0.88, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.88, opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28, mass: 0.8 }}
+            transition={{ type: "spring", stiffness: 260, damping: 28 }}
           >
             {/* Glass card */}
             <div

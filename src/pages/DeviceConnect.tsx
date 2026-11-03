@@ -116,10 +116,10 @@ export default function DeviceConnect() {
   /* Glass section wrapper — light+dark aware */
   const GlassSection = ({ icon: Icon, title, badge, color = "cyan", children }: any) => {
     const c = {
-      cyan:  { iconCls: "text-cyan-600 dark:text-cyan-400",  titleCls: "text-cyan-700 dark:text-cyan-400",  borderCls: "border-cyan-500/20",  bgCls: "bg-cyan-500/5" },
+      cyan:  { iconCls: "text-teal-600 dark:text-teal-400",  titleCls: "text-teal-600 dark:text-teal-400",  borderCls: "border-border",  bgCls: "bg-muted/40" },
       blue:  { iconCls: "text-blue-600 dark:text-blue-400",  titleCls: "text-blue-700 dark:text-blue-400",  borderCls: "border-blue-500/20",  bgCls: "bg-blue-500/5" },
       teal:  { iconCls: "text-teal-600 dark:text-teal-400",  titleCls: "text-teal-700 dark:text-teal-400",  borderCls: "border-teal-500/20",  bgCls: "bg-teal-500/5" },
-    }[color as "cyan" | "blue" | "teal"] ?? { iconCls: "text-cyan-600 dark:text-cyan-400", titleCls: "text-cyan-700 dark:text-cyan-400", borderCls: "border-cyan-500/20", bgCls: "bg-cyan-500/5" };
+    }[color as "cyan" | "blue" | "teal"] ?? { iconCls: "text-cyan-600 dark:text-cyan-400", titleCls: "text-teal-600 dark:text-teal-400", borderCls: "border-border", bgCls: "bg-muted/40" };
     return (
       <div className={`liquid-glass rounded-2xl overflow-hidden border ${c.borderCls}`}>
         <div className={`flex items-center gap-2 px-4 py-3 border-b ${c.borderCls} ${c.bgCls}`}>
@@ -141,7 +141,7 @@ export default function DeviceConnect() {
   /* Glass button — light+dark aware */
   const GlassBtn = ({ onClick, disabled, children, variant = "cyan" }: any) => {
     const styles: Record<string, string> = {
-      cyan: "bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/20",
+      cyan: "bg-teal-500/10 border-border text-teal-600 dark:text-teal-400 hover:bg-cyan-500/20",
       blue: "bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400 hover:bg-blue-500/20",
       teal: "bg-teal-500/10 border-teal-500/30 text-teal-700 dark:text-teal-400 hover:bg-teal-500/20",
       red:  "bg-red-500/8 border-red-500/25 text-red-700 dark:text-red-400 hover:bg-red-500/15",
@@ -171,9 +171,9 @@ export default function DeviceConnect() {
           )}
 
           {/* Main card */}
-          <div className="liquid-glass rounded-2xl overflow-hidden border border-cyan-500/20 shadow-[0_0_40px_rgba(0,243,255,0.06)]">
+          <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
             {/* Cyan top glow line */}
-            <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+            
 
             <div className="p-7 space-y-5">
               {/* Header */}
@@ -181,11 +181,11 @@ export default function DeviceConnect() {
                 <motion.div
                   animate={(scanState === "SCANNING" || bleState === "PAIRING") ? { scale: [1, 1.1, 1] } : {}}
                   transition={{ duration: 1, repeat: Infinity }}
-                  className="mx-auto mb-4 h-16 w-16 rounded-2xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/25 shadow-[0_0_20px_rgba(0,243,255,0.1)]"
+                  className="mx-auto mb-4 h-14 w-14 rounded-2xl flex items-center justify-center bg-teal-500/10 border border-teal-500/20 shadow-sm"
                 >
                   <Smartphone className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
                 </motion.div>
-                <h1 className="font-display text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-400">
+                <h1 className="font-display text-xl font-black tracking-wide text-foreground uppercase">
                   {t("deviceConnect.title")}
                 </h1>
                 <p className="font-mono text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
@@ -196,7 +196,7 @@ export default function DeviceConnect() {
               {/* BLE Section */}
               <GlassSection icon={Bluetooth} title="Bluetooth BLE" badge="Recommended" color="cyan">
                 <p className="font-mono text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                  Direct connection. No WiFi needed. Requires <span className="text-cyan-700 dark:text-cyan-400 font-bold">Chrome</span>.
+                  Direct connection. No WiFi needed. Requires <span className="text-teal-600 dark:text-teal-400 font-bold">Chrome</span>.
                 </p>
                 <AnimatePresence mode="wait">
                   {bleState === "IDLE" && (
@@ -209,12 +209,12 @@ export default function DeviceConnect() {
                   )}
                   {bleState === "PAIRING" && (
                     <motion.div key="pairing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="flex flex-col items-center gap-3 py-4 rounded-xl text-center bg-cyan-500/5 border border-dashed border-cyan-500/20">
+                      className="flex flex-col items-center gap-3 py-4 rounded-xl text-center bg-muted/40 border border-dashed border-border">
                       <div className="relative h-7 w-7">
-                        <div className="absolute inset-0 rounded-full border-t-2 border-cyan-500 animate-spin" />
+                        <div className="absolute inset-0 rounded-full border-t-2 border-teal-500 animate-spin" />
                         <div className="absolute inset-1.5 rounded-full border-b border-blue-500 animate-spin" style={{ animationDirection: "reverse", animationDuration: "0.7s" }} />
                       </div>
-                      <p className="font-mono text-[10px] text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">Searching for ESP32...</p>
+                      <p className="font-mono text-[10px] text-teal-600 dark:text-teal-400 uppercase tracking-wider">Searching for ESP32...</p>
                       <p className="font-mono text-[9px] text-muted-foreground">Select your device in the browser popup</p>
                     </motion.div>
                   )}

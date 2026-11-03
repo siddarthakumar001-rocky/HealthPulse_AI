@@ -1,57 +1,59 @@
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
+
+  const getLabel = () => {
+    if (themeMode === "system") {
+      return `System (${theme === "dark" ? "Dark" : "Light"})`;
+    }
+    return themeMode === "dark" ? "Dark Mode" : "Light Mode";
+  };
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.92 }}
-      className="relative"
-    >
-      {/* Animated Glow Layer */}
-      <motion.div
-        className="absolute inset-0 rounded-full blur-md opacity-20 pointer-events-none"
-        animate={{
-          backgroundColor: theme === "light" ? "rgba(0, 0, 0, 0.4)" : "rgba(0, 243, 255, 0.8)",
-          scale: [1, 1.1, 1],
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-
-      <Button
-        variant="ghost"
-        size="icon"
+    <div className="relative inline-flex items-center">
+      <motion.button
+        type="button"
         onClick={toggleTheme}
-        className="relative rounded-full w-10 h-10 transition-all duration-300"
-        style={{
-          background: theme === "light" ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.05)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: theme === "light" ? "1px solid rgba(0, 0, 0, 0.1)" : "1px solid rgba(0, 243, 255, 0.2)",
-          boxShadow: theme === "light" ? "none" : "0 0 15px rgba(0, 243, 255, 0.1)",
-        }}
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.94 }}
+        title={`Theme: ${getLabel()} — Click to switch`}
+        aria-label={`Toggle theme, current is ${getLabel()}`}
+        className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={theme}
-            initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-            animate={{ rotate: 0, opacity: 1, scale: 1 }}
-            exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            key={themeMode}
+            initial={{ opacity: 0, rotate: -30, scale: 0.8 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: 30, scale: 0.8 }}
+            transition={{ duration: 0.18, ease: "easeInOut" }}
             className="flex items-center justify-center"
           >
-            {theme === "light" ? (
-              <Moon className="h-5 w-5 text-slate-800" />
+            {themeMode === "system" ? (
+              <Monitor className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            ) : theme === "dark" ? (
+              <Moon className="w-4 h-4 text-amber-300" />
             ) : (
-              <Sun className="h-5 w-5 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]" />
+              <Sun className="w-4 h-4 text-amber-500" />
             )}
           </motion.div>
         </AnimatePresence>
-      </Button>
-    </motion.div>
+
+        {/* Small Mode Pip Indicator */}
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white dark:border-slate-950 ${
+            themeMode === "system"
+              ? "bg-indigo-500"
+              : theme === "dark"
+              ? "bg-teal-400"
+              : "bg-amber-500"
+          }`}
+        />
+      </motion.button>
+    </div>
   );
 }

@@ -2,20 +2,62 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>HealthPulse AI</title>
-    <meta name="description" content="HealthPulse AI - The next-generation AI healthcare platform for real-time vitals tracking, personalized medical insights, and automated health intelligence." />
+    <meta name="description" content="HealthPulse AI - Dual-Horizon Clinical Intelligence Platform for Real-Time IoMT Vitals and Public Health Network Logistics." />
     <meta name="author" content="HealthPulse AI Intelligence" />
-    <meta name="theme-color" content="#050a14" />
+    <meta name="theme-color" id="meta-theme-color" content="#F8FAFC" />
 
-    <meta property="og:title" content="HealthPulse AI | Next-Gen Intelligence" />
-    <meta property="og:description" content="Real-time biometric tracking meets advanced neural analysis. Personalized health intelligence at your fingertips." />
+    <!-- Google Fonts: Inter, JetBrains Mono, and Indic Script fallbacks -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Prevent Theme Flash before first paint -->
+    <script>
+      (function() {
+        try {
+          var mode = localStorage.getItem('theme-mode') || localStorage.getItem('theme');
+          var isDark = false;
+          if (mode === 'dark') {
+            isDark = true;
+          } else if (mode === 'light') {
+            isDark = false;
+          } else {
+            // Default to system
+            isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          var root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+            root.classList.remove('light');
+            root.style.colorScheme = 'dark';
+            var meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', '#0B1220');
+          } else {
+            root.classList.add('light');
+            root.classList.remove('dark');
+            root.style.colorScheme = 'light';
+            var meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', '#F8FAFC');
+          }
+        } catch (e) {
+          console.error('[Theme Preload Error]', e);
+        }
+      })();
+    </script>
+
+    <meta property="og:title" content="HealthPulse AI | Dual-Horizon Health Intelligence" />
+    <meta property="og:description" content="Real-time 250 Hz IoMT telemetry meets predictive clinical digital twins and district public health logistics." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/og-preview.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@HealthPulseAI" />
-    <meta name="twitter:title" content="HealthPulse AI | Neural Health Platform" />
+    <meta name="twitter:title" content="HealthPulse AI | Clinical Intelligence Platform" />
   </head>
 
   <body>
@@ -27,8 +69,8 @@
         if (window.location.hostname === 'localhost') {
           // Only show overlay on local dev for productivity
           const div = document.createElement('div');
-          div.style = "position:fixed;bottom:20px;right:20px;z-index:99999;background:rgba(255,0,0,0.9);color:white;padding:15px;border-radius:12px;font-family:monospace;max-width:300px;font-size:10px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);box-shadow:0 10px 40px rgba(0,0,0,0.5)";
-          div.innerHTML = `<h4 style="margin:0 0 5px 0;color:#ffcccc">RUNTIME_${type}</h4><p style="margin:0;opacity:0.8">${err}</p>`;
+          div.style = "position:fixed;bottom:20px;right:20px;z-index:99999;background:rgba(220,38,38,0.92);color:white;padding:12px 16px;border-radius:10px;font-family:monospace;max-width:320px;font-size:11px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4)";
+          div.innerHTML = `<h4 style="margin:0 0 4px 0;color:#ffcccc;font-weight:bold">RUNTIME_${type}</h4><p style="margin:0;opacity:0.9">${err}</p>`;
           document.body.appendChild(div);
           setTimeout(() => div.remove(), 10000);
         }

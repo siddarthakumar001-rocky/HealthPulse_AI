@@ -104,7 +104,7 @@ export default function AiSuggestions() {
         <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
           <div className="relative">
             <div className="h-24 w-24 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
-            <Brain className="absolute inset-0 m-auto h-10 w-10 text-cyan-600 dark:text-cyan-400 animate-pulse" />
+            <Brain className="absolute inset-0 m-auto h-10 w-10 text-indigo-600 dark:text-indigo-400 animate-pulse" />
           </div>
           <div className="text-center space-y-1.5">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -138,24 +138,17 @@ export default function AiSuggestions() {
     <DashboardLayout>
       <div className="mx-auto max-w-6xl space-y-6 px-2 sm:px-4 pb-16">
         {/* Top Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border dark:border-cyan-500/20 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/dashboard")}
-              className="rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
+            
             <div>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-cyan-700 dark:text-cyan-400">
+                <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
                   {t("aiSuggestions.engineTitle", "AI Diagnostic & Remedy Engine")}
                 </span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300">
+              <h1 className="text-2xl md:text-3xl font-black text-foreground">
                 {t("aiSuggestions.pageTitle", "Health Analysis & Remedies")}
               </h1>
             </div>
@@ -166,7 +159,7 @@ export default function AiSuggestions() {
               variant="outline"
               size="sm"
               onClick={handleAnalyze}
-              className="rounded-full border-cyan-400/50 dark:border-cyan-500/40 text-cyan-800 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 text-xs bg-card dark:bg-slate-900 shadow-sm"
+              className="rounded-xl border border-border text-foreground hover:bg-muted text-xs font-mono font-medium shadow-sm"
             >
               <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
               {t("aiSuggestions.reAnalyze", "Re-Analyze Symptoms")}
@@ -178,7 +171,7 @@ export default function AiSuggestions() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Status Panel (Col 1) */}
           <div className="lg:col-span-1 space-y-4">
-            <Card className="bg-card/95 dark:bg-slate-900/80 border border-border dark:border-cyan-500/30 backdrop-blur-md relative overflow-hidden shadow-md dark:shadow-xl">
+            <Card className="bg-card border border-border shadow-sm rounded-2xl relative overflow-hidden">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <div
@@ -194,7 +187,7 @@ export default function AiSuggestions() {
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">{t("aiSuggestions.aiConfidence", "AI Confidence")}</p>
-                    <p className="text-base font-bold text-cyan-600 dark:text-cyan-400">{confidencePercent}%</p>
+                    <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">{confidencePercent}%</p>
                   </div>
                 </div>
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white">{t("aiSuggestions.aiHealthScore", "AI Health Score")}</CardTitle>
@@ -230,17 +223,17 @@ export default function AiSuggestions() {
             </Card>
 
             {/* Prakriti Dosha Card */}
-            <Card className="bg-card/95 dark:bg-slate-900/80 border border-border dark:border-cyan-500/30 overflow-hidden shadow-md dark:shadow-lg">
+            <Card className="bg-card border border-border shadow-sm rounded-2xl overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500" />
               <CardHeader className="py-3">
                 <CardTitle className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                  <Activity className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  <Activity className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                   {t("aiSuggestions.prakritiTitle", "Prakriti (Dosha Constitution)")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4 space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-cyan-500/15 flex items-center justify-center border border-cyan-500/30 text-lg font-bold text-cyan-700 dark:text-cyan-300">
+                  <div className="h-10 w-10 rounded-full bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30 text-lg font-bold text-cyan-700 dark:text-cyan-300">
                     {dominantDosha[0]}
                   </div>
                   <div>
@@ -263,10 +256,10 @@ export default function AiSuggestions() {
           <div className="lg:col-span-3 space-y-6">
             {/* User Reported Symptoms & Diagnostic Breakdown */}
             {reportedSymptoms.length > 0 && (
-              <Card className="bg-card/95 dark:bg-slate-900/80 border border-border dark:border-cyan-500/30 shadow-md dark:shadow-lg">
+              <Card className="bg-card border border-border shadow-sm rounded-2xl">
                 <CardHeader className="p-4 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <CardTitle className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Stethoscope className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                    <Stethoscope className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     {t("aiSuggestions.reportedSymptomsTitle", "User Reported Symptoms & Targeted Clinical Analysis")}
                   </CardTitle>
                 </CardHeader>
@@ -275,7 +268,7 @@ export default function AiSuggestions() {
                     {reportedSymptoms.map((sym: string, i: number) => (
                       <span
                         key={i}
-                        className="px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-500/30 text-xs font-medium"
+                        className="px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-foreground border border-cyan-200 dark:border-border text-xs font-medium"
                       >
                         ✓ {translateSymptom(sym, activeLang)}
                       </span>
@@ -290,7 +283,7 @@ export default function AiSuggestions() {
                             <span className="font-bold text-slate-800 dark:text-slate-200">
                               {translateCondition(p.condition, activeLang)}
                             </span>
-                            <span className="text-[10px] text-cyan-700 dark:text-cyan-400 font-mono font-bold">
+                            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-bold">
                               {translateMatch(activeLang)}: {Math.round((p.confidence || 0.9) * 100)}%
                             </span>
                           </div>
@@ -353,10 +346,10 @@ export default function AiSuggestions() {
             {/* Immediate Home Relief & Precautions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Home Remedies */}
-              <Card className="bg-card/95 dark:bg-slate-900/80 border border-border dark:border-cyan-500/20 shadow-md dark:shadow-lg">
+              <Card className="bg-card border border-border shadow-sm rounded-2xl">
                 <CardHeader className="p-4 pb-2 border-b border-slate-200 dark:border-slate-800">
-                  <CardTitle className="text-sm font-bold text-cyan-800 dark:text-cyan-300 flex items-center gap-2">
-                    <Home className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Home className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     {t("aiSuggestions.immediateHomeRelief", "Immediate Home Relief Measures")}
                   </CardTitle>
                 </CardHeader>
@@ -364,7 +357,7 @@ export default function AiSuggestions() {
                   {homeRemedies.length > 0 ? (
                     homeRemedies.map((hr: string, i: number) => (
                       <div key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                         <span>{translateAdvice(hr, activeLang)}</span>
                       </div>
                     ))

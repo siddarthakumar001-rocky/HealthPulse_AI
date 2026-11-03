@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/lib/auth";
-import { Bell, Moon, Sun, User, LogOut, Activity } from "lucide-react";
+import { Bell, Moon, Sun, User, LogOut, Activity, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -17,9 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
-import CursorTrail from "@/components/dashboard/CursorTrail";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import { AntiGravityBackground } from "@/components/AntiGravityBackground";
 import { useScrollFlow } from "@/hooks/useScrollFlow";
 import { useState } from "react";
 
@@ -30,6 +28,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const location = useLocation();
   const { isScrolled } = useScrollFlow(10);
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+
+  const handleBack = () => {
+    const hasHistory =
+      typeof window !== "undefined" &&
+      Boolean(window.history?.state && typeof window.history.state.idx === "number" && window.history.state.idx > 0);
+    if (hasHistory) {
+      navigate(-1);
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
   const addRipple = (e: React.MouseEvent) => {
     const id = Date.now();
@@ -51,8 +60,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           />
         ))}
 
-        <CursorTrail />
-        <AntiGravityBackground />
 
         <div className="min-h-screen flex w-full bg-background selection:bg-primary/20">
           <AppSidebar />
@@ -67,12 +74,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
               }}
             >
-              {/* Left: sidebar trigger */}
-              <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                <SidebarTrigger
-                  className="text-foreground/90 hover:text-primary transition-colors h-10 w-10 min-h-[44px] min-w-[44px]"
-                />
-              </motion.div>
+              {/* Left: sidebar trigger + contextual back button */}
+              <div className="flex items-center gap-2">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <SidebarTrigger
+                    className="text-foreground/90 hover:text-primary transition-colors h-10 w-10 min-h-[44px] min-w-[44px]"
+                  />
+                </motion.div>
+
+                {location.pathname !== "/dashboard" && location.pathname !== "/command" && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleBack}
+                      className="flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-xl text-xs font-mono font-medium tracking-wide text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-border/60 transition-colors"
+                      title="Go back"
+                      aria-label="Go back"
+                    >
+                      <ArrowLeft className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                      <span className="hidden sm:inline">Back</span>
+                    </Button>
+                  </motion.div>
+                )}
+              </div>
 
               {/* Right: actions */}
               <div className="flex items-center gap-1.5 sm:gap-3">

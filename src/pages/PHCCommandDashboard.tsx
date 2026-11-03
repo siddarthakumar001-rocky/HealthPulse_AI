@@ -59,7 +59,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 
 // Leaflet custom marker generator
 const createCustomMarker = (status: string) => {
-  let color = "#05D3B3"; // teal
+  let color = "#0D9488"; // teal
   if (status === "Warning") color = "#f59e0b"; // yellow
   else if (status === "Critical") color = "#ef4444"; // red
   else if (status === "Outbreak") color = "#a855f7"; // purple
@@ -124,9 +124,18 @@ const userLiveIcon = L.divIcon({
 function MapHelper({ facilities }: { facilities: PHCFacility[] }) {
   const map = useMap();
   useEffect(() => {
-    if (facilities.length > 0) {
-      const bounds = L.latLngBounds(facilities.map((f) => [f.latitude, f.longitude]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+    const valid = (facilities || []).filter(
+      (f) => typeof f?.latitude === "number" && !isNaN(f.latitude) && typeof f?.longitude === "number" && !isNaN(f.longitude)
+    );
+    if (valid.length > 0) {
+      try {
+        const bounds = L.latLngBounds(valid.map((f) => [f.latitude, f.longitude]));
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+        }
+      } catch (err) {
+        console.warn("MapHelper bounds error:", err);
+      }
     }
   }, [facilities, map]);
   return null;
@@ -136,7 +145,13 @@ function MapHelper({ facilities }: { facilities: PHCFacility[] }) {
 function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, zoom, { duration: 1.2 });
+    if (center && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
+      try {
+        map.flyTo(center, zoom, { duration: 1.2 });
+      } catch (err) {
+        console.warn("MapViewController flyTo error:", err);
+      }
+    }
   }, [center, zoom, map]);
   return null;
 }
@@ -282,14 +297,14 @@ export default function PHCCommandDashboard() {
       <div className="space-y-6 pb-16 max-w-7xl mx-auto">
         
         {/* ── HEADER STRIP (ANTIGRAVITY MEDICAL GLASS) ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-teal-500/20 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="mermaid-chip text-[11px] font-bold">
-                <Globe className="h-3.5 w-3.5 text-[#05D3B3]" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[10px] font-bold text-[11px] font-bold">
+                <Globe className="h-3.5 w-3.5 text-[#0D9488]" />
                 {t("phc.enterpriseCommandCenter", "Enterprise Command Center • Live GPS & Network Intelligence")}
               </span>
-              <span className="flex items-center gap-1 text-xs text-[#05D3B3] font-mono">
+              <span className="flex items-center gap-1 text-xs text-[#0D9488] font-mono">
                 <Radio className="h-3 w-3 animate-pulse" /> {t("phc.liveTelemetryFeed", "Live Telemetry Feed")}
               </span>
             </div>
@@ -307,9 +322,9 @@ export default function PHCCommandDashboard() {
               size="sm"
               onClick={captureUserLocation}
               disabled={locating}
-              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
+              className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
-              <LocateFixed className={`h-3.5 w-3.5 mr-1.5 ${locating ? "animate-spin text-[#05D3B3]" : ""}`} />
+              <LocateFixed className={`h-3.5 w-3.5 mr-1.5 ${locating ? "animate-spin text-[#0D9488]" : ""}`} />
               {locating ? t("phc.locating", "Locating...") : t("phc.locateNearMe", "Locate Near Me")}
             </Button>
             <Button
@@ -317,7 +332,7 @@ export default function PHCCommandDashboard() {
               size="sm"
               onClick={() => loadData(true)}
               disabled={refreshing}
-              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
+              className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
               <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
               {t("phc.syncNetwork", "Sync Network")}
@@ -325,7 +340,7 @@ export default function PHCCommandDashboard() {
             <Button
               size="sm"
               onClick={() => navigate("/phc-supply-chain")}
-              className="mermaid-btn text-xs font-bold uppercase tracking-wider h-10 px-4 rounded-2xl shadow-sm"
+              className="h-10 px-4 rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700"
             >
               <Pill className="h-3.5 w-3.5 mr-1.5" /> {t("phc.supplyChainHub", "Supply Chain Hub")}
             </Button>
@@ -334,10 +349,10 @@ export default function PHCCommandDashboard() {
 
         {/* ── TOP KPIS BENTO BANNER (MERMAID GLASS) ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm space-y-1">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.nearbyPHCs", "Nearby PHCs")}</span>
-              <Building className="h-4 w-4 text-[#05D3B3]" />
+              <Building className="h-4 w-4 text-[#0D9488]" />
             </div>
             <p className="text-2xl font-black font-mono text-foreground mt-1">
               {filteredFacilities.length} <span className="text-xs font-normal text-muted-foreground font-sans">{t("phc.centres", "Centres")}</span>
@@ -347,7 +362,7 @@ export default function PHCCommandDashboard() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm space-y-1">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.networkHealth", "Network Health")}</span>
               <ShieldCheck className="h-4 w-4 text-teal-500" />
@@ -360,7 +375,7 @@ export default function PHCCommandDashboard() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm space-y-1">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.criticalAlerts", "Critical Alerts")}</span>
               <AlertOctagon className="h-4 w-4 text-rose-500" />
@@ -373,7 +388,7 @@ export default function PHCCommandDashboard() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm space-y-1">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.stockoutRisk", "Stockout Risk")}</span>
               <Pill className="h-4 w-4 text-amber-500" />
@@ -386,7 +401,7 @@ export default function PHCCommandDashboard() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm space-y-1">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.outbreakSignals", "Outbreak Signals")}</span>
               <Activity className="h-4 w-4 text-purple-400" />
@@ -399,7 +414,7 @@ export default function PHCCommandDashboard() {
             </p>
           </div>
 
-          <div className="mermaid-glass p-4 rounded-3xl border border-teal-500/20 shadow-md space-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm space-y-1">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.coldChainRisk", "Cold Chain Risk")}</span>
               <Snowflake className="h-4 w-4 text-cyan-400" />
@@ -414,10 +429,10 @@ export default function PHCCommandDashboard() {
         </div>
 
         {/* ── REAL-TIME SCENARIO STRESS SIMULATOR (ANTIGRAVITY GLASS) ── */}
-        <div className="mermaid-glass p-6 rounded-[2rem] border border-teal-500/20 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-teal-500/15 pb-3">
+        <div className="bg-card border border-border shadow-sm rounded-xl p-6 rounded-2xl border border-border shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30 text-[#05D3B3]">
+              <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30 text-[#0D9488]">
                 <Cpu className="h-4 w-4" />
               </div>
               <h2 className="text-sm sm:text-base font-black text-foreground">
@@ -462,7 +477,7 @@ export default function PHCCommandDashboard() {
               size="sm"
               disabled={simulating}
               onClick={() => handleSimulate("PATIENT_SURGE")}
-              className="rounded-2xl border-teal-500/30 bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 text-xs font-bold h-9 shadow-sm"
+              className="rounded-2xl border-border bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 text-xs font-bold h-9 shadow-sm"
             >
               <Users className="h-3.5 w-3.5 mr-1.5 text-teal-400" /> {t("phc.simBedOverload", "Simulate Bed Overload")}
             </Button>
@@ -492,12 +507,12 @@ export default function PHCCommandDashboard() {
           
           {/* Interactive Geo-Map (2 cols) */}
           <div className="lg:col-span-2">
-            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl overflow-hidden flex flex-col">
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col">
               
-              <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-teal-500/15">
+              <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border">
                 <div>
                   <h3 className="text-base font-black text-foreground flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#05D3B3]" />
+                    <MapPin className="h-4 w-4 text-[#0D9488]" />
                     {t("phc.geospatialNetwork", "Live Geospatial Health Intelligence Network")}
                   </h3>
                   <p className="text-xs text-muted-foreground font-mono">
@@ -510,7 +525,7 @@ export default function PHCCommandDashboard() {
                   <select
                     value={districtFilter}
                     onChange={(e) => setDistrictFilter(e.target.value)}
-                    className="antigravity-input bg-card/80 border border-teal-500/30 rounded-2xl px-3 text-xs font-semibold h-9 text-foreground shadow-sm"
+                    className="antigravity-input bg-card/80 border border-border rounded-2xl px-3 text-xs font-semibold h-9 text-foreground shadow-sm"
                   >
                     <option value="NEAR_ME" className="bg-slate-900 text-white">📍 {t("phc.nearMyLiveGps", "Near My Live GPS (< 35 km)")}</option>
                     <option value="Bengaluru Urban" className="bg-slate-900 text-white">Bengaluru Urban (BBMP)</option>
@@ -518,18 +533,25 @@ export default function PHCCommandDashboard() {
                     <option value="ALL" className="bg-slate-900 text-white">{t("phc.allDistricts", "All Districts (Karnataka)")}</option>
                   </select>
 
-                  <div className="flex items-center gap-1 bg-card/80 p-1 rounded-2xl border border-teal-500/20">
+                  <div className="relative inline-flex items-center p-1 rounded-full bg-slate-100 dark:bg-slate-900 border border-border shadow-inner">
                     {["ALL", "OPTIMAL", "WARNING", "OUTBREAK"].map((st) => (
                       <button
                         key={st}
                         onClick={() => setStatusFilter(st)}
-                        className={`px-2.5 py-1 rounded-xl transition text-[10px] font-extrabold ${
+                        className={`relative z-10 px-3 py-1 rounded-full transition-colors text-[10px] font-mono font-extrabold tracking-wider uppercase select-none ${
                           statusFilter === st
-                            ? "bg-[#05D3B3] text-slate-950 shadow-sm"
+                            ? "text-white dark:text-slate-950 font-black"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
-                        {st}
+                        {statusFilter === st && (
+                          <motion.div
+                            layoutId="phc-status-pill"
+                            className="absolute inset-0 rounded-full bg-teal-600 dark:bg-teal-400 shadow-sm"
+                            transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                          />
+                        )}
+                        <span className="relative z-10">{st}</span>
                       </button>
                     ))}
                   </div>
@@ -582,7 +604,9 @@ export default function PHCCommandDashboard() {
                   )}
 
                   {/* PHC Facilities Markers */}
-                  {filteredFacilities.map((facility) => (
+                  {filteredFacilities
+                    .filter((facility) => Number.isFinite(facility?.latitude) && Number.isFinite(facility?.longitude))
+                    .map((facility) => (
                     <Marker
                       key={facility._id}
                       position={[facility.latitude, facility.longitude]}
@@ -635,7 +659,7 @@ export default function PHCCommandDashboard() {
                               setSelectedPHCId(facility._id);
                               setIsTwinOpen(true);
                             }}
-                            className="mermaid-btn w-full mt-2 text-xs font-bold h-7"
+                            className="w-full mt-2 text-xs font-bold h-7 rounded-lg bg-teal-600 text-white shadow-sm"
                           >
                             Open Digital Twin
                           </Button>
@@ -650,13 +674,13 @@ export default function PHCCommandDashboard() {
 
           {/* Connected Facilities List (1 col) */}
           <div className="space-y-3">
-            <div className="mermaid-glass rounded-[2rem] border border-teal-500/20 shadow-xl h-[545px] flex flex-col p-5">
-              <div className="flex items-center justify-between border-b border-teal-500/15 pb-3 mb-3">
+            <div className="bg-card rounded-2xl border border-border shadow-sm h-[545px] flex flex-col p-5">
+              <div className="flex items-center justify-between border-b border-border pb-3 mb-3">
                 <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-                  <Building className="h-4 w-4 text-[#05D3B3]" />
+                  <Building className="h-4 w-4 text-[#0D9488]" />
                   {t("phc.nearbyFacilities", "Nearby Facilities")} ({filteredFacilities.length})
                 </h3>
-                <span className="mermaid-chip text-[9px] font-bold">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[9px] font-bold">
                   Live GPS
                 </span>
               </div>
@@ -670,11 +694,11 @@ export default function PHCCommandDashboard() {
                       setIsTwinOpen(true);
                       setMapCenter([f.latitude, f.longitude]);
                     }}
-                    className="p-3.5 rounded-2xl bg-card/60 border border-teal-500/15 hover:border-teal-500/40 cursor-pointer transition flex flex-col gap-1.5 shadow-sm"
+                    className="p-3.5 rounded-2xl bg-card/60 border border-border hover:border-teal-500/40 cursor-pointer transition flex flex-col gap-1.5 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-bold text-xs text-foreground hover:text-[#05D3B3] transition">
+                        <p className="font-bold text-xs text-foreground hover:text-[#0D9488] transition">
                           {f.name}
                         </p>
                         <p className="text-[10px] text-muted-foreground font-mono">
@@ -698,7 +722,7 @@ export default function PHCCommandDashboard() {
                     <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono pt-1.5 border-t border-teal-500/10">
                       <span>{t("phc.beds", "Beds")}: {f.availableBeds} free</span>
                       {f.distanceKm !== null && (
-                        <span className="text-[#05D3B3] font-bold">{f.distanceKm} km {t("phc.away", "away")}</span>
+                        <span className="text-[#0D9488] font-bold">{f.distanceKm} km {t("phc.away", "away")}</span>
                       )}
                       <span className="text-teal-600 dark:text-teal-300 font-bold">Score: {f.networkHealthScore}</span>
                     </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-  LineChart,
   ShieldCheck,
   Cpu,
   Activity,
@@ -332,63 +331,7 @@ export default function ResearchEvaluation() {
           </TabsContent>
         </Tabs>
 
-        {/* Paper Figures Panels (Figure 5 to Figure 8) */}
-        <div className="space-y-4 pt-4 border-t border-border">
-          <div className="flex items-center gap-2">
-            <LineChart className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-bold">IEEE Paper Figure Placeholders (Figures 5–8)</h3>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="border-border/60 bg-card/60">
-              <CardHeader className="p-3 pb-2">
-                <CardTitle className="text-xs font-bold">Figure 5: CSDI Reconstruction under Dropout</CardTitle>
-                <CardDescription className="text-[11px]">Observed vs Missing vs Imputed segments</CardDescription>
-              </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <div className="h-28 rounded-lg border border-dashed border-border/80 flex items-center justify-center bg-muted/20 text-xs text-muted-foreground italic">
-                  Experiment pending — no validated result available.
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/60 bg-card/60">
-              <CardHeader className="p-3 pb-2">
-                <CardTitle className="text-xs font-bold">Figure 6: Activity Recognition Confusion Matrix</CardTitle>
-                <CardDescription className="text-[11px]">5-class IMU classification performance</CardDescription>
-              </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <div className="h-28 rounded-lg border border-dashed border-border/80 flex items-center justify-center bg-muted/20 text-xs text-muted-foreground italic">
-                  Experiment pending — no validated result available.
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/60 bg-card/60">
-              <CardHeader className="p-3 pb-2">
-                <CardTitle className="text-xs font-bold">Figure 7: Context-Aware Alert Escalation Behavior</CardTitle>
-                <CardDescription className="text-[11px]">Static Threshold vs Context Sentinel Triage</CardDescription>
-              </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <div className="h-28 rounded-lg border border-dashed border-border/80 flex items-center justify-center bg-muted/20 text-xs text-muted-foreground italic">
-                  Experiment pending — no validated result available.
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/60 bg-card/60">
-              <CardHeader className="p-3 pb-2">
-                <CardTitle className="text-xs font-bold">Figure 8: Ablation Study Comparison (A1 to A4)</CardTitle>
-                <CardDescription className="text-[11px]">Systematic ablation performance breakdown</CardDescription>
-              </CardHeader>
-              <CardContent className="p-3 pt-0">
-                <div className="h-28 rounded-lg border border-dashed border-border/80 flex items-center justify-center bg-muted/20 text-xs text-muted-foreground italic">
-                  Experiment pending — no validated result available.
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
     </DashboardLayout>
   );

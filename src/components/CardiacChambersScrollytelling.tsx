@@ -439,10 +439,11 @@ export default function CardiacChambersScrollytelling() {
   return (
     <section
       ref={containerRef}
-      className="relative h-[220vh] w-full transition-colors duration-300 touch-pan-y"
+      id="heart-scrollytelling"
+      className="relative lg:h-[400vh] min-h-screen w-full transition-colors duration-300 touch-pan-y"
     >
       {/* ── STICKY VIEWPORT CONTAINER ── */}
-      <div className="sticky top-20 z-20 min-h-[calc(100dvh-5rem)] max-h-[calc(100dvh-5rem)] w-full overflow-y-auto lg:overflow-hidden flex flex-col justify-between py-2 sm:py-3 px-3 sm:px-8 max-w-7xl mx-auto touch-pan-y">
+      <div className="sticky top-16 sm:top-20 z-20 h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-5rem)] w-full flex flex-col justify-between py-2 sm:py-3 px-3 sm:px-8 max-w-7xl mx-auto touch-pan-y">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-200/80 dark:border-white/10 pb-1.5 sm:pb-2 shrink-0">
@@ -710,7 +711,7 @@ export default function CardiacChambersScrollytelling() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="p-5 xl:p-6 rounded-[2rem] bg-white/90 dark:bg-[#0D131A]/95 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-2xl space-y-3"
               >
                 {/* Header Tag & Feature Tier */}

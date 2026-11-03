@@ -1,57 +1,72 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 export function AntiGravityBackground() {
-  const { scrollYProgress } = useScroll();
-
-  // Scroll parallax transforms for depth separation
-  const yOrb1 = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const yOrb2 = useTransform(scrollYProgress, [0, 1], [0, -190]);
-  const yOrb3 = useTransform(scrollYProgress, [0, 1], [0, 110]);
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
-      {/* ── MERMAID GLASS HYDRO BACKGROUND PARTICLES & CAUSTICS ── */}
-
-      {/* Orb 1: Radiant Seafoam & Mermaid Aqua */}
+      {/* Light/Dark Adaptive Soft Ambient Orbs */}
       <motion.div
-        className="absolute -top-24 -left-20 w-[480px] h-[480px] rounded-full opacity-60 dark:opacity-35 filter blur-[95px]"
+        className="absolute -top-20 -left-20 w-[420px] h-[420px] rounded-full opacity-35 dark:opacity-25 filter blur-[80px] will-change-transform"
         style={{
-          y: yOrb1,
-          background: "radial-gradient(circle, #05D3B3 0%, #06D6A0 40%, #2DD4BF 70%, transparent 100%)",
+          background: "radial-gradient(circle, #38BDF8 0%, #0284C7 70%, transparent 100%)",
         }}
-        animate={{
-          x: [0, 50, -30, 0],
-          scale: [1, 1.08, 0.94, 1],
-        }}
-        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        animate={
+          shouldReduceMotion
+            ? { x: 0, y: 0, scale: 1 }
+            : {
+                x: [0, 40, -20, 0],
+                y: [0, 40, 10, 0],
+                scale: [1, 1.05, 0.95, 1],
+              }
+        }
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { duration: 18, repeat: Infinity, ease: "easeInOut" }
+        }
       />
 
-      {/* Orb 2: Deep Ocean Cyan & Emerald Hydro Marine */}
       <motion.div
-        className="absolute top-1/4 -right-24 w-[540px] h-[540px] rounded-full opacity-50 dark:opacity-30 filter blur-[110px]"
+        className="absolute top-1/3 -right-20 w-[460px] h-[460px] rounded-full opacity-30 dark:opacity-20 filter blur-[90px] will-change-transform"
         style={{
-          y: yOrb2,
-          background: "radial-gradient(circle, #0D9488 0%, #0891B2 45%, #0EA5E9 75%, transparent 100%)",
+          background: "radial-gradient(circle, #818CF8 0%, #4F46E5 70%, transparent 100%)",
         }}
-        animate={{
-          x: [0, -60, 40, 0],
-          scale: [1, 0.92, 1.06, 1],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        animate={
+          shouldReduceMotion
+            ? { x: 0, y: 0, scale: 1 }
+            : {
+                x: [0, -40, 20, 0],
+                y: [0, -30, 20, 0],
+                scale: [1, 0.95, 1.05, 1],
+              }
+        }
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { duration: 22, repeat: Infinity, ease: "easeInOut" }
+        }
       />
 
-      {/* Orb 3: Luminous Mint Droplet Caustic Shimmer */}
       <motion.div
-        className="absolute -bottom-28 left-1/3 w-[500px] h-[500px] rounded-full opacity-45 dark:opacity-25 filter blur-[100px]"
+        className="absolute -bottom-20 left-1/4 w-[420px] h-[420px] rounded-full opacity-30 dark:opacity-20 filter blur-[85px] will-change-transform"
         style={{
-          y: yOrb3,
-          background: "radial-gradient(circle, #34D399 0%, #10B981 50%, #A7F3D0 80%, transparent 100%)",
+          background: "radial-gradient(circle, #34D399 0%, #059669 70%, transparent 100%)",
         }}
-        animate={{
-          x: [0, 45, -45, 0],
-          scale: [1, 1.05, 0.95, 1],
-        }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        animate={
+          shouldReduceMotion
+            ? { x: 0, y: 0, scale: 1 }
+            : {
+                x: [0, 30, -30, 0],
+                y: [0, -20, 30, 0],
+                scale: [1, 1.04, 0.96, 1],
+              }
+        }
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { duration: 20, repeat: Infinity, ease: "easeInOut" }
+        }
       />
     </div>
   );

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function LiquidCursor() {
   const { theme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
+  const [isPointerDevice, setIsPointerDevice] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
   const mouseX = useMotionValue(-100);
@@ -15,6 +17,18 @@ export default function LiquidCursor() {
   const cursorY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Guard: Only mount for precision pointer devices with hover capability
+    const mql = window.matchMedia("(pointer: fine) and (hover: hover)");
+    setIsPointerDevice(mql.matches);
+
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setIsPointerDevice(e.matches);
+    };
+
+    mql.addEventListener("change", handleMediaChange);
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -22,13 +36,13 @@ export default function LiquidCursor() {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const isInteractive = 
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
-        target.closest('button') || 
-        target.closest('a') ||
-        target.classList.contains('cursor-pointer');
-      
+      const isInteractive =
+        target.tagName === "BUTTON" ||
+        target.tagName === "A" ||
+        target.closest("button") ||
+        target.closest("a") ||
+        target.classList.contains("cursor-pointer");
+
       setIsHovering(!!isInteractive);
     };
 
@@ -36,13 +50,19 @@ export default function LiquidCursor() {
     window.addEventListener("mouseover", handleMouseOver);
 
     return () => {
+      mql.removeEventListener("change", handleMediaChange);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseover", handleMouseOver);
     };
   }, [mouseX, mouseY]);
 
-  const color = theme === "dark" ? "rgba(229, 93, 66, 0.9)" : "rgba(227, 83, 54, 0.85)";
-  const glowColor = theme === "dark" ? "rgba(229, 93, 66, 0.35)" : "rgba(227, 83, 54, 0.2)";
+  // If touch device or reduced motion is requested, do not render custom cursor
+  if (!isPointerDevice || shouldReduceMotion) {
+    return null;
+  }
+
+  const color = theme === "dark" ? "rgba(13, 148, 136, 0.9)" : "rgba(15, 118, 110, 0.85)";
+  const glowColor = theme === "dark" ? "rgba(45, 212, 191, 0.35)" : "rgba(13, 148, 136, 0.2)";
 
   return (
     <>
@@ -53,7 +73,7 @@ export default function LiquidCursor() {
           }
         `}
       </style>
-      
+
       {/* Outer Glow Layer */}
       <motion.div
         className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[9999] rounded-full blur-[6px]"
@@ -70,15 +90,15 @@ export default function LiquidCursor() {
 
       {/* Inner Dot */}
       <motion.div
-        className="fixed top-0 left-0 w-1.5 h-1.5 pointer-events-none z-[10000] rounded-full"
+        className="fixed top-0 left-0 w-2 h-2 pointer-events-none z-[10000] rounded-full"
         style={{
           x: cursorX,
           y: cursorY,
           translateX: "-50%",
           translateY: "-50%",
           backgroundColor: color,
-          scale: isHovering ? 2 : 1,
-          boxShadow: theme === "dark" ? "0 0 10px rgba(0, 243, 255, 1)" : "none",
+          scale: isHovering ? 1.8 : 1,
+          boxShadow: theme === "dark" ? "0 0 10px rgba(45, 212, 191, 0.8)" : "none",
         }}
       />
     </>

@@ -166,11 +166,11 @@ export default function AIEpidemicSurge() {
     <DashboardLayout>
       <div className="space-y-6 pb-12">
         {/* Header Strip in AntiGravity Style */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-teal-500/20 pb-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-5">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="mermaid-chip text-[11px] font-bold">
-                <BrainCircuit className="h-3.5 w-3.5 text-[#05D3B3]" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-border text-teal-700 dark:text-teal-300 font-mono text-[10px] font-bold text-[11px] font-bold">
+                <BrainCircuit className="h-3.5 w-3.5 text-[#0D9488]" />
                 {t("phc.predictiveEngine", "PREDICTIVE AI ENGINE")}
               </span>
               <span className="text-xs text-muted-foreground font-mono">
@@ -193,7 +193,7 @@ export default function AIEpidemicSurge() {
             <select
               value={selectedPHCId}
               onChange={(e) => handleSelectPHC(e.target.value)}
-              className="antigravity-input bg-card/80 border border-teal-500/30 rounded-2xl px-3.5 py-2 text-xs font-semibold text-foreground h-10 min-w-[200px] shadow-sm backdrop-blur-md"
+              className="antigravity-input bg-card/80 border border-border rounded-2xl px-3.5 py-2 text-xs font-semibold text-foreground h-10 min-w-[200px] shadow-sm backdrop-blur-md"
             >
               {facilities.map((f) => (
                 <option key={f._id} value={f._id} className="bg-slate-900 text-white">
@@ -207,7 +207,7 @@ export default function AIEpidemicSurge() {
               size="sm"
               onClick={() => fetchPredictions(selectedPHCId)}
               disabled={loading}
-              className="border-teal-500/30 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
+              className="border-border text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 rounded-2xl text-xs h-10 px-4 font-bold shadow-sm"
             >
               <RefreshCw className={`h-3.5 w-3.5 mr-2 ${loading ? "animate-spin" : ""}`} />
               {t("phc.recalculate", "Recalculate")}
@@ -218,7 +218,7 @@ export default function AIEpidemicSurge() {
         {/* Prediction KPI Bento Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Daily Footfall */}
-          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl shadow-lg border border-border space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.currentDailyFootfall", "Current Daily Footfall")}</span>
               <Users className="h-4 w-4 text-teal-500" />
@@ -235,10 +235,10 @@ export default function AIEpidemicSurge() {
           </div>
 
           {/* Card 2: 7-Day Forecast */}
-          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl shadow-lg border border-border space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.forecastAverage", "7-Day Forecast Average")}</span>
-              <TrendingUp className="h-4 w-4 text-[#05D3B3]" />
+              <TrendingUp className="h-4 w-4 text-[#0D9488]" />
             </div>
             <p className="text-3xl font-black font-mono text-teal-600 dark:text-teal-300 mt-2">
               {footfallForecast?.sevenDayForecastAvg || 135}{" "}
@@ -253,7 +253,7 @@ export default function AIEpidemicSurge() {
           </div>
 
           {/* Card 3: Surge Risk Level */}
-          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl shadow-lg border border-border space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.surgeRiskLevel", "Surge Risk Level")}</span>
               <Flame className="h-4 w-4 text-amber-500" />
@@ -280,7 +280,7 @@ export default function AIEpidemicSurge() {
           </div>
 
           {/* Card 4: At-Risk Stockouts */}
-          <div className="mermaid-glass p-5 rounded-3xl shadow-lg border border-teal-500/20 space-y-1">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-5 rounded-2xl shadow-lg border border-border space-y-1">
             <div className="flex items-center justify-between text-xs font-mono font-bold text-muted-foreground uppercase">
               <span>{t("phc.atRiskStockouts", "At-Risk Stockouts")}</span>
               <Pill className="h-4 w-4 text-amber-500" />
@@ -299,7 +299,7 @@ export default function AIEpidemicSurge() {
 
         {/* Epidemic Surge Early Warnings Radar */}
         {outbreakSignals.length > 0 && (
-          <div className="mermaid-glass p-6 rounded-3xl border border-rose-500/40 shadow-xl space-y-4">
+          <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-rose-500/40 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-rose-500/25 pb-3">
               <div className="flex items-center gap-2">
                 <Flame className="h-5 w-5 text-rose-500 animate-pulse" />
@@ -343,11 +343,11 @@ export default function AIEpidemicSurge() {
         )}
 
         {/* Forecast Chart: Historical vs Predicted vs Confidence Range */}
-        <div className="mermaid-glass p-6 rounded-3xl border border-teal-500/25 shadow-xl space-y-4">
+        <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-teal-500/15 pb-3">
             <div>
               <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <ChartIcon className="h-4 w-4 text-[#05D3B3]" />
+                <ChartIcon className="h-4 w-4 text-[#0D9488]" />
                 {t(
                   "phc.footfallTrajectory",
                   "7-Day Projected Patient Footfall Trajectory & Confidence Interval"
@@ -365,8 +365,8 @@ export default function AIEpidemicSurge() {
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
                 {t("phc.historical", "Historical")}
               </span>
-              <span className="flex items-center gap-1.5 text-[#05D3B3]">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#05D3B3]" />
+              <span className="flex items-center gap-1.5 text-[#0D9488]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0D9488]" />
                 {t("phc.predicted", "Predicted")}
               </span>
               <span className="flex items-center gap-1.5 text-indigo-400">
@@ -381,8 +381,8 @@ export default function AIEpidemicSurge() {
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="confidenceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#05D3B3" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#05D3B3" stopOpacity={0.02} />
+                    <stop offset="5%" stopColor="#0D9488" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#0D9488" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(45, 212, 191, 0.15)" />
@@ -391,7 +391,7 @@ export default function AIEpidemicSurge() {
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "rgba(6, 18, 21, 0.95)",
-                    borderColor: "#05D3B3",
+                    borderColor: "#0D9488",
                     borderRadius: "16px",
                     fontSize: "12px",
                     boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
@@ -424,9 +424,9 @@ export default function AIEpidemicSurge() {
                 <Line
                   type="monotone"
                   dataKey="projected"
-                  stroke="#05D3B3"
+                  stroke="#0D9488"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: "#05D3B3" }}
+                  dot={{ r: 4, fill: "#0D9488" }}
                   name={t("phc.aiProjected", "AI Projected")}
                 />
               </AreaChart>
@@ -435,10 +435,10 @@ export default function AIEpidemicSurge() {
         </div>
 
         {/* Medicine Demand Forecast Matrix */}
-        <div className="mermaid-glass p-6 rounded-3xl border border-teal-500/25 shadow-xl space-y-4">
+        <div className="bg-card border border-border shadow-sm rounded-2xl p-6 rounded-2xl border border-border shadow-xl space-y-4">
           <div className="border-b border-teal-500/15 pb-3">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Pill className="h-4 w-4 text-[#05D3B3]" />
+              <Pill className="h-4 w-4 text-[#0D9488]" />
               {t("phc.medicineDemandForecastTitle", "Medicine Demand Forecast & Estimated Depletion Windows")}
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -447,7 +447,7 @@ export default function AIEpidemicSurge() {
           </div>
           <div className="overflow-x-auto rounded-2xl border border-teal-500/15">
             <table className="w-full text-xs text-left">
-              <thead className="bg-card/80 text-muted-foreground border-b border-teal-500/20 font-mono uppercase">
+              <thead className="bg-card/80 text-muted-foreground border-b border-border font-mono uppercase">
                 <tr>
                   <th className="p-3.5">{t("phc.colMedicineName", "Medicine Name")}</th>
                   <th className="p-3.5">{t("phc.colCurrentStock", "Current Stock")}</th>

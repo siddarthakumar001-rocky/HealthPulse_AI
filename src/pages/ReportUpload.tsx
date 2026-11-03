@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -70,6 +71,8 @@ const DataRow = ({ label, value, icon: Icon, t }: { label: string; value: any; i
 );
 
 export default function ReportUpload() {
+  const [activeMainTab, setActiveMainTab] = useState("onboarding");
+  const [activeRemedyTab, setActiveRemedyTab] = useState("medical");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -332,20 +335,20 @@ export default function ReportUpload() {
         </div>
 
         <Tabs defaultValue="onboarding" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 p-1 rounded-2xl">
-            <TabsTrigger value="onboarding" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-premium">
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-full shadow-inner">
+            <TabsTrigger value="onboarding" className="flex items-center gap-2 rounded-full font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-teal-600 dark:data-[state=active]:bg-teal-400 data-[state=active]:text-white dark:data-[state=active]:text-slate-950 transition-colors">
               <User className="h-4 w-4" />
               <span>{t('reports.tabProfile')}</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-premium">
+            <TabsTrigger value="reports" className="flex items-center gap-2 rounded-full font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-teal-600 dark:data-[state=active]:bg-teal-400 data-[state=active]:text-white dark:data-[state=active]:text-slate-950 transition-colors">
               <ClipboardList className="h-4 w-4" />
               <span>{t('reports.tabReports')}</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="onboarding" className="mt-0">
-            <Card className="overflow-hidden border-none shadow-premium bg-background/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/30 px-6 py-4">
+            <Card className="overflow-hidden border border-border shadow-sm bg-card rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-muted/40 px-6 py-4">
                 <div className="flex items-center gap-3">
                   <Activity className="h-5 w-5 text-primary" />
                   <div>
@@ -708,8 +711,8 @@ export default function ReportUpload() {
           </TabsContent>
 
           <TabsContent value="reports" className="mt-0 space-y-6">
-            <Card className="border-none shadow-premium bg-background/50 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="border-b bg-muted/30 px-6 py-6">
+            <Card className="border border-border shadow-sm bg-card rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border bg-muted/40 px-6 py-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="flex items-center gap-3">
                     <Upload className="h-6 w-6 text-primary" />
@@ -725,7 +728,7 @@ export default function ReportUpload() {
                   <div className="space-y-8">
                     {pdfUrl ? (
                       <div className="space-y-4">
-                        <div className="flex justify-between items-center bg-primary/5 p-4 rounded-3xl border border-primary/10">
+                        <div className="flex justify-between items-center bg-primary/5 p-4 rounded-2xl border border-primary/10">
                           <div className="flex items-center gap-3">
                             <FileText className="h-5 w-5 text-primary" />
                             <h3 className="font-bold text-base">Uploaded Document</h3>
@@ -734,10 +737,10 @@ export default function ReportUpload() {
                             <Upload className="h-3 w-3 mr-2" /> Upload Another
                           </Button>
                         </div>
-                        <iframe src={pdfUrl} className="w-full h-full min-h-[700px] border-2 border-primary/20 rounded-3xl bg-white shadow-premium" />
+                        <iframe src={pdfUrl} className="w-full h-full min-h-[700px] border-2 border-primary/20 rounded-2xl bg-white shadow-premium" />
                       </div>
                     ) : (
-                      <div className="group relative border-2 border-dashed border-primary/20 rounded-3xl p-12 text-center hover:border-primary/40 transition-all bg-primary/5 cursor-pointer">
+                      <div className="group relative border-2 border-dashed border-border hover:border-primary/50 rounded-2xl p-10 text-center hover:bg-muted/30 transition-all bg-muted/15 cursor-pointer">
                         <input type="file" onChange={onFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept=".pdf,image/*" disabled={uploadLoading} />
                         <div className="space-y-4 pointer-events-none">
                           <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -757,7 +760,7 @@ export default function ReportUpload() {
                       <div className="grid grid-cols-2 gap-4">
                         <Button
                           variant="outline"
-                          className="h-auto p-6 rounded-3xl border-2 border-primary/10 hover:border-primary/30 bg-background flex flex-col items-center gap-3 text-center transition-all group"
+                          className="h-auto p-5 rounded-2xl border border-border hover:border-primary/40 bg-card hover:bg-muted/30 flex flex-col items-center gap-3 text-center transition-all group shadow-sm"
                           onClick={() => document.getElementById('report-upload-input')?.click()}
                         >
                           <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -772,7 +775,7 @@ export default function ReportUpload() {
 
                         <Button
                           variant="outline"
-                          className="h-auto p-6 rounded-3xl border-2 border-primary/10 hover:border-primary/30 bg-background flex flex-col items-center gap-3 text-center transition-all group"
+                          className="h-auto p-5 rounded-2xl border border-border hover:border-primary/40 bg-card hover:bg-muted/30 flex flex-col items-center gap-3 text-center transition-all group shadow-sm"
                           onClick={() => setIsSkinModalOpen(true)}
                         >
                           <div className="h-12 w-12 rounded-2xl bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
@@ -786,7 +789,7 @@ export default function ReportUpload() {
 
                         <Button
                           variant="outline"
-                          className="h-auto p-6 rounded-3xl border-2 border-indigo-500/10 hover:border-indigo-500/30 bg-background flex flex-col items-center gap-3 text-center transition-all group"
+                          className="h-auto p-6 rounded-2xl border-2 border-indigo-500/10 hover:border-indigo-500/30 bg-background flex flex-col items-center gap-3 text-center transition-all group"
                           onClick={() => setIsDoctorModalOpen(true)}
                         >
                           <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
@@ -799,7 +802,7 @@ export default function ReportUpload() {
                         </Button>
 
                         <Button
-                          className="h-auto p-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 hover:scale-[1.02] transition-all flex flex-col items-center gap-3 text-center shadow-premium group"
+                          className="h-auto p-6 rounded-2xl bg-gradient-to-br from-primary to-primary/80 hover:scale-[1.02] transition-all flex flex-col items-center gap-3 text-center shadow-premium group"
                           onClick={handleFullAIAnalysis}
                           disabled={analyzingHealth}
                         >
@@ -822,7 +825,7 @@ export default function ReportUpload() {
                       <div className="flex items-center justify-between">
                         <Label className="text-base font-bold text-primary">{t('reports.manualEntry')}</Label>
                       </div>
-                      <div className="grid grid-cols-1 gap-4 bg-muted/30 p-6 rounded-3xl border border-muted/50">
+                      <div className="grid grid-cols-1 gap-4 bg-muted/30 p-6 rounded-2xl border border-muted/50">
                         <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase tracking-widest opacity-60">{t('reports.hemo')}</Label>
                           <Input
@@ -941,7 +944,7 @@ export default function ReportUpload() {
                           </h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {reportAnalysis.parameters?.filter((p: any) => p.parameter_name || p.test_name).map((param: any, idx: number) => (
-                              <div key={idx} className="bg-background border-2 border-muted/50 p-5 rounded-3xl hover:border-primary/20 transition-all group">
+                              <div key={idx} className="bg-background border-2 border-muted/50 p-5 rounded-2xl hover:border-primary/20 transition-all group">
                                 <div className="flex items-center justify-between mb-3">
                                   <span className="font-bold text-xs text-muted-foreground truncate max-w-[120px]">{param.parameter_name || param.test_name}</span>
                                   <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${param.status === 'normal' ? 'bg-green-100 text-green-700' :
@@ -968,7 +971,7 @@ export default function ReportUpload() {
                             </h4>
                             <div className="space-y-4">
                               {reportAnalysis.predictions.map((pred: any, i: number) => (
-                                <div key={i} className="bg-background p-6 rounded-3xl border border-primary/10 shadow-sm">
+                                <div key={i} className="bg-background p-6 rounded-2xl border border-primary/10 shadow-sm">
                                   <div className="flex items-center justify-between mb-2">
                                     <span className="font-bold text-lg text-foreground">{pred.condition}</span>
                                     <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black ${pred.confidence === 'High' ? 'bg-red-100 text-red-700' :
@@ -1003,7 +1006,7 @@ export default function ReportUpload() {
                                 {reportAnalysis.skin_analysis.severity}
                               </span>
                             </div>
-                            <div className="bg-background p-6 rounded-3xl border border-orange-100 shadow-sm space-y-4">
+                            <div className="bg-background p-6 rounded-2xl border border-orange-100 shadow-sm space-y-4">
                               <div className="flex items-baseline gap-2">
                                 <span className="font-black text-2xl text-orange-900">{reportAnalysis.skin_analysis.condition}</span>
                                 <span className="text-xs font-bold text-orange-600 opacity-60">Detected condition</span>
@@ -1039,10 +1042,10 @@ export default function ReportUpload() {
                               AI Doctor Recommendations
                             </h4>
                             <Tabs defaultValue="medical" className="w-full">
-                              <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-2xl h-12">
-                                <TabsTrigger value="medical" className="rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all font-bold text-xs">Medical</TabsTrigger>
-                                <TabsTrigger value="ayurvedic" className="rounded-xl data-[state=active]:bg-green-500 data-[state=active]:text-white transition-all font-bold text-xs">Ayurvedic</TabsTrigger>
-                                <TabsTrigger value="lifestyle" className="rounded-xl data-[state=active]:bg-purple-500 data-[state=active]:text-white transition-all font-bold text-xs">Lifestyle</TabsTrigger>
+                              <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-full h-12">
+                                <TabsTrigger value="medical" className="rounded-full data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all font-bold text-xs">Medical</TabsTrigger>
+                                <TabsTrigger value="ayurvedic" className="rounded-full data-[state=active]:bg-green-500 data-[state=active]:text-white transition-all font-bold text-xs">Ayurvedic</TabsTrigger>
+                                <TabsTrigger value="lifestyle" className="rounded-full data-[state=active]:bg-purple-500 data-[state=active]:text-white transition-all font-bold text-xs">Lifestyle</TabsTrigger>
                               </TabsList>
 
                               <TabsContent value="medical" className="mt-4">
@@ -1104,8 +1107,8 @@ export default function ReportUpload() {
                         )}
                       </div>
                     ) : (
-                      <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-muted/20 rounded-3xl border border-dashed border-muted/50 opacity-60">
-                        <div className="h-20 w-20 rounded-3xl bg-background flex items-center justify-center mb-6 shadow-sm">
+                      <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-muted/20 rounded-2xl border border-dashed border-muted/50 opacity-60">
+                        <div className="h-20 w-20 rounded-2xl bg-background flex items-center justify-center mb-6 shadow-sm">
                           <FileText className="h-10 w-10 text-muted-foreground opacity-30" />
                         </div>
                         <h3 className="font-bold text-xl mb-2">{t('reports.analysisTitle')}</h3>
@@ -1135,7 +1138,7 @@ export default function ReportUpload() {
             </DialogHeader>
 
             <div className="p-8 space-y-6 bg-background">
-              <div className="border-2 border-dashed border-orange-200 rounded-3xl p-12 text-center bg-orange-50/30 group hover:border-orange-400 transition-all cursor-pointer relative">
+              <div className="border-2 border-dashed border-orange-200 rounded-2xl p-12 text-center bg-orange-50/30 group hover:border-orange-400 transition-all cursor-pointer relative">
                 <input
                   type="file"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
