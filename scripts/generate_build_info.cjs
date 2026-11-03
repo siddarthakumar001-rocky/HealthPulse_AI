@@ -48,3 +48,4 @@ if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
 fs.writeFileSync(path.join(outputDir, 'buildInfo.json'), JSON.stringify(buildInfo, null, 2), 'utf8');
 console.log('Build info generated successfully at src/config/buildInfo.json');
+

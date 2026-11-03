@@ -94,3 +94,4 @@ export async function sanitizeAndCompressImage(file: File): Promise<ProcessedIma
     reader.readAsDataURL(file);
   });
 }
+
