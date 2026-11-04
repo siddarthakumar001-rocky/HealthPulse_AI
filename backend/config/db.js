@@ -17,7 +17,31 @@ const connectDB = async () => {
     return mongoose.connection;
   }
 
-  const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || process.env.MONGOD_URI || 'mongodb://127.0.0.1:27017/healthDB';
+  const resolveMongoUri = () => {
+    const rawCandidates = [
+      process.env.MONGODB_URI,
+      process.env.MONGO_URI,
+      process.env.MONGOD_URI
+    ];
+
+    for (const raw of rawCandidates) {
+      if (!raw) continue;
+      let s = String(raw).trim();
+      // Strip accidental variable name prefix if copied whole line into Render / cloud dashboard
+      s = s.replace(/^(MONGODB_URI|MONGO_URI|MONGOD_URI)\s*=\s*/i, '').trim();
+      // Strip surrounding quotes if wrapped in single or double quotes
+      if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+        s = s.slice(1, -1).trim();
+      }
+      if (s.startsWith('mongodb://') || s.startsWith('mongodb+srv://')) {
+        return s;
+      }
+    }
+
+    return 'mongodb://127.0.0.1:27017/healthDB';
+  };
+
+  const mongoUri = resolveMongoUri();
 
   const options = {
     useNewUrlParser: true,
