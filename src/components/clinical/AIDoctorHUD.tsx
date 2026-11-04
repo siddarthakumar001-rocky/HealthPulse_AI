@@ -560,36 +560,8 @@ export function AIDoctorHUD() {
             </Label>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Camera / Image Upload */}
-            <label
-              htmlFor="clinical-image-upload"
-              className="h-10 w-10 rounded-2xl bg-muted border border-border hover:border-teal-500/40 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors shadow-sm shrink-0"
-              title="Upload image (skin rash, lesion, eye, prescription)"
-            >
-              <Camera className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-              <input
-                id="clinical-image-upload"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
-            </label>
-
-            {/* Microphone Voice Dictation */}
-            <Button
-              type="button"
-              variant={isListening ? "default" : "outline"}
-              size="icon"
-              onClick={toggleVoiceInput}
-              className={`h-10 w-10 rounded-2xl shrink-0 ${isListening ? "bg-red-600 hover:bg-red-700 animate-pulse text-white" : ""}`}
-              title={isListening ? "Listening... click to stop" : "Speak your symptoms"}
-            >
-              {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-            </Button>
-
-            {/* Text Input */}
+          <div className="rounded-2xl border border-border bg-card p-3 shadow-xs focus-within:ring-2 focus-within:ring-teal-500/30 focus-within:border-teal-500 transition-all space-y-2">
+            {/* The Text Input */}
             <Textarea
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
@@ -599,21 +571,58 @@ export function AIDoctorHUD() {
                   handleSendMessage();
                 }
               }}
-              placeholder="Describe symptoms, ask about lab tests, or speak with microphone..."
-              className="flex-1 min-w-0 min-h-[42px] max-h-32 resize-none rounded-2xl bg-card border-border text-xs focus-visible:ring-1 focus-visible:ring-teal-500 py-2.5 px-3"
-              rows={1}
+              placeholder="Type your symptoms, medications, or medical questions here (e.g., 'I have fever and persistent dry cough for 2 days')..."
+              className="w-full resize-none border-0 bg-transparent p-1 text-xs sm:text-sm focus-visible:ring-0 shadow-none min-h-[54px] max-h-36 text-foreground placeholder:text-muted-foreground"
+              rows={2}
             />
 
-            {/* Send Button */}
-            <Button
-              type="button"
-              onClick={handleSendMessage}
-              disabled={loading || (!inputMessage.trim() && !selectedImage)}
-              className="h-10 px-3 sm:px-4 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shrink-0 flex items-center justify-center gap-1.5"
-            >
-              <Send className="w-4 h-4" />
-              <span className="hidden sm:inline">Send</span>
-            </Button>
+            {/* Bottom Actions Row: Modalities + Send */}
+            <div className="flex items-center justify-between pt-2 border-t border-border/40 gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Camera / Image Upload */}
+                <label
+                  htmlFor="clinical-image-upload"
+                  className="h-8 px-2.5 rounded-xl bg-muted/80 border border-border hover:border-teal-500/40 hover:bg-muted flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground transition-colors shadow-xs text-xs font-medium shrink-0"
+                  title="Upload clinical image (skin rash, lesion, eye, prescription)"
+                >
+                  <Camera className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                  <span className="text-[11px] font-semibold">Image</span>
+                  <input
+                    id="clinical-image-upload"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                </label>
+
+                {/* Microphone Voice Dictation */}
+                <Button
+                  type="button"
+                  variant={isListening ? "default" : "outline"}
+                  size="sm"
+                  onClick={toggleVoiceInput}
+                  className={`h-8 px-2.5 rounded-xl text-xs font-medium gap-1.5 shrink-0 ${
+                    isListening ? "bg-red-600 hover:bg-red-700 animate-pulse text-white" : "bg-muted/80 text-muted-foreground hover:text-foreground"
+                  }`}
+                  title={isListening ? "Listening... click to stop" : "Speak your symptoms"}
+                >
+                  {isListening ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
+                  <span className="text-[11px] font-semibold">{isListening ? "Listening..." : "Voice"}</span>
+                </Button>
+              </div>
+
+              {/* Send Button */}
+              <Button
+                type="button"
+                onClick={handleSendMessage}
+                disabled={loading || (!inputMessage.trim() && !selectedImage)}
+                className="h-8 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs shrink-0 flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              >
+                <span>Send</span>
+                <Send className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
