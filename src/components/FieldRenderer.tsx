@@ -19,6 +19,13 @@ interface FieldRendererProps {
 export function FieldRenderer({ field, value, onChange, data }: FieldRendererProps) {
   const { t } = useTranslation();
 
+  // Safe translation helper returning strictly string to satisfy React children & SelectItem typings
+  const tr = (key?: string, fallback?: string): string => {
+    if (!key) return fallback || "";
+    const res = t(key, fallback || key);
+    return typeof res === "string" ? res : (fallback || key);
+  };
+
   // Evaluate condition if present
   if (field.condition && !field.condition(data)) {
     return null;
@@ -31,7 +38,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
           <Input
             value={value || ""}
             onChange={(e) => onChange(field.key, e.target.value)}
-            placeholder={field.placeholder ? t(field.placeholder, field.placeholder) : ""}
+            placeholder={tr(field.placeholder)}
             className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-teal-600 focus:ring-teal-600/20 h-11 rounded-xl min-h-[44px] shadow-sm font-medium"
           />
         );
@@ -41,7 +48,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
           <Textarea
             value={value || ""}
             onChange={(e) => onChange(field.key, e.target.value)}
-            placeholder={field.placeholder ? t(field.placeholder, field.placeholder) : ""}
+            placeholder={tr(field.placeholder)}
             className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-teal-600 focus:ring-teal-600/20 rounded-xl min-h-[80px] shadow-sm font-medium"
           />
         );
@@ -52,7 +59,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
             type="number"
             value={value || ""}
             onChange={(e) => onChange(field.key, e.target.value)}
-            placeholder={field.placeholder ? t(field.placeholder, field.placeholder) : ""}
+            placeholder={tr(field.placeholder)}
             className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-teal-600 focus:ring-teal-600/20 h-11 rounded-xl min-h-[44px] shadow-sm font-medium"
           />
         );
@@ -61,7 +68,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
         return (
           <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/70 p-3.5 min-h-[48px] shadow-sm">
             <Label className="text-sm font-bold text-slate-800 dark:text-slate-100 cursor-pointer select-none">
-              {field.label ? t(field.label) : ""}
+              {tr(field.label)}
             </Label>
             <Switch checked={value || false} onCheckedChange={(v) => onChange(field.key, v)} />
           </div>
@@ -72,12 +79,12 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
           <div className="space-y-2 w-full">
             {field.label && (
               <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                {t(field.label)}
+                {tr(field.label)}
               </Label>
             )}
             <Select value={value || ""} onValueChange={(v) => onChange(field.key, v)}>
               <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 h-11 rounded-xl min-h-[44px] shadow-sm font-medium">
-                <SelectValue placeholder={t("common.select", "Select")} />
+                <SelectValue placeholder={tr("common.select", "Select")} />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-h-60 shadow-xl z-[200]">
                 {field.options?.map((opt: any) => {
@@ -85,7 +92,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
                   const lbl = typeof opt === "string" || typeof opt === "number" ? String(opt) : opt.label;
                   return (
                     <SelectItem key={val} value={val} className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-slate-900 dark:text-slate-100">
-                      {t(lbl, lbl)}
+                      {tr(lbl)}
                     </SelectItem>
                   );
                 })}
@@ -100,7 +107,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
           <div className="space-y-2 w-full">
             {field.label && (
               <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                {t(field.label)}
+                {tr(field.label)}
               </Label>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -131,7 +138,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
                     >
                       {isChecked && <Check className="h-2.5 w-2.5 stroke-[3]" />}
                     </div>
-                    <span className="text-xs sm:text-sm">{t(lbl, lbl)}</span>
+                    <span className="text-xs sm:text-sm">{tr(lbl)}</span>
                   </button>
                 );
               })}
@@ -143,7 +150,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
         return (
           <div className="space-y-2 w-full">
             <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
-              {t(field.label)}: {value ? value[0] : 0}h
+              {tr(field.label)}: {value ? value[0] : 0}h
             </Label>
             <Slider value={value || [0]} onValueChange={(v) => onChange(field.key, v)} min={1} max={14} step={0.5} className="py-2" />
           </div>
@@ -154,7 +161,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
           <div className="space-y-2 w-full">
             {field.label && (
               <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                {t(field.label)}
+                {tr(field.label)}
               </Label>
             )}
             <Input
@@ -186,7 +193,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
     <div className="space-y-2 w-full">
       {field.label && (
         <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
-          {t(field.label)}
+          {tr(field.label)}
         </Label>
       )}
       {renderField()}
