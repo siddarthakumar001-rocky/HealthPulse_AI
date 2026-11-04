@@ -41,7 +41,11 @@ const connectDB = async () => {
     return 'mongodb://127.0.0.1:27017/healthDB';
   };
 
-  const mongoUri = resolveMongoUri();
+  let mongoUri = resolveMongoUri();
+  if (mongoUri.includes('mongodb+srv://') && !mongoUri.includes('authSource=')) {
+    const sep = mongoUri.includes('?') ? '&' : '?';
+    mongoUri = `${mongoUri}${sep}authSource=admin`;
+  }
 
   const options = {
     useNewUrlParser: true,
@@ -53,7 +57,8 @@ const connectDB = async () => {
     minPoolSize: parseInt(process.env.DB_MIN_POOL_SIZE, 10) || 5,
     maxIdleTimeMS: 30000,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    authSource: 'admin'
   };
 
   try {
