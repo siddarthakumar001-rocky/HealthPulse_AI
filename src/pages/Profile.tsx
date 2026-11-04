@@ -608,8 +608,8 @@ export default function Profile() {
                       </h3>
                     </div>
 
-                    {/* Opt-in toggle: ONLY available for non-male profiles */}
-                    {!isMale && (
+                    {/* Opt-in toggle: ONLY available for documented female profiles */}
+                    {isFemale && (
                       <button
                         type="button"
                         onClick={() => setTrackMenstrual(!trackMenstrual)}

@@ -21,7 +21,7 @@ const GITHUB_OWNER = "siddarthakumar001-rocky";
 const GITHUB_REPO = "HealthPulse_AI";
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
 const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases`;
-const DEFAULT_WEBSITE_URL = "https://healthpulse-ai.vercel.app";
+const DEFAULT_WEBSITE_URL = typeof window !== "undefined" ? window.location.origin : "https://pulse-ai-gamma.vercel.app";
 
 /**
  * Compare two semver strings (e.g., "1.0.1" > "1.0.0")

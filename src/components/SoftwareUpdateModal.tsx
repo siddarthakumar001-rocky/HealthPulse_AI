@@ -299,13 +299,13 @@ export function SoftwareUpdateModal({
             </a>
 
             <a
-              href="https://healthpulse-ai.vercel.app"
+              href={typeof window !== "undefined" ? window.location.origin : "https://pulse-ai-gamma.vercel.app"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <Globe className="w-3.5 h-3.5" />
-              <span>Project Website</span>
+              <span>HealthPulse AI Portal</span>
               <ExternalLink className="w-2.5 h-2.5" />
             </a>
           </div>

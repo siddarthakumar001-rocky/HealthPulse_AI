@@ -34,6 +34,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AIDoctorHUD } from "@/components/clinical/AIDoctorHUD";
 import { SpecialistConsultDirectory } from "@/components/clinical/SpecialistConsultDirectory";
+import { BMICalculator } from "@/components/clinical/BMICalculator";
+import { Scale } from "lucide-react";
 import { PhoneCall } from "lucide-react";
 import {
   translateSymptom,
@@ -56,7 +58,7 @@ export default function AiSuggestions() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"ai_doctor" | "specialists" | "remedies">("ai_doctor");
+  const [activeTab, setActiveTab] = useState<"ai_doctor" | "bmi_analyzer" | "specialists" | "remedies">("ai_doctor");
 
   const fetchLatestAnalysis = async () => {
     try {
@@ -128,6 +130,7 @@ export default function AiSuggestions() {
           <div className="relative inline-flex items-center p-1 sm:p-1.5 rounded-full bg-card/90 border border-border shadow-md shrink-0">
             {[
               { id: "ai_doctor", shortLabel: "AI Doctor", label: t("aiSuggestions.tabAiDoctor", "AI Doctor Consultation"), icon: Stethoscope },
+              { id: "bmi_analyzer", shortLabel: "BMI & Body", label: "BMI & Body Health", icon: Scale },
               { id: "specialists", shortLabel: "Specialists", label: t("aiSuggestions.tabSpecialists", "Specialist Directory"), icon: PhoneCall },
               { id: "remedies", shortLabel: "Remedies", label: t("aiSuggestions.tabRemedies", "Baseline & Remedies"), icon: Activity },
             ].map((tab) => {
@@ -162,6 +165,9 @@ export default function AiSuggestions() {
 
         {/* Tab 1: AI Doctor Multimodal HUD */}
         {activeTab === "ai_doctor" && <AIDoctorHUD />}
+
+        {/* Tab: Clinical BMI & Body Health Analyzer */}
+        {activeTab === "bmi_analyzer" && <BMICalculator />}
 
         {/* Tab 2: Verified Specialist & Telemedicine Directory */}
         {activeTab === "specialists" && <SpecialistConsultDirectory />}
