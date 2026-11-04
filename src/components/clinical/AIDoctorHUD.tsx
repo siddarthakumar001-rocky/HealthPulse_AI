@@ -583,7 +583,7 @@ export function AIDoctorHUD() {
                 {/* Camera / Image Upload */}
                 <label
                   htmlFor="clinical-image-upload"
-                  className="h-8 px-2.5 rounded-xl bg-muted/80 border border-border hover:border-teal-500/40 hover:bg-muted flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground transition-colors shadow-xs text-xs font-medium shrink-0"
+                  className="w-auto h-8 px-2.5 rounded-xl bg-muted/80 border border-border hover:border-teal-500/40 hover:bg-muted flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground transition-colors shadow-xs text-xs font-medium shrink-0"
                   title="Upload clinical image (skin rash, lesion, eye, prescription)"
                 >
                   <Camera className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
@@ -618,7 +618,7 @@ export function AIDoctorHUD() {
                 type="button"
                 onClick={handleSendMessage}
                 disabled={loading || (!inputMessage.trim() && !selectedImage)}
-                className="h-8 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs shrink-0 flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                className="w-auto h-8 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs shrink-0 inline-flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 <span>Send</span>
                 <Send className="w-3.5 h-3.5" />
