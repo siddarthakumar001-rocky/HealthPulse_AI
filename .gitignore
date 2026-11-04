@@ -37,3 +37,6 @@ target/
 *.class
 *.jar
 *.war
+
+# Scratch scripts
+scratch/
