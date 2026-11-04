@@ -360,25 +360,25 @@ export default function EmergencyIntelligence() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-foreground/90 pl-12 leading-relaxed">{translateAlertDesc(al.description)}</p>
+                  <p className="text-xs text-foreground/90 sm:pl-12 pl-0 leading-relaxed">{translateAlertDesc(al.description)}</p>
 
                   {al.recommendedAction && (
-                    <div className="ml-12 p-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-xs text-teal-600 dark:text-teal-300 font-mono">
+                    <div className="sm:ml-12 ml-0 p-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-xs text-teal-600 dark:text-teal-300 font-mono">
                       ↳ {t("phc.proactiveAction", "AI Recommended Action")}: {translateAlertAction(al.recommendedAction)}
                     </div>
                   )}
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-teal-500/10 ml-12 text-[11px]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-teal-500/10 sm:ml-12 ml-0 text-[11px]">
                     <span className="text-muted-foreground font-mono">
                       {t("phc.confidence", "AI Confidence")}: <strong className="text-foreground">{al.aiConfidence}%</strong> • {t("phc.detected", "Detected")}: {new Date(al.createdAt).toLocaleString()}
                     </span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
                       {al.status === "Detected" && (
                         <Button
                           size="sm"
                           onClick={() => handleAcknowledge(al._id)}
-                          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-8 px-3 rounded-xl shadow-sm"
+                          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-sm justify-center w-full sm:w-auto"
                         >
                           {t("phc.acknowledgeIncident", "Acknowledge Incident")}
                         </Button>
@@ -390,9 +390,9 @@ export default function EmergencyIntelligence() {
                             setSelectedAlert(al);
                             setResolveModalOpen(true);
                           }}
-                          className="rounded-xl bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-teal-700 text-xs font-bold h-8 px-3 rounded-xl shadow-sm"
+                          className="bg-teal-600 hover:bg-teal-700 text-white dark:text-slate-950 font-bold uppercase text-xs tracking-wider h-9 px-3.5 rounded-xl shadow-sm justify-center w-full sm:w-auto"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {t("phc.markAsResolved", "Mark as Resolved")}
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1 shrink-0" /> {t("phc.markAsResolved", "Mark as Resolved")}
                         </Button>
                       )}
                     </div>

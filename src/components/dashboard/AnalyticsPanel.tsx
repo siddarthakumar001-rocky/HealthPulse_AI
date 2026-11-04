@@ -28,27 +28,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 /* ── Live ECG Waveform Canvas ────────────────────────────────── */
 function LiveECGWaveform() {
-  const [offset, setOffset] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setOffset(prev => (prev + 2) % 400), 30);
-    return () => clearInterval(interval);
-  }, []);
-
-  const generateECGPath = () => {
-    const points: string[] = [];
-    const w = 800;
-    for (let x = 0; x < w; x += 1) {
-      const pos = (x + offset * 2) % 200;
-      let y = 50;
-      if (pos > 60 && pos < 65) y = 50 - Math.sin((pos - 60) / 5 * Math.PI) * 8;
-      else if (pos > 70 && pos < 73) y = 50 - 35;
-      else if (pos > 73 && pos < 76) y = 50 + 15;
-      else if (pos > 76 && pos < 82) y = 50 - Math.sin((pos - 76) / 6 * Math.PI) * 5;
-      else if (pos > 90 && pos < 100) y = 50 - Math.sin((pos - 90) / 10 * Math.PI) * 10;
-      points.push(`${x},${y}`);
-    }
-    return `M ${points.join(" L ")}`;
-  };
+  // Precomputed repeating clinical P-Q-R-S-T wave segment (200px width), repeated for GPU-accelerated seamless scrolling
+  const ecgSegment = (start) => `M ${start},50 L ${start + 60},50 L ${start + 62.5},42 L ${start + 65},50 L ${start + 70},50 L ${start + 71.5},15 L ${start + 74.5},65 L ${start + 76},50 L ${start + 79},45 L ${start + 82},50 L ${start + 90},50 L ${start + 95},40 L ${start + 100},50 L ${start + 200},50`;
+  const fullPath = [0, 200, 400, 600, 800, 1000].map(ecgSegment).join(" ");
 
   return (
     <div className="w-full h-24 overflow-hidden relative">
@@ -60,16 +42,17 @@ function LiveECGWaveform() {
         {Array.from({ length: 5 }, (_, i) => (
           <line key={`hg-${i}`} x1="0" y1={i * 25} x2="800" y2={i * 25} className="stroke-slate-200 dark:stroke-[rgba(0,229,255,0.05)]" strokeWidth="0.5" />
         ))}
-        {/* ECG line */}
-        <path d={generateECGPath()} fill="none" stroke="#0ea5e9" className="dark:stroke-[#00E5FF]" strokeWidth="2"
-          style={{ filter: "drop-shadow(0 0 6px rgba(14,165,233,0.5))" }} />
-        {/* Glow underneath */}
-        <path d={generateECGPath()} fill="none" stroke="#0ea5e9" className="dark:stroke-[#00E5FF]" strokeWidth="4" opacity="0.15"
-          style={{ filter: "blur(4px)" }} />
+        {/* Hardware GPU-accelerated ECG line */}
+        <g style={{ animation: "ecgScroll 2.8s linear infinite" }}>
+          <path d={fullPath} fill="none" stroke="#0ea5e9" className="dark:stroke-[#00E5FF]" strokeWidth="2"
+            style={{ filter: "drop-shadow(0 0 6px rgba(14,165,233,0.5))" }} />
+          <path d={fullPath} fill="none" stroke="#0ea5e9" className="dark:stroke-[#00E5FF]" strokeWidth="4" opacity="0.15"
+            style={{ filter: "blur(4px)" }} />
+        </g>
       </svg>
       {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white dark:from-[#050816] to-transparent opacity-80" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white dark:from-[#050816] to-transparent opacity-80" />
+      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white dark:from-[#050816] to-transparent opacity-80 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white dark:from-[#050816] to-transparent opacity-80 pointer-events-none" />
     </div>
   );
 }

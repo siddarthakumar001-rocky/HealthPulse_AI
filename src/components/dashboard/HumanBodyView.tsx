@@ -77,15 +77,7 @@ function FloatingLabels() {
 export default function HumanBodyView({ heartRate, fingerPresent, status, painAreas = [] }: HumanBodyViewProps) {
   const isPulsing = status === 'connected' && heartRate > 0;
   const pulseDuration = heartRate > 0 ? 60 / heartRate : 1;
-  const [scanY, setScanY] = useState(0);
-
-  // Scan line animation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setScanY(prev => (prev >= 250 ? 0 : prev + 1));
-    }, 20);
-    return () => clearInterval(interval);
-  }, []);
+  // Scan line is GPU hardware-accelerated via CSS motion without CPU setInterval
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] flex items-center justify-center overflow-hidden rounded-3xl mermaid-glass border border-teal-400/35 shadow-2xl"

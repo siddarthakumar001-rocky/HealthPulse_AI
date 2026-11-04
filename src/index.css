@@ -396,3 +396,12 @@
     color: #2DD4BF !important;
   }
 }
+
+@keyframes ecgScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-200px);
+  }
+}

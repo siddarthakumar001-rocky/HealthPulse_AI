@@ -1,7 +1,7 @@
 {
   "name": "healthpulse-ai",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run backend:dev\" \"vite\"",

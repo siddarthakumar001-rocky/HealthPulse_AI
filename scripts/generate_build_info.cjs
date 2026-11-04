@@ -24,8 +24,8 @@ if (targetPath) {
 
 const buildInfo = {
   packageName: 'com.healthpulse.app',
-  versionName: '1.0.0',
-  versionCode: 1,
+  versionName: '1.1.0',
+  versionCode: 2,
   buildTimestamp: new Date().toISOString(),
   apkFileName: 'app-release.apk',
   fileSize: fileSizeFormatted,

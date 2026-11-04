@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ArrowUpCircle,
   ArrowLeft,
+  X,
   Globe,
   Github,
   Calendar,
@@ -65,7 +66,6 @@ export function SoftwareUpdateModal({
 
   const handleDownload = () => {
     setDownloading(true);
-    // Direct local package download to guarantee 100% reliability with no 404
     const downloadUrl = "/app-release.apk";
     updateService.downloadAndInstall(downloadUrl);
     setTimeout(() => setDownloading(false), 2500);
@@ -78,40 +78,65 @@ export function SoftwareUpdateModal({
   };
 
   const isNative = updateService.isNativePlatform();
+  const installedVersion = buildInfo.versionName || CURRENT_APP_VERSION;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl p-0 overflow-hidden bg-card/95 border border-border backdrop-blur-2xl rounded-3xl shadow-2xl text-foreground">
+      <DialogContent className="w-[95vw] sm:max-w-xl max-h-[88dvh] sm:max-h-[86vh] flex flex-col p-0 overflow-hidden bg-card/98 border border-border backdrop-blur-2xl rounded-3xl shadow-2xl text-foreground my-auto">
         
-        {/* Header Strip */}
-        <div className="relative p-4 sm:p-6 bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border-b border-border/60">
-                    {/* Top Actions: Small Round Back Button & Re-check */}
-          <div className="flex items-center justify-between mb-2 sm:mb-3">
+        {/* Sticky Fixed Top Navigation Bar (Always Visible on Mobile & Desktop) */}
+        <div className="sticky top-0 z-30 shrink-0 bg-card/98 backdrop-blur-md px-3.5 py-3 sm:px-6 sm:py-3.5 border-b border-border/80 flex items-center justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="h-8 px-2.5 sm:px-3 rounded-full border border-border/80 bg-background/80 hover:bg-muted text-foreground flex items-center gap-1.5 shadow-xs text-xs font-semibold shrink-0 cursor-pointer active:scale-95 transition-transform"
+            title="Go Back"
+            aria-label="Go Back"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+            <span className="font-bold">Back</span>
+          </Button>
+
+          <div className="text-center px-2 flex-1 min-w-0">
+            <span className="text-xs sm:text-sm font-extrabold tracking-tight text-foreground truncate block">
+              HealthPulse Updates
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
             <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={performCheck}
+              disabled={checking}
+              className="h-8 w-8 rounded-full border border-border/60 hover:bg-muted text-foreground flex items-center justify-center p-0 cursor-pointer"
+              title="Re-check for updates"
+              aria-label="Re-check for updates"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${checking ? "animate-spin text-teal-500" : ""}`} />
+            </Button>
+            <Button
+              type="button"
               variant="outline"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-border/80 bg-background/90 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs flex items-center justify-center p-0 shrink-0 transition-transform active:scale-95"
-              title="Go Back"
-              aria-label="Go Back"
+              className="h-8 w-8 rounded-full border border-border/80 bg-background/80 hover:bg-muted text-foreground flex items-center justify-center p-0 cursor-pointer active:scale-95 transition-transform"
+              title="Close modal"
+              aria-label="Close modal"
             >
-              <ArrowLeft className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={performCheck}
-              disabled={checking}
-              className="h-8 px-2.5 rounded-full text-xs font-mono border border-border/60 hover:bg-muted flex items-center gap-1.5"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${checking ? "animate-spin text-teal-500" : ""}`} />
-              <span className="hidden xs:inline sm:inline">{checking ? "Checking..." : "Re-check"}</span>
+              <X className="w-4 h-4 text-slate-500 hover:text-foreground" />
             </Button>
           </div>
+        </div>
 
-          {/* Title Row: Center-aligned on Mobile, Left-aligned on Desktop */}
-          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-2 sm:gap-3.5">
+        {/* Modal Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs overscroll-contain">
+          
+          {/* Hero Banner Header */}
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border border-border/80">
             <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-md shrink-0 mx-auto sm:mx-0">
               <ArrowUpCircle className="w-7 h-7" />
             </div>
@@ -125,8 +150,8 @@ export function SoftwareUpdateModal({
                     Update Ready
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-[9px] sm:text-[10px] font-mono border-border text-muted-foreground">
-                    v{CURRENT_APP_VERSION}
+                  <Badge variant="outline" className="text-[9px] sm:text-[10px] font-mono border-border text-muted-foreground font-bold">
+                    v{installedVersion}
                   </Badge>
                 )}
               </div>
@@ -137,13 +162,13 @@ export function SoftwareUpdateModal({
           </div>
 
           {/* Build Telemetry Banner */}
-          <div className="grid grid-cols-3 gap-2 mt-4 p-2.5 sm:p-3 rounded-2xl bg-background/80 border border-border/80 shadow-inner font-mono text-center">
+          <div className="grid grid-cols-3 gap-2 p-2.5 sm:p-3 rounded-2xl bg-background/80 border border-border/80 shadow-inner font-mono text-center">
             <div className="px-1">
               <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground block truncate">
                 Installed
               </span>
               <span className="text-xs sm:text-sm font-bold text-foreground">
-                v{CURRENT_APP_VERSION}
+                v{installedVersion}
               </span>
             </div>
             <div className="px-1 border-x border-border/60">
@@ -151,7 +176,7 @@ export function SoftwareUpdateModal({
                 Latest
               </span>
               <span className="text-xs sm:text-sm font-bold text-teal-600 dark:text-teal-400">
-                v{releaseInfo?.latestVersion || CURRENT_APP_VERSION}
+                v{releaseInfo?.latestVersion || installedVersion}
               </span>
             </div>
             <div className="px-1">
@@ -163,17 +188,13 @@ export function SoftwareUpdateModal({
               </span>
             </div>
           </div>
-        </div>
 
-        {/* Modal Body */}
-        <div className="p-4 sm:p-6 space-y-4 max-h-[65vh] overflow-y-auto text-xs">
-          
           {/* Download Action */}
           <div className="space-y-2">
             <Button
               onClick={handleDownload}
               disabled={downloading}
-              className="w-full h-11 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2"
+              className="w-full h-11 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-98"
             >
               <Download className={`w-4 h-4 ${downloading ? "animate-bounce" : ""}`} />
               {downloading ? "Initiating Download..." : "Download Release APK (app-release.apk)"}
@@ -194,7 +215,7 @@ export function SoftwareUpdateModal({
               <button
                 type="button"
                 onClick={() => copyToClipboard(buildInfo.sha256Checksum, "hash")}
-                className="text-[10px] font-mono text-teal-600 dark:text-teal-400 flex items-center gap-1 hover:underline"
+                className="text-[10px] font-mono text-teal-600 dark:text-teal-400 flex items-center gap-1 hover:underline cursor-pointer"
               >
                 {copiedCmd === "hash" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                 {copiedCmd === "hash" ? "Copied" : "Copy Hash"}
@@ -220,7 +241,7 @@ export function SoftwareUpdateModal({
                   <button
                     type="button"
                     onClick={() => copyToClipboard(buildInfo.verificationCommands.windows, "win")}
-                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
+                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
                   >
                     {copiedCmd === "win" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedCmd === "win" ? "Copied" : "Copy"}</span>
@@ -238,7 +259,7 @@ export function SoftwareUpdateModal({
                   <button
                     type="button"
                     onClick={() => copyToClipboard(buildInfo.verificationCommands.macos, "mac")}
-                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
+                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
                   >
                     {copiedCmd === "mac" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedCmd === "mac" ? "Copied" : "Copy"}</span>
@@ -256,7 +277,7 @@ export function SoftwareUpdateModal({
                   <button
                     type="button"
                     onClick={() => copyToClipboard(buildInfo.verificationCommands.linux, "linux")}
-                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline"
+                    className="flex items-center gap-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
                   >
                     {copiedCmd === "linux" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedCmd === "linux" ? "Copied" : "Copy"}</span>
@@ -312,13 +333,14 @@ export function SoftwareUpdateModal({
 
         </div>
 
-        {/* Footer */}
-        <div className="p-3 sm:p-4 bg-muted/20 border-t border-border flex justify-center sm:justify-end">
+        {/* Sticky Fixed Bottom Footer */}
+        <div className="sticky bottom-0 z-30 shrink-0 p-3 sm:p-4 bg-muted/30 border-t border-border flex justify-center sm:justify-end">
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="w-full sm:w-auto rounded-xl text-xs font-semibold px-6 shadow-xs"
+            className="w-full sm:w-auto rounded-xl text-xs font-bold px-6 shadow-xs cursor-pointer active:scale-95 transition-transform"
           >
             Close
           </Button>
