@@ -194,18 +194,18 @@ export default function Onboarding() {
           {/* Progress Header */}
           <div className="space-y-2 flex-shrink-0">
             <div className="flex items-center justify-between text-xs font-mono font-bold">
-              <span className="inline-flex items-center gap-1 text-primary">
-                <ShieldCheck className="w-3.5 h-3.5" /> Step {safeStep + 1} of {totalSteps}
+              <span className="inline-flex items-center gap-1.5 text-teal-600 dark:text-teal-400 font-bold">
+                <ShieldCheck className="w-4 h-4" /> Step {safeStep + 1} of {totalSteps}
               </span>
-              <span className="text-slate-500">{Math.round(progress)}% Complete</span>
+              <span className="text-slate-600 dark:text-slate-400 font-bold">{Math.round(progress)}% Complete</span>
             </div>
-            <Progress value={progress} className="h-2 rounded-full" />
+            <Progress value={progress} className="h-2 rounded-full bg-slate-200 dark:bg-slate-800" />
             <div className="pt-2">
-              <h2 className="text-lg sm:text-2xl font-extrabold font-display tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black font-display tracking-tight text-slate-900 dark:text-slate-100">
                 {t(currentSection.title)}
               </h2>
               {currentSection.subtitle && (
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
                   {t(currentSection.subtitle)}
                 </p>
               )}
@@ -232,7 +232,7 @@ export default function Onboarding() {
               variant="outline"
               onClick={() => setStep((s) => Math.max(0, s - 1))}
               disabled={safeStep === 0}
-              className="h-11 px-4 text-xs font-bold rounded-xl border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="h-11 px-4 text-xs font-bold rounded-xl border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm"
             >
               <ChevronLeft className="mr-1 h-4 w-4" /> {t("common.back", "Back")}
             </Button>

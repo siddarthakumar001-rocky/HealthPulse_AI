@@ -32,7 +32,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
             value={value || ""}
             onChange={(e) => onChange(field.key, e.target.value)}
             placeholder={field.placeholder ? t(field.placeholder, field.placeholder) : ""}
-            className="w-full bg-slate-900/60 border-slate-800 text-slate-200 h-11 rounded-xl min-h-[44px]"
+            className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-teal-600 focus:ring-teal-600/20 h-11 rounded-xl min-h-[44px] shadow-sm font-medium"
           />
         );
 
@@ -42,7 +42,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
             value={value || ""}
             onChange={(e) => onChange(field.key, e.target.value)}
             placeholder={field.placeholder ? t(field.placeholder, field.placeholder) : ""}
-            className="w-full bg-slate-900/60 border-slate-800 text-slate-200 rounded-xl min-h-[80px]"
+            className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-teal-600 focus:ring-teal-600/20 rounded-xl min-h-[80px] shadow-sm font-medium"
           />
         );
 
@@ -53,14 +53,16 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
             value={value || ""}
             onChange={(e) => onChange(field.key, e.target.value)}
             placeholder={field.placeholder ? t(field.placeholder, field.placeholder) : ""}
-            className="w-full bg-slate-900/60 border-slate-800 text-slate-200 h-11 rounded-xl min-h-[44px]"
+            className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-teal-600 focus:ring-teal-600/20 h-11 rounded-xl min-h-[44px] shadow-sm font-medium"
           />
         );
 
       case "boolean":
         return (
-          <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 p-3 min-h-[44px]">
-            <Label className="text-sm font-medium text-slate-200 cursor-pointer">{field.label ? t(field.label) : ""}</Label>
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/70 p-3.5 min-h-[48px] shadow-sm">
+            <Label className="text-sm font-bold text-slate-800 dark:text-slate-100 cursor-pointer select-none">
+              {field.label ? t(field.label) : ""}
+            </Label>
             <Switch checked={value || false} onCheckedChange={(v) => onChange(field.key, v)} />
           </div>
         );
@@ -68,16 +70,24 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
       case "select":
         return (
           <div className="space-y-2 w-full">
-            {field.label && <Label className="text-sm font-semibold text-slate-200">{t(field.label)}</Label>}
+            {field.label && (
+              <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {t(field.label)}
+              </Label>
+            )}
             <Select value={value || ""} onValueChange={(v) => onChange(field.key, v)}>
-              <SelectTrigger className="w-full bg-slate-900/60 border-slate-800 text-slate-200 h-11 rounded-xl min-h-[44px]">
+              <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 h-11 rounded-xl min-h-[44px] shadow-sm font-medium">
                 <SelectValue placeholder={t("common.select", "Select")} />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-800 text-white max-h-60">
+              <SelectContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-h-60 shadow-xl z-[200]">
                 {field.options?.map((opt: any) => {
                   const val = typeof opt === "string" || typeof opt === "number" ? String(opt) : opt.value;
                   const lbl = typeof opt === "string" || typeof opt === "number" ? String(opt) : opt.label;
-                  return <SelectItem key={val} value={val}>{t(lbl, lbl)}</SelectItem>;
+                  return (
+                    <SelectItem key={val} value={val} className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-slate-900 dark:text-slate-100">
+                      {t(lbl, lbl)}
+                    </SelectItem>
+                  );
                 })}
               </SelectContent>
             </Select>
@@ -88,7 +98,11 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
         const selectedArr = (value || []) as string[];
         return (
           <div className="space-y-2 w-full">
-            {field.label && <Label className="text-sm font-semibold text-slate-200">{t(field.label)}</Label>}
+            {field.label && (
+              <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {t(field.label)}
+              </Label>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {field.options?.map((opt: any) => {
                 const val = typeof opt === "string" || typeof opt === "number" ? String(opt) : opt.value;
@@ -104,20 +118,20 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
                         : [...selectedArr, val];
                       onChange(field.key, newArr);
                     }}
-                    className={`flex items-center gap-3 rounded-xl border p-3 text-sm text-left transition-all duration-150 cursor-pointer min-h-[44px] ${
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-sm text-left transition-all duration-150 cursor-pointer min-h-[46px] shadow-sm ${
                       isChecked
-                        ? "border-cyan-400 bg-cyan-500/15 text-white shadow-[0_0_12px_rgba(0,229,255,0.15)]"
-                        : "border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900"
+                        ? "border-teal-600 bg-teal-50 dark:bg-teal-950/40 text-teal-950 dark:text-teal-200 font-bold ring-2 ring-teal-500/20"
+                        : "border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 font-medium"
                     }`}
                   >
                     <div
                       className={`h-4 w-4 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
-                        isChecked ? "border-cyan-400 bg-cyan-400 text-slate-950" : "border-slate-600 bg-transparent"
+                        isChecked ? "border-teal-600 bg-teal-600 text-white" : "border-slate-400 dark:border-slate-600 bg-transparent"
                       }`}
                     >
                       {isChecked && <Check className="h-2.5 w-2.5 stroke-[3]" />}
                     </div>
-                    <span className="font-medium text-xs sm:text-sm">{t(lbl, lbl)}</span>
+                    <span className="text-xs sm:text-sm">{t(lbl, lbl)}</span>
                   </button>
                 );
               })}
@@ -128,7 +142,7 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
       case "slider":
         return (
           <div className="space-y-2 w-full">
-            <Label className="text-sm font-semibold text-slate-200">
+            <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
               {t(field.label)}: {value ? value[0] : 0}h
             </Label>
             <Slider value={value || [0]} onValueChange={(v) => onChange(field.key, v)} min={1} max={14} step={0.5} className="py-2" />
@@ -138,11 +152,15 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
       case "file":
         return (
           <div className="space-y-2 w-full">
-            {field.label && <Label className="text-sm font-semibold text-slate-200">{t(field.label)}</Label>}
+            {field.label && (
+              <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {t(field.label)}
+              </Label>
+            )}
             <Input
               type="file"
               onChange={(e) => onChange(field.key, e.target.files?.[0])}
-              className="w-full bg-slate-900/60 border-slate-800 text-slate-200 file:bg-cyan-500/20 file:text-cyan-300 file:border-0 file:rounded-md file:mr-3 file:py-1 file:px-2 min-h-[44px]"
+              className="w-full bg-slate-50 dark:bg-slate-900/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 file:bg-teal-600 file:text-white file:border-0 file:rounded-lg file:mr-3 file:py-1 file:px-3 file:font-semibold min-h-[44px] shadow-sm"
             />
           </div>
         );
@@ -166,7 +184,11 @@ export function FieldRenderer({ field, value, onChange, data }: FieldRendererPro
   // Wrapper for bare inputs like text and textarea
   return (
     <div className="space-y-2 w-full">
-      {field.label && <Label className="text-sm font-semibold text-slate-200">{t(field.label)}</Label>}
+      {field.label && (
+        <Label className="text-sm font-bold text-slate-800 dark:text-slate-100">
+          {t(field.label)}
+        </Label>
+      )}
       {renderField()}
     </div>
   );
