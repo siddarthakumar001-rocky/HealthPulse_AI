@@ -84,78 +84,81 @@ export function SoftwareUpdateModal({
       <DialogContent className="max-w-xl p-0 overflow-hidden bg-card/95 border border-border backdrop-blur-2xl rounded-3xl shadow-2xl text-foreground">
         
         {/* Header Strip */}
-        <div className="relative p-6 bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border-b border-border/60">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-9 px-2.5 rounded-xl border border-border/80 bg-background/80 hover:bg-muted text-xs font-mono font-bold flex items-center gap-1.5 shrink-0 text-muted-foreground hover:text-foreground shadow-sm"
-                title="Go Back"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                <span>Back</span>
-              </Button>
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-md">
-                <ArrowUpCircle className="w-7 h-7" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <DialogTitle className="text-lg font-black font-display tracking-tight text-foreground">
-                    Software Updates & APK Download
-                  </DialogTitle>
-                  {releaseInfo?.hasUpdate ? (
-                    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                      Update Ready
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-[10px] font-mono border-border text-muted-foreground">
-                      v{CURRENT_APP_VERSION}
-                    </Badge>
-                  )}
-                </div>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-mono">
-                  Package: {buildInfo.packageName} • Version Code: {buildInfo.versionCode}
-                </DialogDescription>
-              </div>
-            </div>
+        <div className="relative p-4 sm:p-6 bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border-b border-border/60">
+          {/* Top Actions: Back Button & Re-check */}
+          <div className="flex items-center justify-between mb-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 px-2.5 rounded-xl border border-border/80 bg-background/80 hover:bg-muted text-xs font-mono font-bold flex items-center gap-1.5 text-muted-foreground hover:text-foreground shadow-sm"
+              title="Go Back"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+              <span>Back</span>
+            </Button>
 
             <Button
               variant="ghost"
               size="sm"
               onClick={performCheck}
               disabled={checking}
-              className="h-8 px-2.5 rounded-xl text-xs font-mono border border-border/60 hover:bg-muted"
+              className="h-8 px-2.5 rounded-xl text-xs font-mono border border-border/60 hover:bg-muted flex items-center gap-1"
             >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${checking ? "animate-spin text-teal-500" : ""}`} />
-              {checking ? "Checking..." : "Re-check"}
+              <RefreshCw className={`w-3.5 h-3.5 ${checking ? "animate-spin text-teal-500" : ""}`} />
+              <span>{checking ? "Checking..." : "Re-check"}</span>
             </Button>
           </div>
 
+          {/* Title Row */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-md shrink-0">
+              <ArrowUpCircle className="w-6 h-6 sm:w-7 sm:h-7" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <DialogTitle className="text-base sm:text-lg font-black font-display tracking-tight text-foreground truncate">
+                  Updates & APK Download
+                </DialogTitle>
+                {releaseInfo?.hasUpdate ? (
+                  <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                    Update Ready
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-[9px] sm:text-[10px] font-mono border-border text-muted-foreground">
+                    v{CURRENT_APP_VERSION}
+                  </Badge>
+                )}
+              </div>
+              <DialogDescription className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 font-mono truncate">
+                Package: {buildInfo.packageName} • Version Code: {buildInfo.versionCode}
+              </DialogDescription>
+            </div>
+          </div>
+
           {/* Build Telemetry Banner */}
-          <div className="grid grid-cols-3 gap-2.5 mt-5 p-3 rounded-2xl bg-background/80 border border-border/80 shadow-inner font-mono text-center">
-            <div>
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">
+          <div className="grid grid-cols-3 gap-2 mt-4 p-2.5 sm:p-3 rounded-2xl bg-background/80 border border-border/80 shadow-inner font-mono text-center">
+            <div className="px-1">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground block truncate">
                 Installed
               </span>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-xs sm:text-sm font-bold text-foreground">
                 v{CURRENT_APP_VERSION}
               </span>
             </div>
-            <div>
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">
-                Latest Available
+            <div className="px-1 border-x border-border/60">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground block truncate">
+                Latest
               </span>
-              <span className="text-sm font-bold text-teal-600 dark:text-teal-400">
+              <span className="text-xs sm:text-sm font-bold text-teal-600 dark:text-teal-400">
                 v{releaseInfo?.latestVersion || CURRENT_APP_VERSION}
               </span>
             </div>
-            <div>
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground block">
+            <div className="px-1">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground block truncate">
                 File Size
               </span>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-xs sm:text-sm font-bold text-foreground">
                 {buildInfo.fileSize}
               </span>
             </div>
@@ -163,7 +166,7 @@ export function SoftwareUpdateModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-4 max-h-[65vh] overflow-y-auto text-xs">
+        <div className="p-4 sm:p-6 space-y-4 max-h-[65vh] overflow-y-auto text-xs">
           
           {/* Download Action */}
           <div className="space-y-2">

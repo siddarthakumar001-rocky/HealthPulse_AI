@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -68,8 +67,10 @@ public class TelemetryProcessingService {
             log.info("Processing {} metrics on virtual thread: {}", metrics.size(), Thread.currentThread());
             int count = 0;
             for (VitalMetric metric : metrics) {
-                // Simulate lightweight I/O or downstream persistence
-                count++;
+                if (metric != null && metric.patientId() != null) {
+                    log.debug("Telemetry metric ingested: {} for patient {}", metric.metricType(), metric.patientId());
+                    count++;
+                }
             }
             return count;
         }, virtualThreadExecutor);

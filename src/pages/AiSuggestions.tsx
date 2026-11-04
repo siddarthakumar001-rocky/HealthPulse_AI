@@ -124,7 +124,7 @@ export default function AiSuggestions() {
       <div className="mx-auto max-w-6xl space-y-6 px-2 sm:px-4 pb-16">
         {/* Top Header */}
         {/* Sliding Navigation Tabs */}
-        <div className="flex justify-center my-2 px-2 overflow-x-auto scrollbar-none max-w-full">
+        <div className="flex justify-center my-3 px-1 w-full overflow-x-auto scrollbar-none">
           <div className="relative inline-flex items-center p-1 sm:p-1.5 rounded-full bg-card/90 border border-border shadow-md shrink-0">
             {[
               { id: "ai_doctor", shortLabel: "AI Doctor", label: t("aiSuggestions.tabAiDoctor", "AI Doctor Consultation"), icon: Stethoscope },

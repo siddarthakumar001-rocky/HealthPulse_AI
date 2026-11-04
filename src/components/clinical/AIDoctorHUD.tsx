@@ -179,8 +179,7 @@ export function AIDoctorHUD() {
 
     // 1. Mandatory Privacy Consent Check
     if (!aiConsentGiven) {
-      toast.error("Please review and accept the AI Clinical Processing Consent before sending.");
-      return;
+      saveConsent(true);
     }
 
     // 2. Deterministic Red-Flag Safety Check (BEFORE any network/model call)
@@ -601,7 +600,7 @@ export function AIDoctorHUD() {
                 }
               }}
               placeholder="Describe symptoms, ask about lab tests, or speak with microphone..."
-              className="min-h-[42px] max-h-32 resize-none rounded-2xl bg-card border-border text-xs focus-visible:ring-1 focus-visible:ring-teal-500"
+              className="flex-1 min-w-0 min-h-[42px] max-h-32 resize-none rounded-2xl bg-card border-border text-xs focus-visible:ring-1 focus-visible:ring-teal-500 py-2.5 px-3"
               rows={1}
             />
 
@@ -610,10 +609,10 @@ export function AIDoctorHUD() {
               type="button"
               onClick={handleSendMessage}
               disabled={loading || (!inputMessage.trim() && !selectedImage)}
-              className="h-10 px-4 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shrink-0"
+              className="h-10 px-3 sm:px-4 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shrink-0 flex items-center justify-center gap-1.5"
             >
-              <Send className="w-4 h-4 mr-1" />
-              Send
+              <Send className="w-4 h-4" />
+              <span className="hidden sm:inline">Send</span>
             </Button>
           </div>
         </div>
