@@ -85,17 +85,17 @@ export function SoftwareUpdateModal({
         
         {/* Header Strip */}
         <div className="relative p-4 sm:p-6 bg-gradient-to-br from-teal-500/15 via-primary/10 to-transparent border-b border-border/60">
-          {/* Top Actions: Back Button & Re-check */}
-          <div className="flex items-center justify-between mb-3">
+                    {/* Top Actions: Small Round Back Button & Re-check */}
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
+              size="icon"
               onClick={onClose}
-              className="h-8 px-2.5 rounded-xl border border-border/80 bg-background/80 hover:bg-muted text-xs font-mono font-bold flex items-center gap-1.5 text-muted-foreground hover:text-foreground shadow-sm"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border border-border/80 bg-background/90 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs flex items-center justify-center p-0 shrink-0 transition-transform active:scale-95"
               title="Go Back"
+              aria-label="Go Back"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-              <span>Back</span>
+              <ArrowLeft className="w-4 h-4 text-teal-600 dark:text-teal-400" />
             </Button>
 
             <Button
@@ -103,21 +103,21 @@ export function SoftwareUpdateModal({
               size="sm"
               onClick={performCheck}
               disabled={checking}
-              className="h-8 px-2.5 rounded-xl text-xs font-mono border border-border/60 hover:bg-muted flex items-center gap-1"
+              className="h-8 px-2.5 rounded-full text-xs font-mono border border-border/60 hover:bg-muted flex items-center gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${checking ? "animate-spin text-teal-500" : ""}`} />
-              <span>{checking ? "Checking..." : "Re-check"}</span>
+              <span className="hidden xs:inline sm:inline">{checking ? "Checking..." : "Re-check"}</span>
             </Button>
           </div>
 
-          {/* Title Row */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-md shrink-0">
-              <ArrowUpCircle className="w-6 h-6 sm:w-7 sm:h-7" />
+          {/* Title Row: Center-aligned on Mobile, Left-aligned on Desktop */}
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-2 sm:gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-md shrink-0 mx-auto sm:mx-0">
+              <ArrowUpCircle className="w-7 h-7" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <DialogTitle className="text-base sm:text-lg font-black font-display tracking-tight text-foreground truncate">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+                <DialogTitle className="text-base sm:text-lg font-black font-display tracking-tight text-foreground">
                   Updates & APK Download
                 </DialogTitle>
                 {releaseInfo?.hasUpdate ? (
@@ -130,7 +130,7 @@ export function SoftwareUpdateModal({
                   </Badge>
                 )}
               </div>
-              <DialogDescription className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 font-mono truncate">
+              <DialogDescription className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 font-mono text-center sm:text-left">
                 Package: {buildInfo.packageName} • Version Code: {buildInfo.versionCode}
               </DialogDescription>
             </div>
@@ -313,12 +313,12 @@ export function SoftwareUpdateModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-muted/20 border-t border-border flex justify-end">
+        <div className="p-3 sm:p-4 bg-muted/20 border-t border-border flex justify-center sm:justify-end">
           <Button
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="rounded-xl text-xs font-semibold px-4"
+            className="w-full sm:w-auto rounded-xl text-xs font-semibold px-6 shadow-xs"
           >
             Close
           </Button>
