@@ -242,21 +242,24 @@ export function AIDoctorHUD() {
         }
         setSelectedImage(null);
       } else {
-        // Direct text consultation via /api/doctor-ai
+                // Direct text consultation via /api/doctor-ai
         const res: any = await api.post("/doctor-ai", { prompt: sanitizedPrompt });
 
-        const structured: StructuredClinicalAdvice = res?.data || {
+        const structured: StructuredClinicalAdvice = res?.data?.data || res?.data || {
           urgencyLevel: "ROUTINE_CONSULT",
           possibleCausesToDiscuss: ["Clinical evaluation required for symptoms described"],
           whatToWatchFor: ["Difficulty breathing", "Sudden sharp chest pains", "High persistent fever"],
           followUpQuestionsForDoctor: ["What diagnostic blood tests should I perform?"],
-          clinicalNotes: sanitizeAIOuput(res?.reply || "Consult a registered doctor."),
-          disclaimer: res?.disclaimer || "Educational triage guidance.",
+          clinicalNotes: sanitizeAIOuput(res?.data?.reply || res?.reply || "Consult a registered doctor."),
+          disclaimer: res?.data?.disclaimer || res?.disclaimer || "Educational triage guidance.",
         };
+
+        const replyText = res?.data?.reply || res?.data?.message || res?.reply || res?.message;
 
         const doctorMsg: Message = {
           id: `doc-${Date.now()}`,
           sender: "doctor",
+          text: replyText,
           structuredAdvice: structured,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };

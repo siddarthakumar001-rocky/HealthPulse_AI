@@ -72,8 +72,9 @@ const queryGrok = async (userInput) => {
   const fallback = (err) => {
     logger.warn('[Grok Circuit Breaker Triggered] Returning clinical fallback:', { error: err.message });
     return {
-      success: true,
+      success: false,
       fallback: true,
+      error: err.message,
       reply: "Disclaimer: HealthPulse Doctor AI is currently operating with offline heuristics. For any concerning symptoms, chest discomfort, or high fever, please seek direct in-person evaluation at your nearest primary health center."
     };
   };
