@@ -13,6 +13,7 @@ export interface User {
     phone?: string;
     age?: number;
     gender?: string;
+    biological_sex?: string;
     emergency_contact?: string;
   };
 }

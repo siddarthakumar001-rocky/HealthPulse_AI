@@ -70,7 +70,8 @@ export function BMICalculator() {
     return userAge > 0 ? userAge : 24;
   });
   const [gender, setGender] = useState<"male" | "female">(() => {
-    const g = (user?.user_metadata?.biological_sex || user?.user_metadata?.gender || "").toLowerCase();
+    const meta = (user?.user_metadata || {}) as Record<string, any>;
+    const g = String(meta.biological_sex || meta.gender || "").toLowerCase();
     return g.includes("female") ? "female" : "male";
   });
   const [activityLevel, setActivityLevel] = useState<"sedentary" | "light" | "moderate" | "active">("moderate");
@@ -689,3 +690,4 @@ export function BMICalculator() {
 }
 
 export default BMICalculator;
+

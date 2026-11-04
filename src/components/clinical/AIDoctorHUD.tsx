@@ -562,7 +562,8 @@ export function AIDoctorHUD() {
 
           <div className="rounded-2xl border border-border bg-card p-3 shadow-xs focus-within:ring-2 focus-within:ring-teal-500/30 focus-within:border-teal-500 transition-all space-y-2">
             {/* The Text Input */}
-            <Textarea
+            <textarea
+              id="ai-doctor-chat-textarea"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={(e) => {
@@ -571,8 +572,8 @@ export function AIDoctorHUD() {
                   handleSendMessage();
                 }
               }}
-              placeholder="Type your symptoms, medications, or medical questions here (e.g., 'I have fever and persistent dry cough for 2 days')..."
-              className="w-full resize-none border-0 bg-transparent p-1 text-xs sm:text-sm focus-visible:ring-0 shadow-none min-h-[54px] max-h-36 text-foreground placeholder:text-muted-foreground"
+              placeholder="Type your health questions or symptoms here (e.g. 'I have had a high fever, headache, and sore throat since yesterday')..."
+              className="w-full block resize-none border border-border/80 focus:border-teal-500 rounded-xl bg-background/80 p-3 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner min-h-[68px] max-h-36 text-foreground placeholder:text-muted-foreground leading-relaxed"
               rows={2}
             />
 
