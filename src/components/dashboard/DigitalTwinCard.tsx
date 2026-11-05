@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Activity, ShieldCheck, Cpu, Zap, Dumbbell, Bed, UserCheck, AlertCircle } from "lucide-react";
+import { Activity, ShieldCheck, Cpu, Dumbbell, Bed, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { api } from "@/services/api";
@@ -54,22 +54,22 @@ export default function DigitalTwinCard({ heartRate, spo2, temperature, classNam
     switch (activity) {
       case "running":
       case "exercise":
-        return <Dumbbell className="w-4 h-4 text-amber-400" />;
+        return <Dumbbell className="w-4 h-4 text-amber-500 dark:text-amber-400" />;
       case "walking":
-        return <Activity className="w-4 h-4 text-emerald-400" />;
+        return <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
       case "sleeping":
-        return <Bed className="w-4 h-4 text-blue-400" />;
+        return <Bed className="w-4 h-4 text-blue-500 dark:text-blue-400" />;
       default:
-        return <UserCheck className="w-4 h-4 text-cyan-400" />;
+        return <UserCheck className="w-4 h-4 text-teal-600 dark:text-cyan-400" />;
     }
   };
 
   return (
-    <div className={`rounded-3xl p-5 mermaid-glass border border-teal-400/35 shadow-xl relative overflow-hidden ${className}`}>
+    <div className={`rounded-3xl p-5 mermaid-glass border border-teal-500/30 dark:border-teal-400/35 shadow-xl relative overflow-hidden ${className}`}>
       {/* Top Banner */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+          <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-cyan-400">
             <Cpu className="w-4 h-4 animate-pulse" />
           </div>
           <div>
@@ -78,8 +78,8 @@ export default function DigitalTwinCard({ heartRate, spo2, temperature, classNam
           </div>
         </div>
 
-        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs gap-1.5 py-0.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs gap-1.5 py-0.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
           Twin Synced
         </Badge>
       </div>
@@ -87,7 +87,7 @@ export default function DigitalTwinCard({ heartRate, spo2, temperature, classNam
       {/* Grid: Context & Model Indicators */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {/* Activity Recognition (Random Forest) */}
-        <div className="p-3 rounded-xl bg-secondary/30 border border-border/70">
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-secondary/30 border border-slate-200/80 dark:border-border/70">
           <div className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider flex items-center justify-between mb-1">
             <span>Physical Activity</span>
             <Badge variant="secondary" className="text-[9px] h-4 px-1 py-0 bg-primary/10 text-primary">
@@ -104,32 +104,32 @@ export default function DigitalTwinCard({ heartRate, spo2, temperature, classNam
         </div>
 
         {/* Context-Aware Sentinel */}
-        <div className="p-3 rounded-xl bg-secondary/30 border border-border/70">
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-secondary/30 border border-slate-200/80 dark:border-border/70">
           <div className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider flex items-center justify-between mb-1">
             <span>Alert Sentinel</span>
-            <span className="text-emerald-400 font-bold text-[10px]">Active</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">Active</span>
           </div>
           <div className="flex items-center gap-1.5 mt-1">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span className="text-sm font-bold text-foreground">{suppressedAlerts} Suppressed</span>
           </div>
-          <p className="text-[10px] text-emerald-400/90 mt-1">False exercise alarms avoided</p>
+          <p className="text-[10px] text-emerald-600 dark:text-emerald-400/90 mt-1">False exercise alarms avoided</p>
         </div>
       </div>
 
       {/* Data Quality Bar (Sensor vs CSDI) */}
-      <div className="p-3 rounded-xl bg-secondary/20 border border-border/50">
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-secondary/20 border border-slate-200/80 dark:border-border/50">
         <div className="flex items-center justify-between text-xs mb-1.5">
           <span className="text-muted-foreground flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             Sensor Reliability vs CSDI Imputation
           </span>
           <span className="font-bold text-foreground">{reliabilityPercent.toFixed(1)}% Measured</span>
         </div>
-        <Progress value={reliabilityPercent} className="h-2 bg-cyan-950" />
+        <Progress value={reliabilityPercent} className="h-2 bg-slate-200 dark:bg-cyan-950" />
         <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
-          <span className="text-emerald-400 font-medium">● True Sensors (93.8%)</span>
-          <span className="text-cyan-400 font-medium">● CSDI Imputed (6.2%)</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-medium">● True Sensors (93.8%)</span>
+          <span className="text-teal-600 dark:text-cyan-400 font-medium">● CSDI Imputed (6.2%)</span>
           <span className="text-muted-foreground">MAE: 1.45 BPM</span>
         </div>
       </div>

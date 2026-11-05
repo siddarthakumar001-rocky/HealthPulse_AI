@@ -311,7 +311,7 @@ export default function Landing() {
 
           <Button
             asChild
-            className="mermaid-btn text-xs font-mono tracking-widest uppercase h-10 px-5 rounded-xl text-black font-extrabold shadow-lg shadow-[#00F5D4]/20 hover:scale-105 active:scale-95 transition-all hidden md:inline-flex"
+            className="mermaid-btn text-xs font-mono tracking-widest uppercase h-10 px-5 rounded-xl font-extrabold shadow-lg shadow-[#00F5D4]/20 hover:scale-105 active:scale-95 transition-all hidden md:inline-flex"
           >
             <Link to="/signup">
               <span>{t("landing.getStarted", "ACCESS HUD")}</span>
@@ -406,7 +406,7 @@ export default function Landing() {
                 <Button
                   size="lg"
                   asChild
-                  className="mermaid-btn h-14 px-8 rounded-2xl text-xs font-mono tracking-widest uppercase text-black font-extrabold shadow-xl shadow-[#00F5D4]/25 hover:scale-105 active:scale-95 transition-all"
+                  className="mermaid-btn h-14 px-8 rounded-2xl text-xs font-mono tracking-widest uppercase font-extrabold shadow-xl shadow-[#00F5D4]/25 hover:scale-105 active:scale-95 transition-all"
                 >
                   <Link to="/signup" className="flex items-center gap-2">
                     <span>INITIALIZE SCAN</span>
@@ -448,9 +448,9 @@ export default function Landing() {
               <div className="relative rounded-[2rem] bg-white/90 dark:bg-black/50 border border-slate-200/90 dark:border-white/10 p-5 sm:p-7 backdrop-blur-2xl overflow-hidden shadow-2xl">
                 
                 {/* Header Metadata */}
-                <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-3 mb-4 text-[10px] font-mono text-slate-500 dark:text-[#94A3B8]">
+                <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-3 mb-4 text-[10px] font-mono text-slate-600 dark:text-[#94A3B8]">
                   <span className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
-                    <span className="w-2 h-2 rounded-full bg-[#00F5D4] animate-ping" />
+                    <span className="w-2 h-2 rounded-full bg-teal-600 dark:bg-[#00F5D4] animate-ping" />
                     HDT_MODEL // LIVE_TELEMETRY
                   </span>
                   <span>ADC: 16-BIT • SAMPLING: 250HZ</span>
@@ -459,14 +459,13 @@ export default function Landing() {
                 {/* Central Anatomical SVG with Orbiting Telemetry Cards */}
                 <div className="relative h-[340px] sm:h-[380px] flex items-center justify-center">
                   
-                  <svg viewBox="0 0 240 400" className="w-full h-full max-h-[340px] drop-shadow-[0_0_25px_rgba(0,245,212,0.3)]">
+                  <svg viewBox="0 0 240 400" className="w-full h-full max-h-[340px] drop-shadow-[0_0_25px_rgba(13,148,136,0.25)] dark:drop-shadow-[0_0_25px_rgba(0,245,212,0.3)]">
                     {/* Head / Brain Cortex */}
                     <circle
                       cx="120"
                       cy="45"
                       r="25"
-                      fill="rgba(0, 245, 212, 0.08)"
-                      stroke={selectedOrgan === "brain" ? "#00F5D4" : "rgba(0, 245, 212, 0.4)"}
+                      className="fill-teal-500/10 dark:fill-[#00F5D4]/10 stroke-teal-600 dark:stroke-[#00F5D4]/40"
                       strokeWidth={selectedOrgan === "brain" ? "2.5" : "1.5"}
                     />
                     <motion.circle
@@ -474,7 +473,7 @@ export default function Landing() {
                       cy="45"
                       r="12"
                       fill="none"
-                      stroke="#00F5D4"
+                      className="stroke-teal-600 dark:stroke-[#00F5D4]"
                       strokeWidth="1"
                       strokeDasharray="2 3"
                       animate={{ rotate: 360 }}
@@ -482,13 +481,12 @@ export default function Landing() {
                     />
 
                     {/* Spine / Telemetry Bus */}
-                    <line x1="120" y1="70" x2="120" y2="240" stroke="rgba(0, 245, 212, 0.3)" strokeWidth="2" strokeDasharray="3 3" />
+                    <line x1="120" y1="70" x2="120" y2="240" className="stroke-teal-600/40 dark:stroke-[#00F5D4]/30" strokeWidth="2" strokeDasharray="3 3" />
 
                     {/* Torso Skeleton */}
                     <path
                       d="M 85 80 Q 60 140 75 220 L 165 220 Q 180 140 155 80 Z"
-                      fill="rgba(0, 245, 212, 0.04)"
-                      stroke="rgba(0, 245, 212, 0.35)"
+                      className="fill-teal-500/5 dark:fill-[#00F5D4]/5 stroke-teal-600/60 dark:stroke-[#00F5D4]/35"
                       strokeWidth="1.5"
                     />
 
@@ -529,16 +527,14 @@ export default function Landing() {
                     {/* Lungs */}
                     <motion.path
                       d="M 90 95 Q 75 130 90 160 Q 105 130 90 95 Z"
-                      fill="rgba(6, 182, 212, 0.15)"
-                      stroke="rgba(6, 182, 212, 0.4)"
+                      className="fill-cyan-500/20 dark:fill-cyan-500/15 stroke-teal-600 dark:stroke-cyan-400"
                       strokeWidth="1.5"
                       animate={{ scale: [1, 1.08, 1] }}
                       transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
                     />
                     <motion.path
                       d="M 150 95 Q 165 130 150 160 Q 135 130 150 95 Z"
-                      fill="rgba(6, 182, 212, 0.15)"
-                      stroke="rgba(6, 182, 212, 0.4)"
+                      className="fill-cyan-500/20 dark:fill-cyan-500/15 stroke-teal-600 dark:stroke-cyan-400"
                       strokeWidth="1.5"
                       animate={{ scale: [1, 1.08, 1] }}
                       transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
@@ -547,7 +543,7 @@ export default function Landing() {
                     {/* Limbs Structure */}
                     <path
                       d="M 85 90 L 50 170 L 40 240 M 155 90 L 190 170 L 200 240 M 95 220 L 90 350 M 145 220 L 150 350"
-                      stroke="rgba(0, 245, 212, 0.25)"
+                      className="stroke-teal-600/50 dark:stroke-[#00F5D4]/25"
                       strokeWidth="2"
                       fill="none"
                     />
@@ -557,15 +553,15 @@ export default function Landing() {
                   <motion.div
                     animate={{ y: [0, -6, 0] }}
                     transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
-                    className="absolute top-2 left-0 mermaid-glass p-3 rounded-2xl shadow-xl w-36 border border-white/10"
+                    className="absolute top-2 left-0 bg-white/95 dark:bg-[#111A2E]/95 backdrop-blur-xl p-3 rounded-2xl shadow-xl w-36 border border-slate-200/90 dark:border-white/10"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                      <span>CARDIO BPM</span>
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-[#94A3B8]">
+                      <span className="font-semibold">CARDIO BPM</span>
                       <Heart className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.bpm} /></span>
-                      <span className="text-xs font-bold text-rose-500 font-mono">BPM</span>
+                      <span className="text-2xl font-black font-mono text-slate-900 dark:text-white"><CountUpNumber target={current.bpm} /></span>
+                      <span className="text-xs font-bold text-rose-600 dark:text-rose-500 font-mono">BPM</span>
                     </div>
                   </motion.div>
 
@@ -573,15 +569,15 @@ export default function Landing() {
                   <motion.div
                     animate={{ y: [0, 8, 0] }}
                     transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut", delay: 0.5 }}
-                    className="absolute top-2 right-0 mermaid-glass p-3 rounded-2xl shadow-xl w-36 border border-white/10"
+                    className="absolute top-2 right-0 bg-white/95 dark:bg-[#111A2E]/95 backdrop-blur-xl p-3 rounded-2xl shadow-xl w-36 border border-slate-200/90 dark:border-white/10"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                      <span>SPO2 BLOOD</span>
-                      <Wind className="w-3.5 h-3.5 text-[#00F5D4]" />
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-[#94A3B8]">
+                      <span className="font-semibold">SPO2 BLOOD</span>
+                      <Wind className="w-3.5 h-3.5 text-teal-600 dark:text-[#00F5D4]" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.spo2} /></span>
-                      <span className="text-xs font-bold text-[#00F5D4] font-mono">%</span>
+                      <span className="text-2xl font-black font-mono text-slate-900 dark:text-white"><CountUpNumber target={current.spo2} /></span>
+                      <span className="text-xs font-bold text-teal-700 dark:text-[#00F5D4] font-mono">%</span>
                     </div>
                   </motion.div>
 
@@ -589,15 +585,15 @@ export default function Landing() {
                   <motion.div
                     animate={{ y: [0, -8, 0] }}
                     transition={{ repeat: Infinity, duration: 4.1, ease: "easeInOut", delay: 1 }}
-                    className="absolute bottom-2 left-0 mermaid-glass p-3 rounded-2xl shadow-xl w-36 border border-white/10"
+                    className="absolute bottom-2 left-0 bg-white/95 dark:bg-[#111A2E]/95 backdrop-blur-xl p-3 rounded-2xl shadow-xl w-36 border border-slate-200/90 dark:border-white/10"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                      <span>CORE TEMP</span>
-                      <Thermometer className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-[#94A3B8]">
+                      <span className="font-semibold">CORE TEMP</span>
+                      <Thermometer className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.temp} decimals={1} /></span>
-                      <span className="text-xs font-bold text-amber-400 font-mono">°C</span>
+                      <span className="text-2xl font-black font-mono text-slate-900 dark:text-white"><CountUpNumber target={current.temp} decimals={1} /></span>
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">°C</span>
                     </div>
                   </motion.div>
 
@@ -605,29 +601,29 @@ export default function Landing() {
                   <motion.div
                     animate={{ y: [0, 6, 0] }}
                     transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 1.5 }}
-                    className="absolute bottom-2 right-0 mermaid-glass p-3 rounded-2xl shadow-xl w-36 border border-white/10"
+                    className="absolute bottom-2 right-0 bg-white/95 dark:bg-[#111A2E]/95 backdrop-blur-xl p-3 rounded-2xl shadow-xl w-36 border border-slate-200/90 dark:border-white/10"
                   >
-                    <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
-                      <span>ALLOSTATIC</span>
-                      <Zap className="w-3.5 h-3.5 text-[#00F5D4]" />
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-[#94A3B8]">
+                      <span className="font-semibold">ALLOSTATIC</span>
+                      <Zap className="w-3.5 h-3.5 text-teal-600 dark:text-[#00F5D4]" />
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-black font-mono text-white"><CountUpNumber target={current.stress} /></span>
-                      <span className="text-xs font-mono text-[#94A3B8]">/100</span>
+                      <span className="text-2xl font-black font-mono text-slate-900 dark:text-white"><CountUpNumber target={current.stress} /></span>
+                      <span className="text-xs font-mono text-slate-600 dark:text-[#94A3B8]">/100</span>
                     </div>
                   </motion.div>
                 </div>
 
                 {/* Continuous ECG Oscilloscope */}
-                <div className="mt-4 pt-3 border-t border-white/10">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[#94A3B8] mb-1.5">
-                    <span className="flex items-center gap-1.5 text-[#00F5D4] font-bold">
+                <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/10">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-[#94A3B8] mb-1.5">
+                    <span className="flex items-center gap-1.5 text-teal-700 dark:text-[#00F5D4] font-bold">
                       <Activity className="w-3.5 h-3.5" /> LEAD-II SINUS OSCILLOSCOPE
                     </span>
-                    <span>SPEED: {current.ecgSpeed}s/sweep</span>
+                    <span className="text-slate-500 dark:text-slate-400">SPEED: {current.ecgSpeed}s/sweep</span>
                   </div>
 
-                  <div className="h-14 w-full bg-black/60 rounded-xl overflow-hidden relative border border-white/10 flex items-center">
+                  <div className="h-14 w-full bg-slate-950 dark:bg-black/90 rounded-xl overflow-hidden relative border border-slate-800 dark:border-white/10 flex items-center shadow-inner">
                     <svg className="w-full h-full" viewBox="0 0 600 60" preserveAspectRatio="none">
                       <motion.path
                         d="M 0 30 L 80 30 L 95 15 L 105 45 L 115 10 L 125 50 L 135 30 L 250 30 L 265 15 L 275 45 L 285 10 L 295 50 L 305 30 L 420 30 L 435 15 L 445 45 L 455 10 L 465 50 L 475 30 L 600 30"
@@ -1011,7 +1007,7 @@ export default function Landing() {
               <Button
                 size="lg"
                 asChild
-                className="mermaid-btn h-14 px-10 rounded-2xl text-xs font-mono tracking-widest uppercase text-black font-extrabold shadow-xl shadow-[#00F5D4]/30 hover:scale-105 active:scale-95 transition-all"
+                className="mermaid-btn h-14 px-10 rounded-2xl text-xs font-mono tracking-widest uppercase font-extrabold shadow-xl shadow-[#00F5D4]/30 hover:scale-105 active:scale-95 transition-all"
               >
                 <Link to="/signup" className="flex items-center gap-2">
                   <span>CREATE FREE ACCOUNT</span>
@@ -1064,7 +1060,7 @@ export default function Landing() {
         <Button asChild variant="outline" className="flex-1 h-12 rounded-2xl font-mono text-xs uppercase border-slate-300 dark:border-white/15 bg-white dark:bg-white/[0.04] text-slate-900 dark:text-white">
           <Link to="/login">Sign In</Link>
         </Button>
-        <Button asChild className="mermaid-btn flex-1 h-12 rounded-2xl font-mono text-xs uppercase font-extrabold text-black shadow-lg shadow-[#00F5D4]/25">
+        <Button asChild className="mermaid-btn flex-1 h-12 rounded-2xl font-mono text-xs uppercase font-extrabold shadow-lg shadow-[#00F5D4]/25">
           <Link to="/signup">Access HUD →</Link>
         </Button>
       </div>

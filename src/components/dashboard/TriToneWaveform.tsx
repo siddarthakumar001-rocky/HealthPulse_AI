@@ -65,22 +65,22 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
   };
 
   return (
-    <div className="rounded-3xl p-5 mermaid-glass border border-teal-400/35 shadow-xl relative overflow-hidden">
+    <div className="rounded-3xl p-5 mermaid-glass border border-teal-500/30 dark:border-teal-400/35 shadow-xl relative overflow-hidden">
       {/* Subtle background glow */}
-      <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-72 h-72 bg-teal-500/5 dark:bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-600 dark:bg-cyan-500" />
             </span>
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
               CSDI Diffusion Time-Series Reconstruction
             </h3>
-            <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-[10px] tracking-wider uppercase bg-cyan-950/30">
+            <Badge variant="outline" className="border-teal-500/30 text-teal-700 dark:text-cyan-400 text-[10px] tracking-wider uppercase bg-teal-500/10">
               HDT Engine
             </Badge>
           </div>
@@ -96,12 +96,12 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
             <span className="text-foreground">Sensor Raw</span>
           </div>
           <div className="flex items-center gap-1.5 font-medium">
-            <span className="w-3 h-0.5 border-t-2 border-dashed border-cyan-400 inline-block" />
-            <span className="text-cyan-400 font-semibold">CSDI Imputed</span>
+            <span className="w-3 h-0.5 border-t-2 border-dashed border-teal-600 dark:border-cyan-400 inline-block" />
+            <span className="text-teal-700 dark:text-cyan-400 font-semibold">CSDI Imputed</span>
           </div>
           <div className="flex items-center gap-1.5 font-medium">
-            <span className="w-3 h-0.5 border-t-2 border-dotted border-amber-400 inline-block" />
-            <span className="text-amber-400">TimeGrad Forecast</span>
+            <span className="w-3 h-0.5 border-t-2 border-dotted border-amber-600 dark:border-amber-400 inline-block" />
+            <span className="text-amber-700 dark:text-amber-400">TimeGrad Forecast</span>
           </div>
         </div>
       </div>
@@ -120,17 +120,17 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
                   <div className="bg-popover/95 border border-border p-2.5 rounded-lg shadow-xl text-xs backdrop-blur-md">
                     <p className="font-bold text-foreground mb-1">Timeline: {pt.time}</p>
                     {pt.sensorHR !== null && pt.sensorHR !== undefined && (
-                      <p className="text-emerald-400 flex items-center gap-1">
+                      <p className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                         <ShieldCheck className="w-3.5 h-3.5" /> Sensor: <strong>{pt.sensorHR} BPM</strong>
                       </p>
                     )}
                     {pt.csdiHR !== null && pt.csdiHR !== undefined && (
-                      <p className="text-cyan-400 flex items-center gap-1">
+                      <p className="text-teal-700 dark:text-cyan-400 flex items-center gap-1">
                         <Cpu className="w-3.5 h-3.5" /> CSDI Reconstructed: <strong>{pt.csdiHR} BPM</strong> (Imputed)
                       </p>
                     )}
                     {pt.forecastHR !== null && pt.forecastHR !== undefined && (
-                      <p className="text-amber-400 flex items-center gap-1">
+                      <p className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
                         <Sparkles className="w-3.5 h-3.5" /> Forecast: <strong>{pt.forecastHR} BPM</strong> (Gated)
                       </p>
                     )}
@@ -152,10 +152,10 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
             <Line
               type="monotone"
               dataKey="csdiHR"
-              stroke="#06b6d4"
+              stroke="#0d9488"
               strokeWidth={2.5}
               strokeDasharray="5 5"
-              dot={{ r: 4, fill: "#06b6d4", strokeWidth: 1.5 }}
+              dot={{ r: 4, fill: "#0d9488", strokeWidth: 1.5 }}
               connectNulls={true}
               name="-- Reconstructed"
             />
@@ -163,10 +163,10 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
             <Line
               type="monotone"
               dataKey="forecastHR"
-              stroke="#f59e0b"
+              stroke="#d97706"
               strokeWidth={2}
               strokeDasharray="2 3"
-              dot={{ r: 3, fill: "#f59e0b" }}
+              dot={{ r: 3, fill: "#d97706" }}
               connectNulls={true}
               name="·· Forecast"
             />
@@ -178,13 +178,13 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
       <div className="mt-3 pt-3 border-t border-border/60 flex flex-col gap-2 text-xs text-muted-foreground">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20">
               ● Measured (Solid)
             </Badge>
-            <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
+            <Badge variant="secondary" className="bg-teal-500/10 text-teal-700 dark:text-cyan-400 border-teal-500/20">
               -- Reconstructed (Dashed)
             </Badge>
-            <Badge variant="secondary" className="bg-amber-500/10 text-amber-400 border-amber-500/20">
+            <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
               ·· Forecast (Dotted)
             </Badge>
           </div>
@@ -192,14 +192,14 @@ export default function TriToneWaveform({ currentHR = 74 }: TriToneWaveformProps
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-7 border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 gap-1.5"
+            className="text-xs h-7 border-teal-500/40 text-teal-700 dark:text-cyan-400 hover:bg-teal-500/10 gap-1.5"
             onClick={handleSimulateDropAndImpute}
             disabled={isSimulating}
           >
             {isSimulating ? (
               <RefreshCw className="w-3 h-3 animate-spin" />
             ) : (
-              <Zap className="w-3 h-3 text-cyan-400" />
+              <Zap className="w-3 h-3 text-teal-600 dark:text-cyan-400" />
             )}
             Simulate Observation Masking & Diffusion
           </Button>

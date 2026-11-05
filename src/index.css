@@ -229,7 +229,7 @@
     line-height: 1.7;
   }
 
-    html, #root, body, button, input, select, textarea {
+  html, #root, body, button, input, select, textarea {
     font-family: 'Inter', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Noto Sans Telugu', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
@@ -348,6 +348,26 @@
     background: rgba(20, 184, 166, 0.15);
     color: #2DD4BF;
     border-color: rgba(45, 212, 191, 0.3);
+  }
+
+  .mermaid-btn {
+    background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(13, 148, 136, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3) !important;
+    font-weight: 800 !important;
+    transition: all 0.2s ease-in-out !important;
+  }
+
+  .dark .mermaid-btn {
+    background: linear-gradient(135deg, #00F5D4 0%, #0D9488 100%) !important;
+    color: #090D16 !important;
+    border: 1px solid rgba(0, 245, 212, 0.5) !important;
+    box-shadow: 0 4px 20px rgba(0, 245, 212, 0.35) !important;
+  }
+
+  .mermaid-btn:hover {
+    filter: brightness(1.08) !important;
   }
 
   /* ══════════════════════════════════════════════════════════
