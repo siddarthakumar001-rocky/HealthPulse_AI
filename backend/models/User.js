@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, index: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
+    name: { type: String, default: '' },
+    avatar: { type: String, default: '' },
+    googleId: { type: String, default: null, index: true },
+    isGoogleAuth: { type: Boolean, default: false },
     role: { 
       type: String, 
       enum: ['user', 'patient', 'caregiver', 'doctor', 'clinic_admin', 'phc_staff', 'dho', 'admin', 'system_admin'], 
@@ -23,6 +27,7 @@ const userSchema = new mongoose.Schema({
   });
 
 userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ googleId: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ organizationId: 1 });
 userSchema.index({ createdAt: -1 });

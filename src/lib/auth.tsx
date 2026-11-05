@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
 import { AntiGravityLoading } from "@/components/AntiGravityLoading";
 
-
 export interface User {
   id: string;
   email: string;
   role: string;
+  avatar?: string;
+  name?: string;
   user_metadata?: {
     name?: string;
+    avatar?: string;
     phone?: string;
     age?: number;
     gender?: string;
@@ -23,6 +25,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ onboarding_completed: boolean; role: string }>;
+  signInWithGoogle: (credential: string) => Promise<{ onboarding_completed: boolean; role: string }>;
   signOut: () => Promise<void>;
 }
 
@@ -70,6 +73,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { onboarding_completed: data.onboarding_completed, role: data.user.role };
   };
 
+  const signInWithGoogle = async (credential: string) => {
+    const data = await api.post("/auth/google", { credential });
+    
+    if (data.session?.access_token) {
+      localStorage.setItem("token", data.session.access_token);
+      localStorage.setItem("userRole", data.user?.role || "user");
+      setUser(data.user);
+    }
+    return { onboarding_completed: data.onboarding_completed, role: data.user.role };
+  };
+
   const signOut = async () => {
     localStorage.removeItem("token");
     localStorage.removeItem("admin_token");
@@ -79,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -90,8 +104,6 @@ export function useAuth() {
   if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }
-
-
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();

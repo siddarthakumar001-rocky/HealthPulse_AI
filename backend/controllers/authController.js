@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -137,6 +138,124 @@ exports.login = async (req, res) => {
   } catch (err) {
     logger.error('[Auth Login Error]:', { error: err.message });
     res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Direct Google Authentication & Gmail Sync
+ * Cryptographically verifies Google ID Token via Google's tokeninfo API.
+ * Guarantees that only authentic, Google-verified emails can register or log in.
+ */
+exports.googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential token is required' });
+    }
+
+    // Query Google OAuth2 TokenInfo endpoint
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      logger.warn('[Google Auth] Tokeninfo verification failed:', { status: response.status, errText });
+      return res.status(401).json({ error: 'Invalid or expired Google authentication credential' });
+    }
+
+    const payload = await response.json();
+
+    // Verify audience matches our authorized Web Client ID
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '363766926067-vph1ues751u8t6sjf3te9v2mcc941qr0.apps.googleusercontent.com';
+    if (payload.aud !== GOOGLE_CLIENT_ID) {
+      logger.warn('[Google Auth] Client ID audience mismatch:', { tokenAud: payload.aud, expectedAud: GOOGLE_CLIENT_ID });
+      return res.status(401).json({ error: 'Google Token audience mismatch: unauthorized client' });
+    }
+
+    // STRICT CHECK: Reject unauthorized / unverified emails
+    const isEmailVerified = payload.email_verified === true || payload.email_verified === 'true';
+    if (!isEmailVerified) {
+      logger.warn('[Google Auth] Blocked unverified email attempt:', { email: payload.email });
+      return res.status(403).json({ 
+        error: 'Security Block: Your Google email is not verified. Only authentic, Google-verified accounts are allowed.' 
+      });
+    }
+
+    if (!payload.email) {
+      return res.status(400).json({ error: 'Google authentication profile does not provide a valid email address.' });
+    }
+
+    const normalizedEmail = payload.email.toLowerCase().trim();
+    let user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      // Create new authentic Google-verified user
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, SALT_ROUNDS);
+
+      user = new User({
+        email: normalizedEmail,
+        password: hashedPassword,
+        name: payload.name || payload.given_name || normalizedEmail.split('@')[0],
+        avatar: payload.picture || '',
+        googleId: payload.sub,
+        isGoogleAuth: true,
+        loginCount: 1,
+        lastLogin: new Date(),
+        role: 'user'
+      });
+      await user.save();
+
+      await logAudit({
+        userId: user._id,
+        action: 'GOOGLE_USER_SIGNUP',
+        req,
+        details: { email: user.email, googleId: payload.sub, name: user.name }
+      });
+    } else {
+      // Update existing user with Google sync info
+      user.loginCount = (user.loginCount || 0) + 1;
+      user.lastLogin = new Date();
+      if (!user.googleId) user.googleId = payload.sub;
+      if (!user.name && payload.name) user.name = payload.name;
+      if (!user.avatar && payload.picture) user.avatar = payload.picture;
+      user.isGoogleAuth = true;
+      await user.save();
+
+      await logAudit({
+        userId: user._id,
+        action: 'GOOGLE_USER_LOGIN',
+        req,
+        details: { email: user.email, googleId: payload.sub }
+      });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role || 'user', email: user.email },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const OnboardingData = require('../models/OnboardingData');
+    const onboarding = await OnboardingData.findOne({ user_id: user._id });
+
+    return res.json({
+      session: { access_token: token },
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role || 'user',
+        user_metadata: {
+          name: user.name || payload.name,
+          avatar: user.avatar || payload.picture,
+          phone: user.phone,
+          age: user.age,
+          gender: user.gender
+        }
+      },
+      onboarding_completed: !!onboarding
+    });
+  } catch (err) {
+    logger.error('[Auth Google Login Error]:', { error: err.message, stack: err.stack });
+    return res.status(500).json({ error: 'Google authentication processing failed: ' + err.message });
   }
 };
 

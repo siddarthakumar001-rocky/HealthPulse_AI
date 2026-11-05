@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
 import { AntiGravityBackground } from "@/components/AntiGravityBackground";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -163,6 +164,21 @@ export default function Login() {
               )}
             </Button>
           </form>
+
+          {/* Authentic Google Authentication Divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+            </div>
+            <div className="relative flex justify-center text-[11px] uppercase">
+              <span className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-3 text-slate-400 dark:text-slate-500 font-semibold tracking-wider rounded-full border border-slate-200/50 dark:border-slate-800/50">
+                {t("auth.orContinueWith", "Or continue with")}
+              </span>
+            </div>
+          </div>
+
+          {/* Official Google Identity Services Sign In */}
+          <GoogleSignInButton mode="signin" />
 
           {/* Quick Demo Link */}
           <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 text-center space-y-2">
