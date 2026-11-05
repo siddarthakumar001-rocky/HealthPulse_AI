@@ -17,6 +17,7 @@ export interface User {
     gender?: string;
     biological_sex?: string;
     emergency_contact?: string;
+    emergency_contact_name?: string;
   };
 }
 
@@ -24,8 +25,13 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<{ onboarding_completed: boolean; role: string }>;
-  signInWithGoogle: (credential: string) => Promise<{ onboarding_completed: boolean; role: string }>;
+  signIn: (email: string, password: string) => Promise<{ onboarding_completed: boolean; role: string; requires_emergency_contact?: boolean }>;
+  signInWithGoogle: (
+    credential: string,
+    emergencyContact?: string,
+    emergencyContactName?: string
+  ) => Promise<{ onboarding_completed: boolean; role: string; requires_emergency_contact?: boolean }>;
+  updateEmergencyContact: (contact: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -70,18 +76,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("userRole", data.user?.role || "user");
       setUser(data.user);
     }
-    return { onboarding_completed: data.onboarding_completed, role: data.user.role };
+    return { 
+      onboarding_completed: data.onboarding_completed, 
+      role: data.user.role,
+      requires_emergency_contact: data.requires_emergency_contact
+    };
   };
 
-  const signInWithGoogle = async (credential: string) => {
-    const data = await api.post("/auth/google", { credential });
+  const signInWithGoogle = async (
+    credential: string,
+    emergencyContact?: string,
+    emergencyContactName?: string
+  ) => {
+    const data = await api.post("/auth/google", { 
+      credential,
+      emergency_contact: emergencyContact,
+      emergency_contact_name: emergencyContactName
+    });
     
     if (data.session?.access_token) {
       localStorage.setItem("token", data.session.access_token);
       localStorage.setItem("userRole", data.user?.role || "user");
       setUser(data.user);
     }
-    return { onboarding_completed: data.onboarding_completed, role: data.user.role };
+    return { 
+      onboarding_completed: data.onboarding_completed, 
+      role: data.user.role,
+      requires_emergency_contact: data.requires_emergency_contact
+    };
+  };
+
+  const updateEmergencyContact = async (contact: string, name?: string) => {
+    const data = await api.post("/auth/emergency-contact", {
+      emergency_contact: contact,
+      emergency_contact_name: name
+    });
+    if (data.success && user) {
+      setUser({
+        ...user,
+        user_metadata: {
+          ...user.user_metadata,
+          emergency_contact: contact,
+          emergency_contact_name: name
+        }
+      });
+    }
+    return data;
   };
 
   const signOut = async () => {
@@ -93,7 +133,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      signUp, 
+      signIn, 
+      signInWithGoogle, 
+      updateEmergencyContact, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );

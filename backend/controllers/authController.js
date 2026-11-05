@@ -79,7 +79,8 @@ exports.login = async (req, res) => {
        return res.json({
          session: { access_token: token },
          user: { id: adminUser._id, email: 'admin', role: 'admin', user_metadata: { name: 'Admin' } },
-         onboarding_completed: true
+         onboarding_completed: true,
+         requires_emergency_contact: false
        });
     }
 
@@ -124,6 +125,8 @@ exports.login = async (req, res) => {
       req,
       details: { email: user.email }
     });
+
+    const hasEmergency = !!(user.emergency_contact || onboarding?.emergency_contact || onboarding?.emergencyContact);
     
     res.json({
       session: { access_token: token },
@@ -131,9 +134,17 @@ exports.login = async (req, res) => {
         id: user._id, 
         email: user.email, 
         role: user.role || 'user',
-        user_metadata: { name: user.name, phone: user.phone, age: user.age, gender: user.gender } 
+        user_metadata: { 
+          name: user.name, 
+          phone: user.phone, 
+          age: user.age, 
+          gender: user.gender,
+          emergency_contact: user.emergency_contact || onboarding?.emergency_contact || '',
+          emergency_contact_name: user.emergency_contact_name || ''
+        } 
       },
-      onboarding_completed: !!onboarding
+      onboarding_completed: !!onboarding,
+      requires_emergency_contact: !hasEmergency
     });
   } catch (err) {
     logger.error('[Auth Login Error]:', { error: err.message });
@@ -145,10 +156,11 @@ exports.login = async (req, res) => {
  * Direct Google Authentication & Gmail Sync
  * Cryptographically verifies Google ID Token via Google's tokeninfo API.
  * Guarantees that only authentic, Google-verified emails can register or log in.
+ * Enforces emergency contact collection for IoMT clinical safety.
  */
 exports.googleAuth = async (req, res) => {
   try {
-    const { credential } = req.body;
+    const { credential, emergency_contact, emergency_contact_name } = req.body;
     if (!credential) {
       return res.status(400).json({ error: 'Google credential token is required' });
     }
@@ -197,6 +209,8 @@ exports.googleAuth = async (req, res) => {
         name: payload.name || payload.given_name || normalizedEmail.split('@')[0],
         avatar: payload.picture || '',
         googleId: payload.sub,
+        emergency_contact: emergency_contact ? emergency_contact.trim() : '',
+        emergency_contact_name: emergency_contact_name ? emergency_contact_name.trim() : '',
         isGoogleAuth: true,
         loginCount: 1,
         lastLogin: new Date(),
@@ -217,6 +231,10 @@ exports.googleAuth = async (req, res) => {
       if (!user.googleId) user.googleId = payload.sub;
       if (!user.name && payload.name) user.name = payload.name;
       if (!user.avatar && payload.picture) user.avatar = payload.picture;
+      if (emergency_contact && !user.emergency_contact) {
+        user.emergency_contact = emergency_contact.trim();
+        if (emergency_contact_name) user.emergency_contact_name = emergency_contact_name.trim();
+      }
       user.isGoogleAuth = true;
       await user.save();
 
@@ -237,6 +255,13 @@ exports.googleAuth = async (req, res) => {
     const OnboardingData = require('../models/OnboardingData');
     const onboarding = await OnboardingData.findOne({ user_id: user._id });
 
+    // Check emergency contact presence
+    const hasEmergencyContact = !!(
+      (user.emergency_contact && user.emergency_contact.trim().length > 0) ||
+      (onboarding?.emergency_contact && onboarding.emergency_contact.trim().length > 0) ||
+      (onboarding?.emergencyContact && onboarding.emergencyContact.trim().length > 0)
+    );
+
     return res.json({
       session: { access_token: token },
       user: {
@@ -248,14 +273,60 @@ exports.googleAuth = async (req, res) => {
           avatar: user.avatar || payload.picture,
           phone: user.phone,
           age: user.age,
-          gender: user.gender
+          gender: user.gender,
+          emergency_contact: user.emergency_contact || onboarding?.emergency_contact || '',
+          emergency_contact_name: user.emergency_contact_name || ''
         }
       },
+      requires_emergency_contact: !hasEmergencyContact,
       onboarding_completed: !!onboarding
     });
   } catch (err) {
     logger.error('[Auth Google Login Error]:', { error: err.message, stack: err.stack });
     return res.status(500).json({ error: 'Google authentication processing failed: ' + err.message });
+  }
+};
+
+/**
+ * Update Emergency Contact directly for active user
+ */
+exports.updateEmergencyContact = async (req, res) => {
+  try {
+    const { emergency_contact, emergency_contact_name } = req.body;
+    if (!emergency_contact || emergency_contact.trim().length < 5) {
+      return res.status(400).json({ error: 'A valid emergency contact phone number is required.' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.emergency_contact = emergency_contact.trim();
+    if (emergency_contact_name) user.emergency_contact_name = emergency_contact_name.trim();
+    await user.save();
+
+    // Also update OnboardingData if present
+    const OnboardingData = require('../models/OnboardingData');
+    await OnboardingData.findOneAndUpdate(
+      { user_id: user._id },
+      { $set: { emergency_contact: user.emergency_contact, emergencyContact: user.emergency_contact } }
+    );
+
+    await logAudit({
+      userId: user._id,
+      action: 'EMERGENCY_CONTACT_UPDATED',
+      req,
+      details: { emergency_contact: user.emergency_contact }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Emergency contact successfully registered.',
+      emergency_contact: user.emergency_contact,
+      emergency_contact_name: user.emergency_contact_name
+    });
+  } catch (err) {
+    logger.error('[Update Emergency Contact Error]:', { error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
@@ -268,7 +339,14 @@ exports.getUser = async (req, res) => {
         id: user._id, 
         email: user.email, 
         role: user.role,
-        user_metadata: { name: user.name, phone: user.phone, age: user.age, gender: user.gender } 
+        user_metadata: { 
+          name: user.name, 
+          phone: user.phone, 
+          age: user.age, 
+          gender: user.gender,
+          emergency_contact: user.emergency_contact,
+          emergency_contact_name: user.emergency_contact_name
+        } 
       } 
     });
   } catch (err) {

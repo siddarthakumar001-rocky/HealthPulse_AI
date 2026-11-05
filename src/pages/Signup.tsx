@@ -264,7 +264,13 @@ export default function Signup() {
           </div>
 
           {/* Official Google Identity Services Sign In / Sign Up */}
-          <GoogleSignInButton mode="signup" />
+          <GoogleSignInButton 
+            mode="signup" 
+            getEmergencyContact={() => ({
+              phone: form.emergencyContact,
+              name: form.name
+            })}
+          />
 
           <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
             {t("signup.haveAccount", "Already have an account?")}{" "}
