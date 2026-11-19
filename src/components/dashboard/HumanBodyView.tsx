@@ -10,15 +10,18 @@ interface HumanBodyViewProps {
 
 /* ── Floating particles ───────────────────────────────────────── */
 function HolographicParticles() {
+  const isMobile = typeof window !== "undefined" && (window.innerWidth < 768 || "ontouchstart" in window);
+  const count = isMobile ? 6 : 24;
+
   const particles = useMemo(() =>
-    Array.from({ length: 30 }, (_, i) => ({
+    Array.from({ length: count }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
+      size: Math.random() * 2.5 + 1,
       dur: Math.random() * 8 + 6,
       delay: Math.random() * 5,
-    })), []);
+    })), [count]);
 
   return (
     <g className="holographic-particles">
@@ -27,7 +30,7 @@ function HolographicParticles() {
           key={p.id}
           cx={p.x} cy={p.y * 2.5} r={p.size * 0.3}
           fill="rgba(6,214,160,0.55)"
-          animate={{ cy: [p.y * 2.5, p.y * 2.5 - 30, p.y * 2.5], opacity: [0.2, 0.7, 0.2] }}
+          animate={isMobile ? { opacity: [0.3, 0.7, 0.3] } : { cy: [p.y * 2.5, p.y * 2.5 - 30, p.y * 2.5], opacity: [0.2, 0.7, 0.2] }}
           transition={{ duration: p.dur, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
         />
       ))}

@@ -114,44 +114,56 @@ export default function Dashboard() {
   }, []);
 
   // ── 1. Fetch authentic real-time readings from backend / MongoDB ──
-  const fetchRealtimeData = async () => {
-    if (!user) return;
-    try {
-      const [devices, onboardingData, latestAi, dbReadings] = await Promise.all([
-        api.get("/devices").catch(() => []),
-        api.get("/onboarding").catch(() => null),
-        api.get("/ai/latest").catch(() => null),
-        api.get(`/device/${user.id || (user as any)._id}`).catch(() => []),
-      ]);
-
-      if (onboardingData) setOnboarding(onboardingData);
-      if (latestAi) setAiAnalysis(latestAi);
-      if (devices && devices.length > 0) setDevice(devices[0]);
-
-      if (Array.isArray(dbReadings) && dbReadings.length > 0) {
-        setReadings(dbReadings);
-        const mostRecent = dbReadings[dbReadings.length - 1];
-        setLatest(mostRecent);
-        setManualHR(mostRecent.heart_rate || 72);
-        setManualSpO2(mostRecent.spo2 || 98);
-        setManualTemp(mostRecent.temperature || 36.6);
-      }
-
-      // Fetch IEEE 8-stage state
-      const [currHealth, reconState] = await Promise.all([
-        healthService.getCurrent().catch(() => null),
-        healthService.getReconstructionState().catch(() => null)
-      ]);
-      if (currHealth) setHealthCurrent(currHealth);
-      if (reconState) setReconstructionData(reconState);
-    } catch (err) {
-      console.error("Dashboard real-time sync failed:", err);
-    }
-  };
-
   useEffect(() => {
+    if (!user) return;
+
+    // One-time fetch for static metadata
+    const fetchStaticMetadata = async () => {
+      try {
+        const [devices, onboardingData] = await Promise.all([
+          api.get("/devices").catch(() => []),
+          api.get("/onboarding").catch(() => null),
+        ]);
+        if (onboardingData) setOnboarding(onboardingData);
+        if (devices && devices.length > 0) setDevice(devices[0]);
+      } catch (e) {
+        console.warn("Metadata load failed:", e);
+      }
+    };
+    fetchStaticMetadata();
+
+    // Streamlined periodic vital telemetry fetch
+    const fetchRealtimeData = async () => {
+      try {
+        const [latestAi, dbReadings, currHealth, reconState] = await Promise.all([
+          api.get("/ai/latest").catch(() => null),
+          api.get(`/device/${user.id || (user as any)._id}`).catch(() => []),
+          healthService.getCurrent().catch(() => null),
+          healthService.getReconstructionState().catch(() => null)
+        ]);
+
+        if (latestAi) setAiAnalysis(latestAi);
+
+        if (Array.isArray(dbReadings) && dbReadings.length > 0) {
+          setReadings(dbReadings);
+          const mostRecent = dbReadings[dbReadings.length - 1];
+          setLatest(mostRecent);
+          setManualHR(mostRecent.heart_rate || 72);
+          setManualSpO2(mostRecent.spo2 || 98);
+          setManualTemp(mostRecent.temperature || 36.6);
+        }
+
+        if (currHealth) setHealthCurrent(currHealth);
+        if (reconState) setReconstructionData(reconState);
+      } catch (err) {
+        console.error("Dashboard real-time sync failed:", err);
+      }
+    };
+
     fetchRealtimeData();
-    const interval = setInterval(fetchRealtimeData, 4000);
+    const isMobileDevice = typeof window !== "undefined" && (window.innerWidth < 768 || "ontouchstart" in window);
+    const pollIntervalMs = isMobileDevice ? 6000 : 4000;
+    const interval = setInterval(fetchRealtimeData, pollIntervalMs);
     return () => clearInterval(interval);
   }, [user]);
 

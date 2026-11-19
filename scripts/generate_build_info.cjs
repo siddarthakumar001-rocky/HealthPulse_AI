@@ -2,14 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const apkPath = path.resolve(__dirname, '../android/app/build/outputs/apk/release/app-release.apk');
+const releaseApkPath = path.resolve(__dirname, '../android/app/build/outputs/apk/release/app-release.apk');
+const publicApkPath = path.resolve(__dirname, '../public/app-release.apk');
 const debugApkPath = path.resolve(__dirname, '../android/app/build/outputs/apk/debug/app-debug.apk');
 
 let sha256 = '1CE6C31BFFEC3328665A9F820D737E54B2D7C04C60529E42F3F2C0232B94F680';
 let fileSizeFormatted = '6.23 MB';
 let fileSizeBytes = 6533143;
 
-const targetPath = fs.existsSync(apkPath) ? apkPath : fs.existsSync(debugApkPath) ? debugApkPath : null;
+const targetPath = fs.existsSync(releaseApkPath)
+  ? releaseApkPath
+  : fs.existsSync(publicApkPath)
+    ? publicApkPath
+    : fs.existsSync(debugApkPath)
+      ? debugApkPath
+      : null;
 
 if (targetPath) {
   try {
@@ -24,8 +31,8 @@ if (targetPath) {
 
 const buildInfo = {
   packageName: 'com.healthpulse.app',
-  versionName: '1.1.0',
-  versionCode: 2,
+  versionName: '1.1.1',
+  versionCode: 3,
   buildTimestamp: new Date().toISOString(),
   apkFileName: 'app-release.apk',
   fileSize: fileSizeFormatted,
@@ -39,7 +46,7 @@ const buildInfo = {
   upgradeRequirements: {
     packageName: 'com.healthpulse.app',
     signingKeyRequirement: 'Must match official production release keystore',
-    minVersionCodeForUpgrade: 2
+    minVersionCodeForUpgrade: 3
   }
 };
 

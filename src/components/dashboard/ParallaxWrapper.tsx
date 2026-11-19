@@ -3,6 +3,7 @@ import { motion, useSpring, useMotionValue } from "framer-motion";
 
 export default function ParallaxWrapper({ children, depth = 0.05, className = "", style = {} }: { children: React.ReactNode, depth?: number, className?: string, style?: React.CSSProperties }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isTouch, setIsTouch] = useState(false);
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -12,6 +13,11 @@ export default function ParallaxWrapper({ children, depth = 0.05, className = ""
   const springY = useSpring(y, springConfig);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0)) {
+      setIsTouch(true);
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       const { innerWidth, innerHeight } = window;
       const mouseX = e.clientX - innerWidth / 2;
@@ -21,9 +27,13 @@ export default function ParallaxWrapper({ children, depth = 0.05, className = ""
       y.set(mouseY * depth);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [depth, x, y]);
+
+  if (isTouch) {
+    return <div ref={ref} style={style} className={className}>{children}</div>;
+  }
 
   return (
     <motion.div

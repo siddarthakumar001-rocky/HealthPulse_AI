@@ -49,20 +49,20 @@ router.get('/ready', async (req, res) => {
  */
 const getVersionManifest = (req, res) => {
   res.status(200).json({
-    latestVersion: '1.0.1',
-    releaseName: 'HealthPulse AI v1.0.1 - Performance, Security & Telemetry Hardening',
+    latestVersion: '1.1.1',
+    releaseName: 'HealthPulse AI v1.1.1 - Mobile GPU Acceleration, Clinical Telemetry & Auto-Update',
     publishedAt: new Date().toISOString(),
     minSupportedVersion: '1.0.0',
     mandatory: false,
-    apkUrl: 'https://github.com/siddhant-deshmukh/healthpulse-ai/releases/latest/download/app-release.apk',
-    releaseUrl: 'https://github.com/siddhant-deshmukh/healthpulse-ai/releases/latest',
-    websiteUrl: 'https://healthpulse-ai.vercel.app',
+    apkUrl: '/app-release.apk',
+    releaseUrl: 'https://github.com/siddarthakumar001-rocky/HealthPulse_AI/releases/latest',
+    websiteUrl: 'https://pulse-ai-gamma.vercel.app',
     releaseNotes: [
-      'In-App Software Update and Auto-Download system for mobile APKs',
-      'Continuous GPS synchronization and resilient Leaflet health map discovery',
-      'Guaranteed regional healthcare network fallback and hospital routing',
-      'Global system recovery Error Boundary for uninterrupted clinical HUD telemetry',
-      'Low-latency ring buffer telemetry stream and responsive UI optimization'
+      'Hardware GPU acceleration and matrix blur bypass for 60fps mobile telemetry',
+      'In-App Software Update and direct official APK download pipeline',
+      'Reduced mobile polling overhead and touch-device gesture optimization',
+      'Google Account authentication with mandatory emergency contact routing',
+      'High-contrast clinical HUD telemetry metrics for both dark and light themes'
     ]
   });
 };

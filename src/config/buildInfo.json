@@ -1,12 +1,12 @@
 {
   "packageName": "com.healthpulse.app",
-  "versionName": "1.1.0",
-  "versionCode": 2,
-  "buildTimestamp": "2026-11-05T13:46:18.889Z",
+  "versionName": "1.1.1",
+  "versionCode": 3,
+  "buildTimestamp": "2026-11-19T17:25:17.103Z",
   "apkFileName": "app-release.apk",
-  "fileSize": "6.23 MB",
-  "fileSizeBytes": 6533143,
-  "sha256Checksum": "1CE6C31BFFEC3328665A9F820D737E54B2D7C04C60529E42F3F2C0232B94F680",
+  "fileSize": "11.61 MB",
+  "fileSizeBytes": 12175601,
+  "sha256Checksum": "0739CB4ACE2E92890C7916EBD8C2C48CBE52E05C755591DA9D3C9B296DEBE435",
   "verificationCommands": {
     "windows": "certutil -hashfile app-release.apk SHA256",
     "macos": "shasum -a 256 app-release.apk",
@@ -15,6 +15,6 @@
   "upgradeRequirements": {
     "packageName": "com.healthpulse.app",
     "signingKeyRequirement": "Must match official production release keystore",
-    "minVersionCodeForUpgrade": 2
+    "minVersionCodeForUpgrade": 3
   }
 }

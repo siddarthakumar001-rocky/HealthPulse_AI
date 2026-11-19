@@ -66,7 +66,7 @@ export function SoftwareUpdateModal({
 
   const handleDownload = () => {
     setDownloading(true);
-    const downloadUrl = "/app-release.apk";
+    const downloadUrl = (isNative && releaseInfo?.apkDownloadUrl) ? releaseInfo.apkDownloadUrl : "/app-release.apk";
     updateService.downloadAndInstall(downloadUrl);
     setTimeout(() => setDownloading(false), 2500);
   };
@@ -201,7 +201,7 @@ export function SoftwareUpdateModal({
             </Button>
             
             <p className="text-[10px] text-center text-muted-foreground font-mono">
-              Direct download from GitHub Releases. Compatible with Android 10+ devices.
+              Direct official production APK. Compatible with Android 10+ devices.
             </p>
           </div>
 
